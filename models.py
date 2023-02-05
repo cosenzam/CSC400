@@ -1,20 +1,27 @@
-from app import db
+from sqlalchemy import MetaData, Column, Integer, String, ForeignKey, Boolean, DateTime
+from sqlalchemy.orm import DeclarativeBase, mapped_column
+from datetime import datetime
+
+class Base(DeclarativeBase):
+    pass
 
 # Database Tables
-class users(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
-    username = db.Column("username", db.String(64))
-    email = db.Column("email", db.String(64))
-    password = db.Column("password", db.String(144))
+class User(Base):
+    __tablename__ = 'users'
+    __table_args__ = {'mysql_engine':'InnoDB'}
 
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
-        self.password = password
+    user_id = mapped_column(
+        Integer, 
+        unique = True, 
+        primary_key=True, 
+        nullable=False,
+        autoincrement=True
+        )
+    user_name = mapped_column(String, nullable=False)
+    email = mapped_column(String, nullable=False)
+    password = mapped_column(String, nullable=False)
+    date_created = mapped_column(DateTime, default=datetime.now())
+    profile_picture_media_id = mapped_column(Integer)
 
-
-def create_tables():
-    db.create_all()
-
-def delete_tables():
-    db.drop_all()
+def create_tables(engine):
+    Base.metadata.create_all(engine)

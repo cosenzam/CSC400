@@ -1,24 +1,30 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from datetime import timedelta
-from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm
-import connect
+from connect import db_connect #connect.py method that handles all connections, returns engine.
 import models
 
 # pip install flask flask-wtf SQLAlchemy passlib flask-login
 
 app = Flask(__name__)
 app.secret_key = "asdf"
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql://{connect.MYSQL_USER}:{connect.MYSQL_PASS}@{connect.MYSQL_IP}/{connect.MYSQL_DB}'
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.permanent_session_lifetime = timedelta(days = 7) # session length
 
-db = SQLAlchemy(app)
+engine = db_connect()
+Session_MySQLdb = sessionmaker(engine)
+db_session = Session_MySQLdb()
+# app.permanent_session_lifetime = timedelta(days = 7) # session length
 
 # Finds if user exists
-def found_user(user):
-    return bool(models.users.query.filter_by(username=user).first())
+def found_user(user_name):
+    result = db_session.execute(
+        select(models.User.user_id)
+        .where(models.User.user_name == user_name)
+    )
+
+    return bool(str(result))
 
 @app.route("/")
 def home():
@@ -32,18 +38,18 @@ def view():
 def create_account():
     form = CreateAccountForm()
     if request.method == "POST" and form.validate_on_submit():
-        session.permanent = True
-        username = form.username.data
-        print(username)
-        print(found_user(username))
-        if not found_user(username):
-            session["user"] = username # add user to session
+        # session.permanent = True
+        user_name = form.username.data
+        print(user_name)
+        print(found_user(user_name))
+        if not found_user(user_name):
+            session["user"] = user_name # add user to session
             email = form.email.data
             password = form.password.data
             hashed_password = sha256_crypt.hash(password)
-            user = models.users(username, email, hashed_password)
-            db.session.add(user)
-            db.session.commit()
+            user = models.User(user_name, email, hashed_password)
+            db_session.add(user)
+            db_session.commit()
             return redirect(url_for("user"))
         else:
             flash("Username already exists", "info")
@@ -114,7 +120,7 @@ def user():
 
 if __name__ == "__main__":
     # Create all database tables in models.py
-    models.create_tables()
+    models.create_tables(engine)
     
     # Delete all database tables
     #models.delete_tables()
