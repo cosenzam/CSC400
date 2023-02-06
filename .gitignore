@@ -161,3 +161,6 @@ cython_debug/
 
 # vs code
 .vscode/
+
+# sql credentials
+credentials.json
