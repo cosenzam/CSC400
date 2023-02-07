@@ -2,6 +2,7 @@
 <html>
     <head>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesheet.css') }}">
         <title>{% block title %}{% endblock %}</title>
     </head>
     <body>
@@ -13,21 +14,32 @@
               </button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                  {% if "user" in session %}
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('home') }}">Home</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('user') }}">Account</a>
+                    <div class="dropdown">
+                      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Account
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('user') }}">My Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}">Edit Profile</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user_settings') }}">Settings</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                      </ul>
+                    </div>
                   </li>
+                  {% endif %}
+                  {% if "user" not in session %}
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                  </li>
-                  <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
                   </li>
+                  {% endif %}
                 </ul>
                 <form class="d-flex" role="search">
                   <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
