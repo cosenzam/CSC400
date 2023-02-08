@@ -8,21 +8,20 @@ from connect import db_connect #connect.py method that handles all connections, 
 import models
 from models import Base
 
-# pip install flask flask-wtf SQLAlchemy passlib flask-login
-
+#app settings
 app = Flask(__name__)
 app.secret_key = "asdf"
+app.permanent_session_lifetime = timedelta(days = 7) # session length
 
+#data base connections
 engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
 # Base.metadata.drop_all(engine, checkfirst=False)
 
-# Create all database tables in models.py
+# Create all database tables in models.pygi
 Base.metadata.create_all(engine)
-
-# app.permanent_session_lifetime = timedelta(days = 7) # session length
 
 # Finds if user exists
 def found_user(found_user):
@@ -56,7 +55,18 @@ def create_account():
                 email = email, 
                 password = hashed_password
                 )
+
             db_session.add(user)
+            db_session.commit()
+
+            #gonna add current user's user_id to session
+            session["user_id"] = int(user.user_id)
+            #creating entry in user profile to fill later
+            user_profile = models.UserProfile(
+                user_id = user.user_id
+            )
+
+            db_session.add(user_profile)
             db_session.commit()
             return redirect(url_for("user"))
         else:
