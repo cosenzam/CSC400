@@ -1,0 +1,17 @@
+div.user_div{
+    text-align: center;
+}
+
+h1.welcome{
+  height: 35%;
+  width: 35%;
+  margin: auto;
+  border-style: solid;
+  }
+
+p.bio{
+  height: 35%;
+  width: 35%;
+  margin: auto;
+  border-style: solid;
+}

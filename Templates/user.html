@@ -8,10 +8,8 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<h1> Welcome {{session["user"]}}</h1>
-<form action="#" method="POST">
-    <input type="email" name="email" placeholder="Enter email" value="{{email if email}}"/>
-    <input type="submit" name="submit">
-</form>
-</form>
+<div class = "user_div">
+    <h1 class = "welcome"> Welcome {{session["user"]}}</h1>
+    <p class = "bio"> {{user_bio}} </p>
+</div>
 {% endblock %}
