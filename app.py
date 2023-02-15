@@ -3,24 +3,25 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, case, literal_column
 from datetime import timedelta
 from passlib.hash import sha256_crypt
-from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm
+from forms import CreateAccountForm, LoginForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 import models
 from models import Base
 
+#app settings
 app = Flask(__name__)
 app.secret_key = "asdf"
+app.permanent_session_lifetime = timedelta(days = 7) # session length
 
+#data base connections
 engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
 # Base.metadata.drop_all(engine, checkfirst=False)
 
-# Create all database tables in models.py
+# Create all database tables in models.pygi
 Base.metadata.create_all(engine)
-
-app.permanent_session_lifetime = timedelta(days = 7) # session length
 
 # Finds if user exists
 def found_user(user_name):
@@ -68,15 +69,28 @@ def create_account():
             return redirect(url_for("create_account"))
         elif not valid_pass(password):
             return redirect(url_for("create_account"))
-        else:
+        else: 
             session["user"] = user_name # add user to session
+            email = form.email.data
+            password = form.password.data
             hashed_password = sha256_crypt.hash(password)
             user = models.User(
                 user_name = user_name, 
                 email = email, 
                 password = hashed_password
                 )
+
             db_session.add(user)
+            db_session.commit()
+
+            #gonna add current user's user_id to session
+            session["user_id"] = int(user.user_id)
+            #creating entry in user profile to fill later
+            user_profile = models.UserProfile(
+                user_id = user.user_id
+            )
+
+            db_session.add(user_profile)
             db_session.commit()
             return redirect(url_for("user"))
     else:
@@ -85,14 +99,18 @@ def create_account():
             return redirect(url_for("user"))
     return render_template("create_account.html", form = form)
     
+    
+
 @app.route("/login/", methods=["POST", "GET"])
 def login():
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
         user_name = form.user_name.data
         password = form.password.data
+        print(user_name)
+        print(password)
         if found_user(user_name):
-            user_query = db_session.query(models.User).filter_by(user_name = user_name).first()
+            user_query = models.users.query.filter_by(user_name=user_name).first()
             hashed_password = user_query.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
@@ -137,14 +155,14 @@ def edit_profile():
 
         if request.method == "POST" and form.validate_on_submit():
             user_bio = form.user_bio.data
-            user_query = db_session.query(models.User).filter_by(user_name = user).first()
-            #user_query.user_profile.bio = user_bio
-            #db_session.commit()
+            user_query = db_session.query(models.UserProfile).filter_by(user_name = user).first()
+            user_query.user_profile.bio = user_bio
+            db_session.commit()
             flash("Your bio has been updated", "info")
             print(user_bio)
             return redirect(url_for("user"))
 
-        return render_template("edit_profile.html", username = user, form = form)
+        return render_template("edit_profile.html", user_name = user, form = form)
     else:
         flash("You must be logged in to edit your profile", "info")
         return redirect(url_for("login"))
