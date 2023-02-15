@@ -24,9 +24,9 @@ Base.metadata.drop_all(engine, checkfirst=False)
 # Base.metadata.create_all(engine)
 
 # Finds if user exists
-def found_user(found_user):
+def found_user(user_name):
     result = bool(db_session.query(models.User)
-        .filter_by(user_name = found_user).first())
+        .filter_by(user_name = user_name).first())
     return result
 
 # Finds if email exists
@@ -51,7 +51,7 @@ def home():
 
 @app.route("/view")
 def view():
-    return render_template("view.html", values=models.users.query.all())
+    return render_template("view.html", values = db_session.query(models.User).all())
 
 @app.route("/create_account/", methods=["POST", "GET"])
 def create_account():
@@ -105,16 +105,16 @@ def create_account():
 def login():
     form = LoginForm()
     if request.method == "POST" and form.validate_on_submit():
-        username = form.username.data
+        user_name = form.user_name.data
         password = form.password.data
-        print(username)
+        print(user+name)
         print(password)
-        if found_user(username):
-            user_query = models.users.query.filter_by(username=username).first()
+        if found_user(user_name):
+            user_query = models.users.query.filter_by(user_name=user_name).first()
             hashed_password = user_query.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
-                session["user"] = username
+                session["user"] = user_name
                 flash("Login Success", "info")
                 return redirect(url_for("user"))
             else:
@@ -162,7 +162,7 @@ def edit_profile():
             print(user_bio)
             return redirect(url_for("user"))
 
-        return render_template("edit_profile.html", username = user, form = form)
+        return render_template("edit_profile.html", user_name = user, form = form)
     else:
         flash("You must be logged in to edit your profile", "info")
         return redirect(url_for("login"))
