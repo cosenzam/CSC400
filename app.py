@@ -107,7 +107,7 @@ def login():
     if request.method == "POST" and form.validate_on_submit():
         user_name = form.user_name.data
         password = form.password.data
-        print(user+name)
+        print(user_name)
         print(password)
         if found_user(user_name):
             user_query = models.users.query.filter_by(user_name=user_name).first()
