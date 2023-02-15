@@ -1,10 +1,16 @@
 import json
+import pathlib
 from sqlalchemy import create_engine
 
 def db_connect():
 
-    with open("credentials.json") as file:
+    path = "credentials.json"
 
+    #I'm storing it here, but keeping original functionality
+    if not pathlib.Path(path).is_file():
+        path = "secrets/credentials.json"
+
+    with open(path) as file:
         credentials = json.load(file)
 
     MYSQL_IP = credentials["MYSQL_IP"]

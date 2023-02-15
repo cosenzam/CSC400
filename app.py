@@ -18,10 +18,10 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-# Base.metadata.drop_all(engine, checkfirst=False)
+Base.metadata.drop_all(engine, checkfirst=False)
 
 # Create all database tables in models.pygi
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 # Finds if user exists
 def found_user(found_user):
@@ -42,7 +42,7 @@ def create_account():
     form = CreateAccountForm()
     if request.method == "POST" and form.validate_on_submit():
         session.permanent = True
-        user_name = form.username.data
+        user_name = form.user_name.data
         print(user_name)
         print(found_user(user_name))
         if not found_user(user_name):
