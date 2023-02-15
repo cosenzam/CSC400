@@ -32,7 +32,7 @@ class UserProfile(Base):
 
     user_profile_id: Mapped[int] = mapped_column(
         unique = True, 
-        primary_key=True, 
+        primary_key=True,
         nullable=False,
         autoincrement=True
     )
