@@ -29,6 +29,22 @@ def found_user(found_user):
         .filter_by(user_name = found_user).first())
     return result
 
+# Finds if email exists
+def found_email(email):
+    result = bool(db_session.query(models.User)
+        .filter_by(email = email).first())
+    return result
+
+# Verifies password requirements | must contain at least 1 number and 1 letter
+def valid_pass(password):
+    has_letters = any(c.isalpha() for c in password)
+    has_numbers = any(i.isdigit() for i in password)
+    if has_letters and has_numbers and len(password) >= 8:
+        return True
+    else:
+        flash("Passwords must be at least 8 characters in length and contain one number and one letter")
+        return False
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -43,9 +59,17 @@ def create_account():
     if request.method == "POST" and form.validate_on_submit():
         session.permanent = True
         user_name = form.user_name.data
-        print(user_name)
-        print(found_user(user_name))
-        if not found_user(user_name):
+        email = form.email.data
+        password = form.password.data
+        if found_user(user_name):
+            flash("Username already exists", "info")
+            return redirect(url_for("create_account"))
+        elif found_email(email):
+            flash("Email already in use", "info")
+            return redirect(url_for("create_account"))
+        elif not valid_pass(password):
+            return redirect(url_for("create_account"))
+        else: 
             session["user"] = user_name # add user to session
             email = form.email.data
             password = form.password.data
@@ -69,9 +93,6 @@ def create_account():
             db_session.add(user_profile)
             db_session.commit()
             return redirect(url_for("user"))
-        else:
-            flash("Username already exists", "info")
-            return redirect(url_for("create_account"))
     else:
         if "user" in session:
             flash("Already logged in", "info")
@@ -119,27 +140,55 @@ def logout():
 @app.route("/user/", methods=["POST", "GET"])
 def user():
 
-    # Change user email, change later, placeholder for now
-    email = None
+    if "user" in session:
+        user_bio = "This is the bio section"
+
+        return render_template("user.html", user_name = user, user_bio = user_bio)
+    else:
+        return redirect(url_for("login"))
+
+@app.route("/edit_profile/", methods=["POST", "GET"])
+def edit_profile():
     if "user" in session:
         user = session["user"]
+        form = UserProfileForm()
 
-        if request.method == "POST":
-            email = request.form["email"]
-            session["email"] = email
-            found_user = models.users.query.filter_by(username=user).first()
-            found_user.email = email
+        if request.method == "POST" and form.validate_on_submit():
+            user_bio = form.user_bio.data
+            user_query = db_session.query(models.UserProfile).filter_by(user_name = user).first()
+            user_query.user_profile.bio = user_bio
             db_session.commit()
-            flash("Email saved", "info")
+            flash("Your bio has been updated", "info")
+            print(user_bio)
+            return redirect(url_for("user"))
 
-        return render_template("user.html", username = user, email = email)
+        return render_template("edit_profile.html", username = user, form = form)
+    else:
+        flash("You must be logged in to edit your profile", "info")
+        return redirect(url_for("login"))
+
+@app.route("/settings/", methods=["POST","GET"])
+def user_settings():
+    if "user" in session:
+        user = session["user"]
+        form = UserSettingsForm()
+        if request.method == "POST" and form.validate_on_submit():
+            user_query = db_session.query(models.User).filter_by(user_name=user).first()
+            email = form.email.data
+            password = form.password.data
+            if email != '' : # and valid email
+                user_query.email = email
+                db_session.commit()
+                flash("Email saved", "info")
+            if password != '' and valid_pass(password):
+                hashed_password = sha256_crypt.hash(password)
+                user_query.password = hashed_password
+                db_session.commit()
+                flash("Password sucessfully changed", "info")
+            return redirect(url_for("user_settings"))
+        return render_template("user_settings.html", form = form)
     else:
         return redirect(url_for("login"))
 
 if __name__ == "__main__":
-
-    
-    # Delete all database tables
-    #models.delete_tables()
-
     app.run()
