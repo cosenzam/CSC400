@@ -1,17 +1,30 @@
-div.user_div{
-    text-align: center;
+.user-div{
+  text-align: center;
 }
 
-h1.welcome{
-  height: 35%;
-  width: 35%;
-  margin: auto;
+.user-name{
+  font-size: 24px;
   border-style: solid;
   }
 
-p.bio{
-  height: 35%;
-  width: 35%;
-  margin: auto;
+.bio{
+  font-size: 16px;
+  border-style: solid;
+}
+
+.content-nav-pad{
+  padding-top: 0.5%;
+}
+
+.profile-pic{
+  height: 64px;
+  width: 64px;
+}
+
+.login-1{
+  height: 90vh;
+}
+
+.login-2{
   border-style: solid;
 }
