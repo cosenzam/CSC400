@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, case, literal_column
 from datetime import timedelta
 from passlib.hash import sha256_crypt
-from forms import CreateAccountForm, LoginForm
+from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 import models
 from models import Base
