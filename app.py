@@ -110,7 +110,7 @@ def login():
         print(user_name)
         print(password)
         if found_user(user_name):
-            user_query = models.users.query.filter_by(user_name=user_name).first()
+            user_query = db_session.query(models.User).filter_by(user_name=user_name).first()
             hashed_password = user_query.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
