@@ -78,11 +78,11 @@ def create_account():
                 )
             db_session.add(user)
             db_session.commit()
-            return redirect(url_for("user"))
+            return redirect(url_for("user", dynamic_user = session["user"]))
     else:
         if "user" in session:
             flash("Already logged in", "info")
-            return redirect(url_for("user"))
+            return redirect(url_for("user", dynamic_user = session["user"]))
     return render_template("create_account.html", form = form)
     
 @app.route("/login/", methods=["POST", "GET"])
@@ -98,7 +98,7 @@ def login():
                 session.permanent = True
                 session["user"] = user_name
                 flash("Login Success", "info")
-                return redirect(url_for("user"))
+                return redirect(url_for("user", dynamic_user = session["user"]))
             else:
                 flash("Incorrect Password", "info")
                 return redirect(url_for("login"))
@@ -108,7 +108,7 @@ def login():
     else:
         if "user" in session:
             flash("Already Logged in", "info")
-            return redirect(url_for("user"))
+            return redirect(url_for("user", dynamic_user = session["user"]))
     return render_template("login.html", form = form)
 
 @app.route("/logout/")
@@ -119,15 +119,20 @@ def logout():
         flash("You have been logged out.", "info")
     return redirect(url_for("login"))
 
-@app.route("/user/", methods=["POST", "GET"])
-def user():
-
-    if "user" in session:
-        user_bio = "This is the bio section"
-
-        return render_template("user.html", user_name = user, user_bio = user_bio)
+@app.route("/user/<dynamic_user>/", methods=["POST", "GET"])
+def user(dynamic_user):
+    # If page is the logged in user's, give appropriate permissions
+    if "user" in session and dynamic_user == session["user"]:
+        user_bio = "This is my page"
+        return render_template("user.html", user_bio = user_bio, dynamic_user = dynamic_user)
+    # If page is not the logged in user's
     else:
-        return redirect(url_for("login"))
+        if found_user(dynamic_user):
+            user_bio = "This is another user's page"
+            return render_template("user.html", user_bio = user_bio, dynamic_user = dynamic_user)
+        else:
+            flash("User not found", "info")
+            return redirect(url_for("home"))
 
 @app.route("/edit_profile/", methods=["POST", "GET"])
 def edit_profile():
@@ -141,8 +146,7 @@ def edit_profile():
             #user_query.user_profile.bio = user_bio
             #db_session.commit()
             flash("Your bio has been updated", "info")
-            print(user_bio)
-            return redirect(url_for("user"))
+            return redirect(url_for("user", dynamic_user = session["user"]))
 
         return render_template("edit_profile.html", username = user, form = form)
     else:
