@@ -8,8 +8,20 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<div class = "user_div">
-    <h1 class = "welcome"> Welcome {{session["user"]}}</h1>
-    <p class = "bio"> {{user_bio}} </p>
+<div class = "row justify-content-center">
+    <div class="media col-sm-4">
+        <div class="align-self-center">
+            <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading">Real Name</h4>
+        </div>
+    </div>
+</div>
+<div class = "row justify-content-center">
+    <span class = "col-sm-4 user-name">{{dynamic_user}}</span>
+</div>
+<div class = "row justify-content-center">
+    <span class = "col-sm-4 bio">{{user_bio}}</span>
 </div>
 {% endblock %}
