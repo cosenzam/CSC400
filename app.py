@@ -82,16 +82,19 @@ def create_account():
 
             db_session.add(user)
             db_session.commit()
-
             #gonna add current user's user_id to session
-            session["user_id"] = int(user.user_id)
+            session["user_id"] = int(user.id)
             #creating entry in user profile to fill later
             user_profile = models.UserProfile(
-                user_id = user.user_id
+                user_id = user.id
             )
-
+            
             db_session.add(user_profile)
             db_session.commit()
+
+            user.profile_id = user_profile.id
+            db_session.commit()
+
             return redirect(url_for("user", dynamic_user = session["user"]))
     else:
         if "user" in session:
@@ -110,11 +113,12 @@ def login():
         print(user_name)
         print(password)
         if found_user(user_name):
-            user_query = db_session.query(models.User).filter_by(user_name=user_name).first()
-            hashed_password = user_query.password
+            user = db_session.execute(select(models.User).where(models.User.user_name == user_name))
+            hashed_password = user.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
                 session["user"] = user_name
+                session["user_id"] = user.id
                 flash("Login Success", "info")
                 return redirect(url_for("user", dynamic_user = session["user"]))
             else:
@@ -156,16 +160,18 @@ def user(dynamic_user):
 def edit_profile():
     if "user" in session:
         user = session["user"]
+        user_id = session["user_id"]
         form = UserProfileForm()
 
         if request.method == "POST" and form.validate_on_submit():
             user_bio = form.user_bio.data
-            user_query = db_session.query(models.UserProfile).filter_by(user_name = user).first()
-            user_query.user_profile.bio = user_bio
+            user_profile = db_session.execute(select(models.UserProfile).where(models.UserProfile.user_id == user_id))
+            user_profile.bio = user_bio
             db_session.commit()
+
             flash("Your bio has been updated", "info")
             print(user_bio)
-            return redirect(url_for("edit_profile.html"))
+            return redirect(url_for("edit_profile"))
 
         return render_template("edit_profile.html", user_name = user, form = form)
     else:
