@@ -22,7 +22,6 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     date_created: Mapped[datetime] = mapped_column(default=datetime.now())
     profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default='')
-    profile_id: Mapped[int] = mapped_column(ForeignKey("UserProfile.id"))
 
     #relationships
     user_profile: Mapped["UserProfile"] = relationship(back_populates="user")
@@ -64,7 +63,7 @@ class Post(Base):
     __tablename__ = 'posts'
     __table_args__ = {'mysql_engine':'InnoDB'}
 
-    post_id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(
         unique = True,
         primary_key = True,
         nullable = False,
@@ -72,6 +71,6 @@ class Post(Base):
     )
     text: Mapped[str] = mapped_column(String(256), nullable = False)
     user_name: Mapped[str] = mapped_column(String(255), nullable = False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     date_posted: Mapped[datetime] = mapped_column(default = datetime.now())
     media: Mapped[str] = mapped_column(String(32), nullable = False)
