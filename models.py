@@ -10,7 +10,7 @@ class User(Base):
     __tablename__ = 'users'
     __table_args__ = {'mysql_engine':'InnoDB'}
 
-    user_id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(
         unique = True, 
         primary_key=True, 
         nullable=False,
@@ -22,6 +22,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     date_created: Mapped[datetime] = mapped_column(default=datetime.now())
     profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default='')
+    profile_id: Mapped[int] = mapped_column(ForeignKey("UserProfile.id"))
 
     #relationships
     user_profile: Mapped["UserProfile"] = relationship(back_populates="user")
@@ -30,14 +31,14 @@ class UserProfile(Base):
     __tablename__ = 'user_profiles'
     __table_args__ = {'mysql_engine':'InnoDB'}
 
-    user_profile_id: Mapped[int] = mapped_column(
+    id: Mapped[int] = mapped_column(
         unique = True, 
         primary_key=True,
         nullable=False,
         autoincrement=True
     )
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default='')
     first_name: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)

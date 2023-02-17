@@ -84,11 +84,12 @@ def create_account():
             db_session.commit()
 
             #gonna add current user's user_id to session
-            session["user_id"] = int(user.user_id)
+            session["user_id"] = int(user.id)
             #creating entry in user profile to fill later
             user_profile = models.UserProfile(
-                user_id = user.user_id
+                user_id = user.id
             )
+
 
             db_session.add(user_profile)
             db_session.commit()
@@ -162,6 +163,8 @@ def edit_profile():
             user_bio = form.user_bio.data
             user_query = db_session.query(models.UserProfile).filter_by(user_name = user).first()
             user_query.user_profile.bio = user_bio
+            db_session.query(User)
+
             db_session.commit()
             flash("Your bio has been updated", "info")
             print(user_bio)
