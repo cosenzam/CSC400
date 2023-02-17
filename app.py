@@ -1,12 +1,11 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, case, literal_column
+from sqlalchemy import select
 from datetime import timedelta
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-import models
-from models import Base
+from models import Base, User, UserProfile, Post
 
 #app settings
 app = Flask(__name__)
@@ -23,22 +22,34 @@ db_session = Session_MySQLdb()
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
 
+            # user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
+
+
 # Finds if user exists
 def found_user(user_name):
-    result = bool(db_session.query(models.User)
-        .filter_by(user_name = user_name).first())
+
+    user_query = select(User).where(User.user_name == user_name)
+    result = bool(db_session.scalars(user_query).one())
     return result
 
 # Finds if email exists
 def found_email(email):
-    result = bool(db_session.query(models.User)
-        .filter_by(email = email).first())
+
+    email_query = select(User).where(User.email == email)
+    result = bool(db_session.scalars(email_query).one())    
     return result
 
 # Verifies password requirements | must contain at least 1 number and 1 letter
-def valid_pass(password):
+def valid_pass(password, confirm_password):
     has_letters = any(c.isalpha() for c in password)
     has_numbers = any(i.isdigit() for i in password)
+
+    if password == confirm_password:
+        pass
+    else:
+        flash("Passwords must match!")
+        return False
+
     if has_letters and has_numbers and len(password) >= 8:
         return True
     else:
@@ -51,7 +62,7 @@ def home():
 
 @app.route("/view")
 def view():
-    return render_template("view.html", values = db_session.query(models.User).all())
+    return render_template("view.html", values = db_session.query(User).all())
 
 @app.route("/create_account/", methods=["POST", "GET"])
 def create_account():
@@ -61,20 +72,21 @@ def create_account():
         user_name = form.user_name.data
         email = form.email.data
         password = form.password.data
+        confirm_password = form.confirm.data
         if found_user(user_name):
             flash("Username already exists", "info")
             return redirect(url_for("create_account"))
         elif found_email(email):
             flash("Email already in use", "info")
             return redirect(url_for("create_account"))
-        elif not valid_pass(password):
+        elif not valid_pass(password, confirm_password):
             return redirect(url_for("create_account"))
         else: 
             session["user"] = user_name # add user to session
             email = form.email.data
             password = form.password.data
             hashed_password = sha256_crypt.hash(password)
-            user = models.User(
+            user = User(
                 user_name = user_name, 
                 email = email, 
                 password = hashed_password
@@ -85,7 +97,7 @@ def create_account():
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
             #creating entry in user profile to fill later
-            user_profile = models.UserProfile(
+            user_profile = UserProfile(
                 user_id = user.id
             )
             
@@ -113,7 +125,9 @@ def login():
         print(user_name)
         print(password)
         if found_user(user_name):
-            user = db_session.execute(select(models.User).where(models.User.user_name == user_name))
+
+            user_query = select(User).where(User.user_name == user_name)
+            user = db_session.scalars(user_query).one()
             hashed_password = user.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
@@ -145,7 +159,10 @@ def logout():
 def user(dynamic_user):
     # If page is the logged in user's, give appropriate permissions
     if "user" in session and dynamic_user == session["user"]:
-        user_bio = "This is my page"
+        user_id = session["user_id"]
+        user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
+        profile = db_session.scalars(user_profile_query).one()
+        user_bio = profile.bio
         return render_template("user.html", user_bio = user_bio, dynamic_user = dynamic_user)
     # If page is not the logged in user's
     else:
@@ -165,7 +182,8 @@ def edit_profile():
 
         if request.method == "POST" and form.validate_on_submit():
             user_bio = form.user_bio.data
-            user_profile = db_session.execute(select(models.UserProfile).where(models.UserProfile.user_id == user_id))
+            user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
+            user_profile = db_session.scalars(user_profile_query).one()
             user_profile.bio = user_bio
             db_session.commit()
 
@@ -184,7 +202,7 @@ def user_settings():
         user = session["user"]
         form = UserSettingsForm()
         if request.method == "POST" and form.validate_on_submit():
-            user_query = db_session.query(models.User).filter_by(user_name=user).first()
+            user_query = db_session.query(User).filter_by(user_name=user).first()
             email = form.email.data
             password = form.password.data
             if email != '' : # and valid email
