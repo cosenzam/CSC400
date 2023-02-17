@@ -165,12 +165,15 @@ def edit_profile():
 
         if request.method == "POST" and form.validate_on_submit():
             user_bio = form.user_bio.data
-            user_profile = db_session.execute(select(models.UserProfile).where(models.UserProfile.user_id == user_id))
+            user_profile_query = select(models.UserProfile).where(models.UserProfile.user_id == user_id)
+            user_profile = db_session.scalars(user_profile_query).one()
             user_profile.bio = user_bio
             db_session.commit()
 
             flash("Your bio has been updated", "info")
             print(user_bio)
+            print(user_profile)
+            print(user_profile.bio)
             return redirect(url_for("edit_profile"))
 
         return render_template("edit_profile.html", user_name = user, form = form)
