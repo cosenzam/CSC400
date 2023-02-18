@@ -17,7 +17,7 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-# Base.metadata.drop_all(engine, checkfirst=False)
+Base.metadata.drop_all(engine, checkfirst=False)
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
@@ -28,16 +28,14 @@ Base.metadata.create_all(engine)
 # Finds if user exists
 def found_user(user_name):
 
-    user_query = select(User).where(User.user_name == user_name)
-    result = bool(db_session.scalars(user_query).one())
-    return result
+    exists = db_session.query(User.id).filter_by(user_name=user_name).first() is not None
+    return exists
 
 # Finds if email exists
 def found_email(email):
 
-    email_query = select(User).where(User.email == email)
-    result = bool(db_session.scalars(email_query).one())    
-    return result
+    exists = db_session.query(User.id).filter_by(email=email).first() is not None   
+    return exists
 
 # Verifies password requirements | must contain at least 1 number and 1 letter
 def valid_pass(password, confirm_password):
