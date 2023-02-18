@@ -17,13 +17,10 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-Base.metadata.drop_all(engine, checkfirst=False)
+# Base.metadata.drop_all(engine, checkfirst=False)
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
-
-            # user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
-
 
 # Finds if user exists
 def found_user(user_name):
