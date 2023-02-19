@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
-from datetime import datetime
+from datetime import datetime, date
 
 class Base(DeclarativeBase):
        pass
@@ -51,7 +51,7 @@ class UserProfile(Base):
     city: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     country: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     zip: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    date_of_birth: Mapped[datetime] = mapped_column(nullable=True, default=Null)
+    date_of_birth: Mapped[date] = mapped_column(nullable=True, default=Null)
     bio: Mapped[str] = mapped_column(Text, nullable=True, default=Null)
     last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
 
