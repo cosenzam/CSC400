@@ -51,7 +51,7 @@ class UserProfile(Base):
     city: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     country: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     zip: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    date_of_birth: Mapped[date] = mapped_column(nullable=True, default=Null)
+    date_of_birth: Mapped[date] = mapped_column(nullable=True, default=None)
     bio: Mapped[str] = mapped_column(Text, nullable=True, default=Null)
     last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
 
