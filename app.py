@@ -6,6 +6,7 @@ from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 from models import Base, User, UserProfile, Post
+from email_validator import validate_email, EmailNotValidError
 
 #app settings
 app = Flask(__name__)
@@ -33,6 +34,10 @@ def found_email(email):
 
     exists = db_session.query(User.id).filter_by(email=email).first() is not None   
     return exists
+
+def valid_email(email):
+
+    return True
 
 # Verifies password requirements | must contain at least 1 number and 1 letter
 def valid_pass(password, confirm_password):
@@ -78,8 +83,6 @@ def create_account():
             return redirect(url_for("create_account"))
         else: 
             session["user"] = user_name # add user to session
-            email = form.email.data
-            password = form.password.data
             hashed_password = sha256_crypt.hash(password)
             user = User(
                 user_name = user_name, 
@@ -117,8 +120,8 @@ def login():
     if request.method == "POST" and form.validate_on_submit():
         user_name = form.user_name.data
         password = form.password.data
-        print(user_name)
-        print(password)
+        #print(user_name)
+        #print(password)
         if found_user(user_name):
 
             user_query = select(User).where(User.user_name == user_name)
@@ -157,13 +160,16 @@ def user(dynamic_user):
         user_id = session["user_id"]
         user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
         profile = db_session.scalars(user_profile_query).one()
-        user_bio = profile.bio
-        return render_template("user.html", user_bio = user_bio, dynamic_user = dynamic_user)
+
+        return render_template("user.html", profile = profile, dynamic_user = dynamic_user)
     # If page is not the logged in user's
     else:
         if found_user(dynamic_user):
-            user_bio = "This is another user's page"
-            return render_template("user.html", user_bio = user_bio, dynamic_user = dynamic_user)
+            user_id = select(User.id).where(User.user_name == dynamic_user)
+            user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
+            profile = db_session.scalars(user_profile_query).one()
+
+            return render_template("user.html", profile = profile, dynamic_user = dynamic_user)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -176,14 +182,36 @@ def edit_profile():
         form = UserProfileForm()
 
         if request.method == "POST" and form.validate_on_submit():
-            user_bio = form.user_bio.data
             user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
             user_profile = db_session.scalars(user_profile_query).one()
-            user_profile.bio = user_bio
-            db_session.commit()
 
-            flash("Your bio has been updated", "info")
-            print(user_bio)
+            if form.user_bio.data:
+                user_profile.bio = form.user_bio.data
+            if form.first_name.data:
+                user_profile.first_name = form.first_name.data
+            if form.middle_name.data:
+                user_profile.middle_name = form.middle_name.data
+            if form.last_name.data:
+                user_profile.last_name = form.last_name.data
+            if form.gender.data:
+                user_profile.gender = form.gender.data
+            if form.pronouns.data:
+                user_profile.pronouns = form.pronouns.data
+            if form.address.data:
+                user_profile.address = form.address.data
+            if form.occupation.data:
+                user_profile.occupation = form.occupation.data
+            if form.city.data:
+                user_profile.city = form.city.data
+            if form.country.data:
+                user_profile.country = form.country.data
+            if form.zip.data:
+                user_profile.zip = form.zip.data
+            if form.date_of_birth.data:
+                user_profile.date_of_birth = form.date_of_birth.data
+
+            db_session.commit()
+            flash("Your profile has been updated", "info")
             return redirect(url_for("edit_profile"))
 
         return render_template("edit_profile.html", user_name = user, form = form)
@@ -198,14 +226,13 @@ def user_settings():
         form = UserSettingsForm()
         if request.method == "POST" and form.validate_on_submit():
             user_query = db_session.query(User).filter_by(user_name=user).first()
-            email = form.email.data
-            password = form.password.data
-            if email != '' : # and valid email
-                user_query.email = email
+            confirm_password = form.confirm.data
+            if form.email.data and valid_email(form.email.data):
+                user_query.email = form.email.data
                 db_session.commit()
                 flash("Email saved", "info")
-            if password != '' and valid_pass(password):
-                hashed_password = sha256_crypt.hash(password)
+            if form.password.data and valid_pass(form.password.data, confirm_password):
+                hashed_password = sha256_crypt.hash(form.password.data)
                 user_query.password = hashed_password
                 db_session.commit()
                 flash("Password sucessfully changed", "info")
