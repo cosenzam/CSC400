@@ -30,12 +30,26 @@ def found_user(user_name):
     return exists
 
 # Finds if email exists
-def found_email(email):
+#def found_email(email):
 
-    exists = db_session.query(User.id).filter_by(email=email).first() is not None   
-    return exists
+    #exists = db_session.query(User.id).filter_by(email=email).first() is not None   
+    #return exists
 
+# Find if email exists in DB and is a valid format
 def valid_email(email):
+
+    exists = db_session.query(User.id).filter_by(email=email).first() is not None 
+    if exists:
+        flash("Email already in use", "info")
+        return False
+
+    try:
+        validation = validate_email(email)
+        email = validation.email
+    except EmailNotValidError as errorMsg:
+        print(str(errorMsg))
+        flash("Email not valid", "info")
+        return False
 
     return True
 
@@ -76,8 +90,7 @@ def create_account():
         if found_user(user_name):
             flash("Username already exists", "info")
             return redirect(url_for("create_account"))
-        elif found_email(email):
-            flash("Email already in use", "info")
+        elif not valid_email(email):
             return redirect(url_for("create_account"))
         elif not valid_pass(password, confirm_password):
             return redirect(url_for("create_account"))
