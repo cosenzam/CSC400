@@ -253,6 +253,32 @@ def user_settings():
         return render_template("user_settings.html", form = form)
     else:
         return redirect(url_for("login"))
+    
+@app.route("/post/", methods=["POST", "GET"])
+def post():
+    if "user" in session:
+        user_id = session["user_id"]
+        form = PostForm()
+        if request.method == "POST" and form.validate_on_submit():
+            
+            text = form.text.data
+            media = form.media.data
+
+            post = Post(
+                text = text,
+                media = media,
+                user_id = user_id
+            )
+
+            db_session.add(post)
+            db_session.commit()
+            flash("Post Created!")
+            print(post)
+            return redirect(url_for("home"))
+        return render_template("post.html", form = form)
+    else:
+        return redirect(url_for("login"))
+
 
 if __name__ == "__main__":
     app.run()
