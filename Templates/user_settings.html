@@ -8,25 +8,25 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<div>
-    <h1> Settings </h1>
-    <form action="#" method="post">
-        {{form.csrf_token}}
-        <p> 
-            {{form.email.label}}
-            {{form.email(size=20)}}
-        </p>
-        <p>
-            {{form.password.label}}
-            {{form.password(size=20)}}
-        </p>
-        <p>
-            {{form.confirm.label}}
-            {{form.confirm(size=20)}}
-        </p>
-        <p>
-            <input type="submit" value="Submit">
-        </p>
-    </form>
+<div class="row container-fliud justify-content-center align-items-center vh-100">
+    <div class="col-sm-4 text-center border">
+        <h1 class="text-center"> Settings </h1>
+        <form action="#" method="post">
+            {{form.csrf_token}}
+            <p> 
+                {{form.email.label}}
+                {{form.email(size=20)}}
+            </p>
+            <p>
+                {{form.password.label}}
+                {{form.password(size=20)}}
+            </p>
+            <p>
+                {{form.confirm.label}}
+                {{form.confirm(size=20)}}
+            </p>
+            <p><input type="submit" value="Submit"></p>
+        </form>
+    </div>
 </div>
 {% endblock %}

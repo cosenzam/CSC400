@@ -4,12 +4,10 @@
 
 .user-name{
   font-size: 24px;
-  border-style: solid;
   }
 
 .bio{
   font-size: 16px;
-  border-style: solid;
 }
 
 .content-nav-pad{
@@ -21,10 +19,22 @@
   width: 64px;
 }
 
-.login-1{
-  height: 90vh;
+.name{
+  font-size: 16px;
 }
 
-.login-2{
-  border-style: solid;
+.location{
+  font-size: 16px;
+}
+
+body{
+  overflow-y: hidden;
+}
+
+.acc-dropdown-pad{
+  padding-right: 1%;
+}
+
+.dropdown-menu{
+  min-width: 1rem;
 }

@@ -9,19 +9,26 @@
     {% endif %}
 {% endwith %}
 <div class = "row justify-content-center">
-    <div class="media col-sm-4">
+    <div class="col-sm-4 media border">
         <div class="align-self-center">
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
         </div>
         <div class="media-body">
-            <h4 class="media-heading">{{profile.first_name}} {{profile.last_name}}</h4>
+            <h4 class="media-heading user-name border">{{dynamic_user}}</h4>
         </div>
     </div>
 </div>
 <div class = "row justify-content-center">
-    <span class = "col-sm-4 user-name">{{dynamic_user}}</span>
+    <span class = "col-sm-2 name border">
+        {% if profile.first_name != "NULL" %} {{profile.first_name}} {% endif %}
+        {% if profile.last_name != "NULL" %} {{profile.last_name}} {% endif %}
+    </span>
+    <span class = "col-sm-2 location text-end border">
+        {% if profile.city != "NULL" %} {{profile.city}}, {% endif %}
+        {% if profile.country != "NULL" %} {{profile.country}} {% endif %}
+    </span>
 </div>
 <div class = "row justify-content-center">
-    <span class = "col-sm-4 bio">{{profile.bio}}</span>
+    <span class = "col-sm-4 bio border">{% if profile.bio != "NULL" %} {{profile.bio}} {% endif %}</span>
 </div>
 {% endblock %}

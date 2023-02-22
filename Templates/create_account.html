@@ -8,29 +8,20 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <div class = "row container-fliud justify-content-center align-items-center login-1">
-        <div class="col-sm-4 login-2">
+    <div class="row container-fliud justify-content-center align-items-center vh-100">
+        <div class="col-sm-4 text-center border">
+            <h1 class="text-center">Create Account</h1>
             <form action="#" method="post">
                 {{form.csrf_token}}
-                <p> 
-                    {{form.user_name.label}}
-                    {{form.user_name(size=20)}}
-                </p>
-                <p> 
-                    {{form.email.label}}
-                    {{form.email(size=20)}}
-                </p>
-                <p>
-                    {{form.password.label}}
-                    {{form.password(size=20)}}
-                </p>
-                <p>
-                    {{form.confirm.label}}
-                    {{form.confirm(size=20)}}
-                </p>
-                <p>
-                    <input type="submit" value="Submit">
-                </p>
+                <p>{{form.user_name.label}}</p>
+                <p>{{form.user_name(size=20)}}</p>
+                <p>{{form.email.label}}</p>
+                <p>{{form.email(size=20)}}</p>
+                <p>{{form.password.label}}</p>
+                <p>{{form.password(size=20)}}</p>
+                <p>{{form.confirm.label}}</p>
+                <p>{{form.confirm(size=20)}}</p>
+                <p><input type="submit" value="Create Account"></p>
             </form>
         </div>
     </div>
