@@ -59,7 +59,6 @@ class UserProfile(Base):
     user: Mapped["User"] = relationship(back_populates="user_profile") 
 
 class Post(Base):
-
     __tablename__ = 'posts'
     __table_args__ = {'mysql_engine':'InnoDB'}
 
@@ -69,8 +68,8 @@ class Post(Base):
         nullable = False,
         autoincrement = True
     )
-    text: Mapped[str] = mapped_column(String(256), nullable = False)
-    user_name: Mapped[str] = mapped_column(String(255), nullable = False)
+
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     date_posted: Mapped[datetime] = mapped_column(default = datetime.now())
-    media: Mapped[str] = mapped_column(String(32), nullable = False)
+    text: Mapped[str] = mapped_column(String(256), nullable = True)
+    media: Mapped[str] = mapped_column(String(32), nullable = True)
