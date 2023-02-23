@@ -31,4 +31,15 @@
 <div class = "row justify-content-center">
     <span class = "col-sm-4 bio border">{% if profile.bio != "NULL" %} {{profile.bio}} {% endif %}</span>
 </div>
+<div class = "row justify-content-center" style="background-color: #212429;">
+    <span class = "col-sm-2 location text-end border" style="width: 600px; word-wrap: break-word">
+            {% for post in posts %}
+                <p><img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+                    <p style="text-align: left;">
+                        &emsp;{{dynamic_user}}&emsp;{{post.date_posted}}
+                    </p>
+                    <br><br><p style="text-align: center;">{{post.text}}</p>
+                </p>
+            {% endfor %}
+    </span>
 {% endblock %}

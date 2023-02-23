@@ -174,7 +174,9 @@ def user(dynamic_user):
         user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
         profile = db_session.scalars(user_profile_query).one()
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user)
+        postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
+
+        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
     # If page is not the logged in user's
     else:
         if found_user(dynamic_user):
@@ -182,7 +184,9 @@ def user(dynamic_user):
             user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
             profile = db_session.scalars(user_profile_query).one()
 
-            return render_template("user.html", profile = profile, dynamic_user = dynamic_user)
+            postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
+
+            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -254,8 +258,8 @@ def user_settings():
     else:
         return redirect(url_for("login"))
     
-@app.route("/post/", methods=["POST", "GET"])
-def post():
+@app.route("/create_post/", methods=["POST", "GET"])
+def create_post():
     if "user" in session:
         user_id = session["user_id"]
         form = PostForm()
@@ -264,18 +268,23 @@ def post():
             text = form.text.data
             media = form.media.data
 
-            post = Post(
-                text = text,
-                media = media,
-                user_id = user_id
-            )
+            if media == "" and text == "":
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("create_post"))
+            
+            else:
+                post = Post(
+                    text = text,
+                    media = media,
+                    user_id = user_id
+                )
 
-            db_session.add(post)
-            db_session.commit()
-            flash("Post Created!")
-            print(post)
-            return redirect(url_for("home"))
-        return render_template("post.html", form = form)
+                db_session.add(post)
+                db_session.commit()
+                flash("Post Created!")
+                #print(post)
+                return redirect(url_for("home"))
+        return render_template("create_post.html", form = form)
     else:
         return redirect(url_for("login"))
 
