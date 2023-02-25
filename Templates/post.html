@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Create Post {% endblock %}
+{% block title %} Post Search Result {% endblock %}
 {% block content %}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -8,18 +8,5 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <div class="row container-fliud justify-content-center align-items-center vh-100">
-        <div class="col-sm-4 text-center border">
-            <h1 class="text-center">Create Post</h1>
-            <form action="#" method="post">
-                {{form.csrf_token}}
-                <p>{{form.text.label}}</p>
-                <p>{{form.text(size=256)}}</p>
-                <br>
-                <p>{{form.media.label }}</p>
-                <p>{{form.media(class='form-control', placeholder='Image URL')}}</p>
-                <p><input type="submit" value="Submit"></p>
-            </form>
-        </div>
-    </div>
+
     {% endblock %}

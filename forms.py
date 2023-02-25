@@ -35,5 +35,5 @@ class UserSettingsForm(FlaskForm):
     confirm  = PasswordField('Repeat Password')
 
 class PostForm(FlaskForm):
-    text = TextAreaField('Write a Post (256 Character limit)', validators = [InputRequired(), Length(max = 256)])
-    media = FileField('Add Media', validators = [FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4'])])
+    text = TextAreaField('Write a Post (256 Character limit)', validators = [Optional(), Length(max = 256)])
+    media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4'])])
