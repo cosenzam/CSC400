@@ -1,10 +1,68 @@
 from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from datetime import datetime, date
+from connect import db_connect #connect.py method that handles all connections, returns engine.
+
+global engine
+global session
+
+def insert_post(user, text):
+    post = Post(
+        user_id = user.id,
+        text = text
+    )
+
+    session.add(post)
+    session.commit()
+
+    return post
+
+def insert_interaction(to_user, from_user, post):
+    
+    if post is not None:
+        post_id = post.id
+        parent_id = post.parent_id
+        interaction_type = "reply"
+    else:
+        post_id = None
+        parent_id = None
+        interaction_type = "follow"
+
+    interaction = Interaction(
+        interaction_type = interaction_type,
+        post_id = post_id,
+        parent_id = parent_id,
+        from_user_id = from_user.id,
+        to_user_id = to_user.id,
+        timestamp = post.timestamp
+    )
+    
+    session.add(interaction)
+    session.commit()
+
+    return interaction
 
 class Base(DeclarativeBase):
     __table_args__ = {'mysql_engine':'InnoDB'}
+    
+class Interaction(Base):
+    __tablename__ = 'interactions'
 
+    id: Mapped[int] = mapped_column(
+        unique = True,
+        primary_key = True,
+        nullable = False,
+        autoincrement = True
+    )
+
+    interaction_type: Mapped[str] = mapped_column(String(255), default="reply")
+    # collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
+    post_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
+    timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
+    
 # Database Tables
 class User(Base):
     __tablename__ = 'users'
@@ -30,7 +88,16 @@ class User(Base):
     occupation: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     date_created: Mapped[datetime] = mapped_column(default=datetime.now())
     last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
-
+    
+    posts = relationship("Post", back_populates="user")
+    
+    def update_user(self, **kwargs):
+        fields = self.__table__.c.keys()
+        for key, value in kwargs.items():
+            if key in fields:
+                print("setting column: " + key + "to value: " + value)
+                setattr(self, key, value)
+                
 class Post(Base):
     __tablename__ = 'posts'
 
@@ -44,7 +111,21 @@ class Post(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     text: Mapped[str] = mapped_column(Text, nullable = True)
-    date_posted: Mapped[datetime] = mapped_column(default = datetime.now())
+    timestamp: Mapped[datetime] = mapped_column(default = datetime.now())
+    
+    user = relationship("User", back_populates="posts")
+
+    def insert_reply(self, user, reply_text):
+        parent_id = self.id
+        reply = Post(
+            user_id = user.id,
+            parent_id = parent_id,
+            text = reply_text)
+        session.add(reply)
+        session.commit()
+
+        insert_interaction(self.user, user, reply)
+        return reply
 
 class MediaCollection(Base):
     __tablename__ = 'media_collections'
@@ -58,11 +139,14 @@ class MediaCollection(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     post_id: Mapped[str] = mapped_column(ForeignKey("posts.id"))
+    interaction_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     collection_type: Mapped[str] =  mapped_column(String(255), nullable=False, default="gallery")
     description: Mapped[str] = mapped_column(Text, nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=False, default=0)
     video_count: Mapped[int] = mapped_column(nullable=False, default=0)
     date_created: Mapped[datetime] =  mapped_column(default=datetime.now())
+
+    media = relationship("Media", back_populates="media_collection")
 
 class Media(Base):
     __tablename__ = 'media'
@@ -78,23 +162,8 @@ class Media(Base):
     media_type: Mapped[str] = mapped_column(String(255), default='photo')
     file_path: Mapped[str] = mapped_column(String(255), default='')
 
-class Interaction(Base):
-    __tablename__ = 'interactions'
+    media_collection = relationship("MediaCollection", back_populates="media")
 
-    id: Mapped[int] = mapped_column(
-        unique = True,
-        primary_key = True,
-        nullable = False,
-        autoincrement = True
-    )
-
-    interaction_type: Mapped[str] = mapped_column(String(255), default="reply")
-    collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
-    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
-    timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
 
 class FollowLookup(Base):
 
@@ -111,4 +180,4 @@ class FollowLookup(Base):
     interaction_id: Mapped[int] = mapped_column(ForeignKey("interactions.id"))
     following_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     is_mutual: Mapped[bool] = mapped_column(default=False)
-    date_followed: Mapped[datetime] = mapped_column(default=datetime.now())
+    timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
