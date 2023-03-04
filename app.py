@@ -121,7 +121,7 @@ def create_account():
             return redirect(url_for("user", dynamic_user = session["user"]))
     else:
         if "user" in session:
-            flash("Already logged in", "info")
+            #flash("Already logged in", "info")
             return redirect(url_for("user", dynamic_user = session["user"]))
     return render_template("create_account.html", form = form)
     
@@ -133,8 +133,6 @@ def login():
     if request.method == "POST" and form.validate_on_submit():
         user_name = form.user_name.data
         password = form.password.data
-        #print(user_name)
-        #print(password)
         if found_user(user_name):
 
             user_query = select(User).where(User.user_name == user_name)
@@ -144,7 +142,7 @@ def login():
                 session.permanent = True
                 session["user"] = user_name
                 session["user_id"] = user.id
-                flash("Login Success", "info")
+                #flash("Login Success", "info")
                 return redirect(url_for("user", dynamic_user = session["user"]))
             else:
                 flash("Incorrect Password", "info")
@@ -154,7 +152,7 @@ def login():
             return redirect(url_for("login"))
     else:
         if "user" in session:
-            flash("Already Logged in", "info")
+            #flash("Already Logged in", "info")
             return redirect(url_for("user", dynamic_user = session["user"]))
     return render_template("login.html", form = form)
 
@@ -170,13 +168,36 @@ def logout():
 def user(dynamic_user):
     # If page is the logged in user's, give appropriate permissions
     if "user" in session and dynamic_user == session["user"]:
+        form = PostForm()
         user_id = session["user_id"]
         user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
         profile = db_session.scalars(user_profile_query).one()
 
         postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
+        if request.method == "POST" and form.validate_on_submit():
+            
+            text = form.text.data
+            media = form.media.data
+
+            if media == "" and text == "":
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("create_post"))
+            
+            else:
+                post = Post(
+                    text = text,
+                    media = media,
+                    user_id = user_id
+                )
+
+                db_session.add(post)
+                db_session.commit()
+                flash("Post Created!")
+                #print(post)
+                return redirect(url_for("user", dynamic_user = session["user"]))
+
+        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form)
     # If page is not the logged in user's
     else:
         if found_user(dynamic_user):
@@ -198,34 +219,34 @@ def edit_profile():
         user_id = session["user_id"]
         form = UserProfileForm()
 
-        if request.method == "POST" and form.validate_on_submit():
-            user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
-            user_profile = db_session.scalars(user_profile_query).one()
+        user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
+        user_profile = db_session.scalars(user_profile_query).one()
 
-            if form.user_bio.data:
-                user_profile.bio = form.user_bio.data
-            if form.first_name.data:
-                user_profile.first_name = form.first_name.data
-            if form.middle_name.data:
-                user_profile.middle_name = form.middle_name.data
-            if form.last_name.data:
-                user_profile.last_name = form.last_name.data
-            if form.gender.data:
-                user_profile.gender = form.gender.data
-            if form.pronouns.data:
-                user_profile.pronouns = form.pronouns.data
-            if form.address.data:
-                user_profile.address = form.address.data
-            if form.occupation.data:
-                user_profile.occupation = form.occupation.data
-            if form.city.data:
-                user_profile.city = form.city.data
-            if form.country.data:
-                user_profile.country = form.country.data
-            if form.zip.data:
-                user_profile.zip = form.zip.data
-            if form.date_of_birth.data:
-                user_profile.date_of_birth = form.date_of_birth.data
+        if request.method == "GET":
+            if user_profile.bio != "NULL":
+                form.user_bio.data = user_profile.bio
+            if user_profile.first_name != "NULL":
+                form.first_name.data = user_profile.first_name
+            if user_profile.middle_name != "NULL":
+                form.middle_name.data = user_profile.middle_name
+            if user_profile.last_name != "NULL":
+                form.last_name.data = user_profile.last_name
+            if user_profile.pronouns != "NULL":
+                form.pronouns.data = user_profile.pronouns
+            if user_profile.occupation != "NULL":
+                form.occupation.data = user_profile.occupation
+            if user_profile.date_of_birth != "NULL":
+                form.date_of_birth.data = user_profile.date_of_birth
+
+        if request.method == "POST" and form.validate_on_submit():
+
+            user_profile.bio = form.user_bio.data
+            user_profile.first_name = form.first_name.data
+            user_profile.middle_name = form.middle_name.data
+            user_profile.last_name = form.last_name.data
+            user_profile.pronouns = form.pronouns.data
+            user_profile.occupation = form.occupation.data
+            user_profile.date_of_birth = form.date_of_birth.data
 
             db_session.commit()
             flash("Your profile has been updated", "info")

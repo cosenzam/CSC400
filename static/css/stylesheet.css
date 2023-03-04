@@ -8,6 +8,7 @@
 
 .bio{
   font-size: 16px;
+  min-height: 80px !important;
 }
 
 .content-nav-pad{
@@ -21,20 +22,37 @@
 
 .name{
   font-size: 16px;
+  min-height: 26px;
 }
 
 .location{
   font-size: 16px;
+  min-height: 26px;
 }
 
-/*body{
-  overflow-y: hidden;
+.vertical-height-100{
+  height: calc(100vh - 70px);
 }
-*/
+
 .acc-dropdown-pad{
   padding-right: 1%;
 }
 
 .dropdown-menu{
   min-width: 1rem;
+}
+
+.post{
+  padding-top: 1%;
+}
+
+.post-font{
+  font-size: 16px;
+}
+
+input, textarea{
+  background-color:#212529;
+  border: solid;
+  border-width: thin;
+  color: #FFF;
 }
