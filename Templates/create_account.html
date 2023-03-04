@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% block title %} Create Account Page {% endblock %}
 {% block content %}
-    {% with messages = get_flashed_messages() %}
+<div class="row justify-content-center align-items-center vertical-height-100">
+    <div class="col-sm-4 text-center border">
+        {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
-                <p>{{msg}}</p>
+                <p class="text-center">{{msg}}</p>
             {% endfor %}
         {% endif %}
-    {% endwith %}
-    <div class="row container-fliud justify-content-center align-items-center vh-100">
-        <div class="col-sm-4 text-center border">
-            <h1 class="text-center">Create Account</h1>
-            <form action="#" method="post">
-                {{form.csrf_token}}
-                <p>{{form.user_name.label}}</p>
-                <p>{{form.user_name(size=20)}}</p>
-                <p>{{form.email.label}}</p>
-                <p>{{form.email(size=20)}}</p>
-                <p>{{form.password.label}}</p>
-                <p>{{form.password(size=20)}}</p>
-                <p>{{form.confirm.label}}</p>
-                <p>{{form.confirm(size=20)}}</p>
-                <p><input type="submit" value="Create Account"></p>
-            </form>
-        </div>
+        {% endwith %}
+        <h1 class="text-center">Create Account</h1>
+        <form action="#" method="post">
+            {{form.csrf_token}}
+            <p>{{form.user_name.label}}</p>
+            <p>{{form.user_name(size=20)}}</p>
+            <p>{{form.email.label}}</p>
+            <p>{{form.email(size=20)}}</p>
+            <p>{{form.password.label}}</p>
+            <p>{{form.password(size=20)}}</p>
+            <p>{{form.confirm.label}}</p>
+            <p>{{form.confirm(size=20)}}</p>
+            <button type="submit" class = "btn btn-primary">Create Account</button>
+        </form>
     </div>
+</div>
 
 {% endblock %}

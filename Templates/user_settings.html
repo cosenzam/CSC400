@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block title %} Settings {% endblock %}
 {% block content %}
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-<div class="row container-fliud justify-content-center align-items-center vh-100">
+<div class="row justify-content-center align-items-center vertical-height-100">
     <div class="col-sm-4 text-center border">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p class="text-center">{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
         <h1 class="text-center"> Settings </h1>
         <form action="#" method="post">
             {{form.csrf_token}}
