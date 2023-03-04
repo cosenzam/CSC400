@@ -5,7 +5,7 @@ from datetime import timedelta
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, UserProfile, Post
+from models import Base, User, Post
 from email_validator import validate_email, EmailNotValidError
 
 #app settings
@@ -108,14 +108,7 @@ def create_account():
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
             #creating entry in user profile to fill later
-            user_profile = UserProfile(
-                user_id = user.id
-            )
-            
-            db_session.add(user_profile)
-            db_session.commit()
 
-            user.profile_id = user_profile.id
             db_session.commit()
 
             return redirect(url_for("user", dynamic_user = session["user"]))
@@ -170,8 +163,8 @@ def user(dynamic_user):
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
-        user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
-        profile = db_session.scalars(user_profile_query).one()
+        user_query = select(User).where(User.id == user_id)
+        profile = db_session.scalars(user_query).one()
 
         postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
 
@@ -187,7 +180,6 @@ def user(dynamic_user):
             else:
                 post = Post(
                     text = text,
-                    media = media,
                     user_id = user_id
                 )
 
@@ -202,8 +194,8 @@ def user(dynamic_user):
     else:
         if found_user(dynamic_user):
             user_id = select(User.id).where(User.user_name == dynamic_user)
-            user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
-            profile = db_session.scalars(user_profile_query).one()
+            user_query = select(User).where(User.id == user_id)
+            profile = db_session.scalars(user_query).one()
 
             postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
 
@@ -219,34 +211,37 @@ def edit_profile():
         user_id = session["user_id"]
         form = UserProfileForm()
 
-        user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
-        user_profile = db_session.scalars(user_profile_query).one()
+        user_query = select(User).where(User.id == user_id)
+        profile = db_session.scalars(user_query).one()
 
         if request.method == "GET":
-            if user_profile.bio != "NULL":
-                form.user_bio.data = user_profile.bio
-            if user_profile.first_name != "NULL":
-                form.first_name.data = user_profile.first_name
-            if user_profile.middle_name != "NULL":
-                form.middle_name.data = user_profile.middle_name
-            if user_profile.last_name != "NULL":
-                form.last_name.data = user_profile.last_name
-            if user_profile.pronouns != "NULL":
-                form.pronouns.data = user_profile.pronouns
-            if user_profile.occupation != "NULL":
-                form.occupation.data = user_profile.occupation
-            if user_profile.date_of_birth != "NULL":
-                form.date_of_birth.data = user_profile.date_of_birth
+            if profile.bio != "NULL":
+                form.user_bio.data = profile.bio
+            if profile.first_name != "NULL":
+                form.first_name.data = profile.first_name
+            if profile.middle_name != "NULL":
+                form.middle_name.data = profile.middle_name
+            if profile.last_name != "NULL":
+                form.last_name.data = profile.last_name
+            if profile.pronouns != "NULL":
+                form.pronouns.data = profile.pronouns
+            if profile.occupation != "NULL":
+                form.occupation.data = profile.occupation
+            if profile.location != "NULL":
+                form.location.data = profile.location
+            if profile.date_of_birth != "NULL":
+                form.date_of_birth.data = profile.date_of_birth
 
         if request.method == "POST" and form.validate_on_submit():
 
-            user_profile.bio = form.user_bio.data
-            user_profile.first_name = form.first_name.data
-            user_profile.middle_name = form.middle_name.data
-            user_profile.last_name = form.last_name.data
-            user_profile.pronouns = form.pronouns.data
-            user_profile.occupation = form.occupation.data
-            user_profile.date_of_birth = form.date_of_birth.data
+            profile.bio = form.user_bio.data
+            profile.first_name = form.first_name.data
+            profile.middle_name = form.middle_name.data
+            profile.last_name = form.last_name.data
+            profile.pronouns = form.pronouns.data
+            profile.occupation = form.occupation.data
+            profile.location = form.location.data
+            profile.date_of_birth = form.date_of_birth.data
 
             db_session.commit()
             flash("Your profile has been updated", "info")
@@ -296,7 +291,6 @@ def create_post():
             else:
                 post = Post(
                     text = text,
-                    media = media,
                     user_id = user_id
                 )
 
