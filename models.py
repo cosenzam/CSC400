@@ -91,7 +91,7 @@ class User(Base):
     pronouns: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     date_of_birth: Mapped[date] = mapped_column(nullable=True, default=None)
     bio: Mapped[str] = mapped_column(Text, nullable=True, default=Null)
-    address: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
+    location: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     occupation: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     date_created: Mapped[datetime] = mapped_column(default=datetime.now())
     last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
@@ -119,7 +119,7 @@ class Post(Base):
     )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
     text: Mapped[str] = mapped_column(Text, nullable = True)
     timestamp: Mapped[datetime] = mapped_column(default = datetime.now())
     

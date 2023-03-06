@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesheet.css') }}">
         <title>{% block title %}{% endblock %}</title>
     </head>
-    <body>
+    <body class="bg-dark text-light">
         <nav class="nav navbar navbar-dark bg-dark navbar-expand-lg sticky-top border-bottom border-light">
             <div class="container-fluid">
               <a class="navbar-brand" href="#">Logo</a>
@@ -57,7 +57,7 @@
           </nav>
 
         <!-- Main div -->
-          <div class="container-fluid content-nav-pad bg-dark text-light bg-dark vh-100">
+          <div class="container-fluid content-nav-pad">
         {% block content %}
         {% endblock %}
           </div>
