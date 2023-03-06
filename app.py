@@ -5,7 +5,7 @@ from datetime import timedelta
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, UserProfile, Post
+from models import Base, User, Post, Media, MediaCollection, Interaction, FollowLookup
 from email_validator import validate_email, EmailNotValidError
 
 #app settings
@@ -18,7 +18,7 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-# Base.metadata.drop_all(engine, checkfirst=False)
+Base.metadata.drop_all(engine)
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
@@ -107,16 +107,6 @@ def create_account():
             db_session.commit()
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
-            #creating entry in user profile to fill later
-            user_profile = UserProfile(
-                user_id = user.id
-            )
-            
-            db_session.add(user_profile)
-            db_session.commit()
-
-            user.profile_id = user_profile.id
-            db_session.commit()
 
             return redirect(url_for("user", dynamic_user = session["user"]))
     else:
@@ -171,7 +161,7 @@ def user(dynamic_user):
     # If page is the logged in user's, give appropriate permissions
     if "user" in session and dynamic_user == session["user"]:
         user_id = session["user_id"]
-        user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
+        user_profile_query = select(User).where(User.id == user_id)
         profile = db_session.scalars(user_profile_query).one()
 
         postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
@@ -181,7 +171,7 @@ def user(dynamic_user):
     else:
         if found_user(dynamic_user):
             user_id = select(User.id).where(User.user_name == dynamic_user)
-            user_profile_query = select(UserProfile).where(UserProfile.id == user_id)
+            user_profile_query = select(User).where(User.id == user_id)
             profile = db_session.scalars(user_profile_query).one()
 
             postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
@@ -199,7 +189,7 @@ def edit_profile():
         form = UserProfileForm()
 
         if request.method == "POST" and form.validate_on_submit():
-            user_profile_query = select(UserProfile).where(UserProfile.user_id == user_id)
+            user_profile_query = select(User).where(User.id == user_id)
             user_profile = db_session.scalars(user_profile_query).one()
 
             if form.user_bio.data:
@@ -210,20 +200,12 @@ def edit_profile():
                 user_profile.middle_name = form.middle_name.data
             if form.last_name.data:
                 user_profile.last_name = form.last_name.data
-            if form.gender.data:
-                user_profile.gender = form.gender.data
             if form.pronouns.data:
                 user_profile.pronouns = form.pronouns.data
             if form.address.data:
                 user_profile.address = form.address.data
             if form.occupation.data:
                 user_profile.occupation = form.occupation.data
-            if form.city.data:
-                user_profile.city = form.city.data
-            if form.country.data:
-                user_profile.country = form.country.data
-            if form.zip.data:
-                user_profile.zip = form.zip.data
             if form.date_of_birth.data:
                 user_profile.date_of_birth = form.date_of_birth.data
 
@@ -275,7 +257,7 @@ def create_post():
             else:
                 post = Post(
                     text = text,
-                    media = media,
+                    # media = media, gonna build a function for uploader
                     user_id = user_id
                 )
 

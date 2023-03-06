@@ -1,10 +1,19 @@
-from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null
+from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null, select
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
+from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime, date
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 
 global engine
 global session
+
+def get_user(id):
+    try:
+        user = session.scalars(select(User).where(User.id == id)).one()
+        return user
+    except NoResultFound:
+        print("No User found.")
+        return None
 
 def insert_post(user, text):
     post = Post(
@@ -17,16 +26,14 @@ def insert_post(user, text):
 
     return post
 
-def insert_interaction(to_user, from_user, post):
+def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
     
-    if post is not None:
+    if interaction_type == "reply":
         post_id = post.id
         parent_id = post.parent_id
-        interaction_type = "reply"
     else:
         post_id = None
         parent_id = None
-        interaction_type = "follow"
 
     interaction = Interaction(
         interaction_type = interaction_type,
@@ -90,6 +97,9 @@ class User(Base):
     last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
     
     posts = relationship("Post", back_populates="user")
+
+    def get_username(self):
+        return self.user_name
     
     def update_user(self, **kwargs):
         fields = self.__table__.c.keys()
