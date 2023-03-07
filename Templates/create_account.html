@@ -10,18 +10,18 @@
             {% endfor %}
         {% endif %}
         {% endwith %}
-        <h1 class="text-center">Create Account</h1>
-        <form action="#" method="post">
+        <h1 class="text-center account">Create Account</h1>
+        <form class="account-form" action="#" method="post">
             {{form.csrf_token}}
             <p>{{form.user_name.label}}</p>
-            <p>{{form.user_name(size=20)}}</p>
+            <p>{{form.user_name(size=30)}}</p>
             <p>{{form.email.label}}</p>
-            <p>{{form.email(size=20)}}</p>
+            <p>{{form.email(size=30)}}</p>
             <p>{{form.password.label}}</p>
-            <p>{{form.password(size=20)}}</p>
+            <p>{{form.password(size=30)}}</p>
             <p>{{form.confirm.label}}</p>
-            <p>{{form.confirm(size=20)}}</p>
-            <button type="submit" class = "btn btn-primary">Create Account</button>
+            <p>{{form.confirm(size=30)}}</p>
+            <button type="submit" class="btn btn-light text-dark">Create Account</button>
         </form>
     </div>
 </div>

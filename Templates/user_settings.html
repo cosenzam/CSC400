@@ -15,17 +15,17 @@
             {{form.csrf_token}}
             <p> 
                 {{form.email.label}}
-                {{form.email(size=20)}}
+                {{form.email(size=30)}}
             </p>
             <p>
                 {{form.password.label}}
-                {{form.password(size=20)}}
+                {{form.password(size=30)}}
             </p>
             <p>
                 {{form.confirm.label}}
-                {{form.confirm(size=20)}}
+                {{form.confirm(size=30)}}
             </p>
-            <p><input type="submit" value="Submit"></p>
+            <button type="submit" class="btn btn-light text-dark">Save Changes</button>
         </form>
     </div>
 </div>
