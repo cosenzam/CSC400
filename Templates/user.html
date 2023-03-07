@@ -9,41 +9,48 @@
     {% endif %}
 {% endwith %}
 <div class="row justify-content-center">
-    <div class="col-sm-4 media border">
+    <div class="col-sm-4 media border profile-min-width">
         <div class="align-self-center">
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
         </div>
         <div class="media-body">
             <h4 class="media-heading user-name border">{{dynamic_user}}</h4>
+            <p class="pronouns border"> {% if profile.pronouns != "NULL" %} {{profile.pronouns}} {% endif %} </p>
         </div>
     </div>
 </div>
 <div class="row justify-content-center">
-    <span class="col-sm-2 name border">
+    <span class="col-sm-1 profile-info border">
         {% if profile.first_name != "NULL" %} {{profile.first_name}} {% endif %}
         {% if profile.last_name != "NULL" %} {{profile.last_name}} {% endif %}
     </span>
-    <span class="col-sm-2 location text-end border">
+    <span class="col-sm-1 profile-info border">
         {% if profile.location != "NULL" %} {{profile.location}} {% endif %}
     </span>
+    <span class="col-sm-2 profile-info border">
+        {% if profile.occupation != "NULL" %} {{profile.occupation}} {% endif %}
+    </span>
+    <!--
+    <span class="col-sm-1 profile-info border">
+        {% if profile.date_of_birth != None %} {{profile.date_of_birth}} {% endif %}
+    </span>
+    -->
 </div>
 <div class="row justify-content-center">
-    <span class="col-sm-4 bio border">{% if profile.bio != "NULL" %} {{profile.bio}} {% endif %}</span>
+    <span class="col-sm-4 bio border profile-min-width">{% if profile.bio != "NULL" %} {{profile.bio}} {% endif %}</span>
 </div>
-<div class="row justify-content-center">
+{% if dynamic_user == session["user"] %}
+<div class="row justify-content-center post-button">
     <span class="col-sm-4 text-center">
             <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Create Post</button>
-        
+        <button type="button" class="btn btn-light text-dark" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content bg-dark text-light">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Create Post</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h5 class="modal-title" id="postModalLabel">Create Post</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <form action="#" method="post">
@@ -53,7 +60,7 @@
                             <p>{{form.media.label}}</p>
                             <p>{{form.media(size=20)}}</p>
                             <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary">Create Post</button>
+                                <button type="submit" class="btn btn-light text-dark">Submit Post</button>
                             </div>
                         </form>
                     </div>
@@ -62,9 +69,10 @@
         </div>
     </span>
 </div>
+{% endif %}
 {% for post in posts %}
 <div class="row justify-content-center post">
-    <span class="col-sm-4 location border post-font" style="word-wrap: break-word">
+    <span class="col-sm-4 location border post-format" style="word-wrap: break-word">
     <p>
         <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
         <p style="text-align: left;">

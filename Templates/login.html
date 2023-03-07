@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %} Login Page {% endblock %}
 {% block content %}
-<div class="row container-fluid justify-content-center align-items-center vertical-height-100">
+<div class="row justify-content-center align-items-center vertical-height-100">
     <div class="col-sm-4 text-center border">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -10,14 +10,15 @@
             {% endfor %}
         {% endif %}
         {% endwith %}
-        <h1 class="text-center">Log In</h1>
-        <form action="#" method="post">
+        <h1 class="text-center login">Log In</h1>
+        <form class="login-form" action="#" method="post">
             {{form.csrf_token}}
             <p>{{form.user_name.label}}</p>
-            <p>{{form.user_name(size=20)}}</p>
+            <p>{{form.user_name(size=30)}}</p>
             <p>{{form.password.label}}</p>
-            <p>{{form.password(size=20)}}</p>
-            <p><input type="submit" value="Log In"></p>
+            <p>{{form.password(size=30)}}</p>
+            <button type="submit" class="btn btn-light text-dark">Log In</button>
+            <!--<p><input type="submit" value="Log In"></p>-->
         </form>
     </div>
 </div>

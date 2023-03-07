@@ -185,7 +185,7 @@ def user(dynamic_user):
 
                 db_session.add(post)
                 db_session.commit()
-                flash("Post Created!")
+                #flash("Post Created!")
                 #print(post)
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
