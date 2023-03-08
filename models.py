@@ -7,9 +7,33 @@ from connect import db_connect #connect.py method that handles all connections, 
 global engine
 global session
 
-def get_user(id):
+def insert_user(user_name, email, password):
+    user = User(
+        user_name=user_name, 
+        email=email, 
+        password=password
+    )
+
+    session.add(user)
+    session.commit()
+    return user
+
+def get_user(id=None, user_name=None, email=None):
+
+    if id is not None:
+        stmt = select(User).where(User.id == id)
+    elif user_name is not None:
+        stmt = select(User).where(User.user_name == user_name)
+    elif email is not None:
+        stmt = select(User).where(User.email == email)
+    else:
+        print("input a user id, email or user_name.")
+        return None
+
+    print(stmt)
+
     try:
-        user = session.scalars(select(User).where(User.id == id)).one()
+        user = session.scalars(stmt).one()
         return user
     except NoResultFound:
         print("No User found.")
@@ -101,8 +125,8 @@ class User(Base):
     def get_username(self):
         return self.user_name
     
-    def update_user(self, **kwargs):
-        fields = self.__table__.c.keys()
+    def update(self, **kwargs):
+        fields = self.__table__.c.keys()[1:]
         for key, value in kwargs.items():
             if key in fields:
                 print("setting column: " + key + "to value: " + value)

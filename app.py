@@ -5,7 +5,9 @@ from datetime import timedelta
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, Post, Media, MediaCollection, Interaction, FollowLookup
+import models
+from models import Base, User, Post, Media, MediaCollection, Interaction, FollowLookup, \
+    insert_user, get_user, insert_post
 from email_validator import validate_email, EmailNotValidError
 
 #app settings
@@ -18,28 +20,18 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-Base.metadata.drop_all(engine)
+# Base.metadata.drop_all(engine)
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
 
-# Finds if user exists
-def found_user(user_name):
-
-    exists = db_session.query(User.id).filter_by(user_name=user_name).first() is not None
-    return exists
-
-# Finds if email exists
-#def found_email(email):
-
-    #exists = db_session.query(User.id).filter_by(email=email).first() is not None   
-    #return exists
+models.session = db_session
 
 # Find if email exists in DB and is a valid format
 def valid_email(email):
 
-    exists = db_session.query(User.id).filter_by(email=email).first() is not None 
-    if exists:
+    user = get_user(email=email)
+    if user is not None:
         flash("Email already in use", "info")
         return False
 
@@ -87,7 +79,7 @@ def create_account():
         email = form.email.data
         password = form.password.data
         confirm_password = form.confirm.data
-        if found_user(user_name):
+        if get_user(user_name=user_name) is not None:
             flash("Username already exists", "info")
             return redirect(url_for("create_account"))
         elif not valid_email(email):
@@ -97,14 +89,12 @@ def create_account():
         else: 
             session["user"] = user_name # add user to session
             hashed_password = sha256_crypt.hash(password)
-            user = User(
+            user = insert_user(
                 user_name = user_name, 
                 email = email, 
                 password = hashed_password
-                )
-
-            db_session.add(user)
-            db_session.commit()
+            )
+            
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
 
@@ -123,10 +113,9 @@ def login():
     if request.method == "POST" and form.validate_on_submit():
         user_name = form.user_name.data
         password = form.password.data
-        if found_user(user_name):
 
-            user_query = select(User).where(User.user_name == user_name)
-            user = db_session.scalars(user_query).one()
+        user = get_user(user_name=user_name)
+        if user is not None:
             hashed_password = user.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
@@ -160,10 +149,8 @@ def user(dynamic_user):
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
-        user_query = select(User).where(User.id == user_id)
-        profile = db_session.scalars(user_query).one()
-
-        postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
+        user = get_user(id=user_id)
+        postings = user.posts
 
         if request.method == "POST" and form.validate_on_submit():
             
@@ -175,28 +162,19 @@ def user(dynamic_user):
                 return redirect(url_for("create_post"))
             
             else:
-                post = Post(
-                    text = text,
-                    user_id = user_id
-                )
-
-                db_session.add(post)
-                db_session.commit()
+                post = insert_post(user, text)
                 flash("Post Created!")
                 #print(post)
-                return redirect(url_for("user", dynamic_user = session["user"]))
+                return redirect(url_for("user", dynamic_user = session["user"]), user=user)
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form)
     # If page is not the logged in user's
     else:
-        if found_user(dynamic_user):
-            user_id = select(User.id).where(User.user_name == dynamic_user)
-            user_query = select(User).where(User.id == user_id)
-            profile = db_session.scalars(user_query).one()
+        user = get_user(user_name = dynamic_user)
+        if  user is not None:
 
-            postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
+            postings = user.posts
 
-            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
+            return render_template("user.html", dynamic_user = dynamic_user, posts = postings, user=user)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -208,39 +186,39 @@ def edit_profile():
         user_id = session["user_id"]
         form = UserProfileForm()
 
-        user_query = select(User).where(User.id == user_id)
-        profile = db_session.scalars(user_query).one()
+        user = get_user(id = user_id)
 
         if request.method == "GET":
-            if profile.bio != "NULL":
-                form.user_bio.data = profile.bio
-            if profile.first_name != "NULL":
-                form.first_name.data = profile.first_name
-            if profile.middle_name != "NULL":
-                form.middle_name.data = profile.middle_name
-            if profile.last_name != "NULL":
-                form.last_name.data = profile.last_name
-            if profile.pronouns != "NULL":
-                form.pronouns.data = profile.pronouns
-            if profile.occupation != "NULL":
-                form.occupation.data = profile.occupation
-            if profile.location != "NULL":
-                form.location.data = profile.location
-            if profile.date_of_birth != "NULL":
-                form.date_of_birth.data = profile.date_of_birth
+            if user.bio != "NULL":
+                form.user_bio.data = user.bio
+            if user.first_name != "NULL":
+                form.first_name.data = user.first_name
+            if user.middle_name != "NULL":
+                form.middle_name.data = user.middle_name
+            if user.last_name != "NULL":
+                form.last_name.data = user.last_name
+            if user.pronouns != "NULL":
+                form.pronouns.data = user.pronouns
+            if user.occupation != "NULL":
+                form.occupation.data = user.occupation
+            if user.location != "NULL":
+                form.location.data = user.location
+            if user.date_of_birth != "NULL":
+                form.date_of_birth.data = user.date_of_birth
 
         if request.method == "POST" and form.validate_on_submit():
 
-            profile.bio = form.user_bio.data
-            profile.first_name = form.first_name.data
-            profile.middle_name = form.middle_name.data
-            profile.last_name = form.last_name.data
-            profile.pronouns = form.pronouns.data
-            profile.occupation = form.occupation.data
-            profile.location = form.location.data
-            profile.date_of_birth = form.date_of_birth.data
+            user.update(
+                bio = form.user_bio.data,
+                first_name = form.first_name.data,
+                middle_name = form.middle_name.data,
+                last_name = form.last_name.data,
+                pronouns = form.pronouns.data,
+                occupation = form.occupation.data,
+                location = form.location.data,
+                date_of_birth = form.date_of_birth.data
+            )
 
-            db_session.commit()
             flash("Your profile has been updated", "info")
             return redirect(url_for("edit_profile"))
 
@@ -252,19 +230,17 @@ def edit_profile():
 @app.route("/settings/", methods=["POST","GET"])
 def user_settings():
     if "user" in session:
-        user = session["user"]
+        user_name = session["user"]
+        user = get_user(user_name = user_name)
         form = UserSettingsForm()
         if request.method == "POST" and form.validate_on_submit():
-            user_query = db_session.query(User).filter_by(user_name=user).first()
             confirm_password = form.confirm.data
             if form.email.data and valid_email(form.email.data):
-                user_query.email = form.email.data
-                db_session.commit()
+                user.update(email=form.email.data)
                 flash("Email saved", "info")
             if form.password.data and valid_pass(form.password.data, confirm_password):
                 hashed_password = sha256_crypt.hash(form.password.data)
-                user_query.password = hashed_password
-                db_session.commit()
+                user.update(password=hashed_password)
                 flash("Password sucessfully changed", "info")
             return redirect(url_for("user_settings"))
         return render_template("user_settings.html", form = form)
@@ -275,6 +251,7 @@ def user_settings():
 def create_post():
     if "user" in session:
         user_id = session["user_id"]
+        user = get_user(id=user_id)
         form = PostForm()
         if request.method == "POST" and form.validate_on_submit():
             
@@ -286,15 +263,8 @@ def create_post():
                 return redirect(url_for("create_post"))
             
             else:
-                post = Post(
-                    text = text,
-                    user_id = user_id
-                )
-
-                db_session.add(post)
-                db_session.commit()
+                post = insert_post(user, text)
                 flash("Post Created!")
-                #print(post)
                 return redirect(url_for("home"))
         return render_template("create_post.html", form = form)
     else:
