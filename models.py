@@ -7,6 +7,7 @@ from connect import db_connect #connect.py method that handles all connections, 
 global engine
 global session
 
+#takes in user_name, email, and password strings to create a User object.
 def insert_user(user_name, email, password):
     user = User(
         user_name=user_name, 
@@ -18,6 +19,7 @@ def insert_user(user_name, email, password):
     session.commit()
     return user
 
+#gets a User object based on id, user_name, or email
 def get_user(id=None, user_name=None, email=None):
 
     if id is not None:
@@ -39,10 +41,18 @@ def get_user(id=None, user_name=None, email=None):
         print("No User found.")
         return None
 
+#uses get_user to check if a user exists
+def exists_user(id=None, user_name=None, email=None):
+    if get_user(id, user_name, email) is not None:
+        return True
+    else:
+        return False
+
+#inserts a post, requires a User object and string for text
 def insert_post(user, text):
     post = Post(
         user_id = user.id,
-        text = text
+        text = text 
     )
 
     session.add(post)
@@ -50,6 +60,7 @@ def insert_post(user, text):
 
     return post
 
+#probably only gonna be used internally, but logs an interaction
 def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
     
     if interaction_type == "reply":
@@ -122,15 +133,25 @@ class User(Base):
     
     posts = relationship("Post", back_populates="user")
 
+    #returns username
     def get_username(self):
         return self.user_name
     
+    #updates any or all fields in a user object
+    #TODO: update last_updated
     def update(self, **kwargs):
         fields = self.__table__.c.keys()[1:]
         for key, value in kwargs.items():
             if key in fields:
-                print("setting column: " + key + "to value: " + value)
+                print("setting column: " + str(key) + "to value: " + str(value))
                 setattr(self, key, value)
+
+    #inserts a post by that user. untested.
+    #TODO: test
+    def post(self, text):
+        post = insert_post(self, text)
+        return post
+
                 
 class Post(Base):
     __tablename__ = 'posts'
@@ -149,6 +170,7 @@ class Post(Base):
     
     user = relationship("User", back_populates="posts")
 
+    #from a Post object, inserts a nother Post object as a reply.
     def insert_reply(self, user, reply_text):
         parent_id = self.id
         reply = Post(
