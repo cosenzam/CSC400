@@ -20,7 +20,7 @@ engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
 db_session = Session_MySQLdb()
 
-# Base.metadata.drop_all(engine)
+Base.metadata.drop_all(engine)
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
@@ -152,6 +152,8 @@ def user(dynamic_user):
         user = get_user(id=user_id)
         postings = user.posts
 
+        print(f"method: {request.method}, user: {str(user.user_name)}")
+
         if request.method == "POST" and form.validate_on_submit():
             
             text = form.text.data
@@ -170,7 +172,7 @@ def user(dynamic_user):
     # If page is not the logged in user's
     else:
         user = get_user(user_name = dynamic_user)
-        if  user is not None:
+        if user is not None:
 
             postings = user.posts
 
