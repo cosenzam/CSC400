@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} User Page{% endblock %}
+{% block title %}{{dynamic_user}}'s Page{% endblock %}
 {% block content %}
 {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -12,23 +12,26 @@
     <div class="col-sm-4 media border profile-min-width">
         <div class="align-self-center">
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
+            <a href="#" class="btn btn-light text-dark follow-btn">Follow</a>
         </div>
         <div class="media-body">
             <h4 class="media-heading user-name border">{{dynamic_user}}</h4>
-            <p class="pronouns border"> {% if profile.pronouns != "NULL" %} {{profile.pronouns}} {% endif %} </p>
+            <p class="pronouns border"> 
+                {% if profile.pronouns != "NULL" %}{{profile.pronouns}}{% endif %} 
+            </p>
         </div>
     </div>
 </div>
 <div class="row justify-content-center">
     <span class="col-sm-1 profile-info border">
-        {% if profile.first_name != "NULL" %} {{profile.first_name}} {% endif %}
-        {% if profile.last_name != "NULL" %} {{profile.last_name}} {% endif %}
+        {% if profile.first_name != "NULL" %}{{profile.first_name}}{% endif %}
+        {% if profile.last_name != "NULL" %}{{profile.last_name}}{% endif %}
     </span>
     <span class="col-sm-1 profile-info border">
-        {% if profile.location != "NULL" %} {{profile.location}} {% endif %}
+        {% if profile.location != "NULL" %}{{profile.location}}{% endif %}
     </span>
     <span class="col-sm-2 profile-info border">
-        {% if profile.occupation != "NULL" %} {{profile.occupation}} {% endif %}
+        {% if profile.occupation != "NULL" %}{{profile.occupation}}{% endif %}
     </span>
     <!--
     <span class="col-sm-1 profile-info border">
@@ -36,8 +39,8 @@
     </span>
     -->
 </div>
-<div class="row justify-content-center">
-    <span class="col-sm-4 bio border profile-min-width">{% if profile.bio != "NULL" %} {{profile.bio}} {% endif %}</span>
+<div class="row justify-content-center" style = "word-wrap: break-word;">
+    <span class="col-sm-4 d-flex bio border profile-min-width">{% if profile.bio != "NULL" %}{{profile.bio}}{% endif %}</span>
 </div>
 {% if dynamic_user == session["user"] %}
 <div class="row justify-content-center post-button">
@@ -72,14 +75,18 @@
 {% endif %}
 {% for post in posts %}
 <div class="row justify-content-center post">
-    <span class="col-sm-4 location border post-format" style="word-wrap: break-word">
-    <p>
+    <span class="col-sm-4 border post-format" style="word-wrap: break-word">
         <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
         <p style="text-align: left;">
-            &emsp;{{dynamic_user}}&emsp;{{post.date_posted}}
+            &emsp;{{dynamic_user}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
         </p>
-        <br><br><p style="text-align: center;">{{post.text}}</p>
-    </p>
+        <br>
+        <p>{{post.text}}</p>
+        <div class="text-center">
+            <span class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Like" style="float: left;"></span>
+            <span class="btn bi bi-arrow-repeat post-icon tt" data-bs-placement="bottom" title="Share"></span>
+            <span class="btn bi bi-reply post-icon tt" data-bs-placement="bottom" title="Reply" style="float: right;"></span>
+        </div>
     </span>
 </div>
 {% endfor %}

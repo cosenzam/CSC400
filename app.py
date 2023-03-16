@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from datetime import timedelta
+from datetime import timedelta, datetime
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
@@ -69,6 +69,38 @@ def valid_pass(password, confirm_password):
     else:
         flash("Passwords must be at least 8 characters in length and contain one number and one letter")
         return False
+
+# Days since post was created
+def getPostRecency(post):
+    d1 = datetime.now()
+    d2 = post.date_posted
+
+    delta = d1 - d2
+    recency_tuple = (delta.seconds, delta.seconds//60, delta.seconds//3600, delta.days)
+
+    return recency_tuple
+
+# Show time since post was created if days <= 7, otherwise show locally formatted date
+# recency_typle = (seconds, mins, hours, days)
+def postDateFormat(post, recency_tuple):
+    seconds = recency_tuple[0]
+    minutes = recency_tuple[1]
+    hours = recency_tuple[2]
+    days = recency_tuple[3]
+    #print(seconds, minutes, hours, days)
+
+    if days < 1:
+        if hours < 1:
+            if minutes < 1:
+                return str(seconds)+"s"
+            else:
+                return str(minutes)+"m"
+        else:
+            return str(hours)+"h"
+    elif days <= 7:
+        return str(days)+"d"
+    else:
+        return post.date_posted.strftime("%x")
 
 @app.route("/")
 def home():
@@ -189,7 +221,8 @@ def user(dynamic_user):
                 #print(post)
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form)
+        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form, 
+        getPostRecency = getPostRecency, postDateFormat = postDateFormat)
     # If page is not the logged in user's
     else:
         if found_user(dynamic_user):
@@ -199,7 +232,11 @@ def user(dynamic_user):
 
             postings = db_session.query(Post).filter_by(user_id=user_id).order_by(Post.date_posted.desc()).all()
 
-            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
+            for post in postings:
+                print(postDateFormat(post, getDays(post)))
+
+            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, 
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -256,19 +293,31 @@ def edit_profile():
 def user_settings():
     if "user" in session:
         user = session["user"]
+        user_query = db_session.query(User).filter_by(user_name=user).first()
         form = UserSettingsForm()
         if request.method == "POST" and form.validate_on_submit():
-            user_query = db_session.query(User).filter_by(user_name=user).first()
+            current_password = form.current_password.data
+            new_password = form.password.data
             confirm_password = form.confirm.data
-            if form.email.data and valid_email(form.email.data):
-                user_query.email = form.email.data
-                db_session.commit()
-                flash("Email saved", "info")
-            if form.password.data and valid_pass(form.password.data, confirm_password):
-                hashed_password = sha256_crypt.hash(form.password.data)
-                user_query.password = hashed_password
-                db_session.commit()
-                flash("Password sucessfully changed", "info")
+            email = form.email.data
+            if email:
+                if email == user_query.email:
+                    flash("New email cannot be current email", "info")
+                elif valid_email(email):
+                    user_query.email = email
+                    db_session.commit()
+                    flash("Email saved", "info")
+            if current_password:
+                if sha256_crypt.verify(current_password, user_query.password):
+                    if sha256_crypt.verify(new_password, user_query.password):
+                        flash("New password cannot be old password", "info")
+                    elif new_password and valid_pass(new_password, confirm_password):
+                        hashed_password = sha256_crypt.hash(new_password)
+                        user_query.password = hashed_password
+                        db_session.commit()
+                        flash("Password sucessfully changed", "info")
+                else:
+                    flash("Incorrect Password", "info")
             return redirect(url_for("user_settings"))
         return render_template("user_settings.html", form = form)
     else:
