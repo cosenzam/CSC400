@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Login Page {% endblock %}
+{% block title %}Login{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
     <div class="col-sm-4 text-center border">
@@ -17,8 +17,10 @@
             <p>{{form.user_name(size=30)}}</p>
             <p>{{form.password.label}}</p>
             <p>{{form.password(size=30)}}</p>
+            <div>
+                <a href="#" class="text-light">Forgot username or password?</a>
+            </div>
             <button type="submit" class="btn btn-light text-dark">Log In</button>
-            <!--<p><input type="submit" value="Log In"></p>-->
         </form>
     </div>
 </div>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Edit Profile {% endblock %}
+{% block title %}Edit Profile{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
     <div class="col-sm-4 text-center border">
@@ -11,12 +11,15 @@
         {% endif %}
         {% endwith %}
         <h1 class="text-center"> Edit Profile </h1>
-        <form action="#" method="post">
+        <form name="count_text" action="#" method="post">
             {{form.csrf_token}}
-            <p> 
+            <p>
                 {{form.user_bio.label}}
-                {{form.user_bio(size=30)}}
-            </p>
+                {{form.user_bio(id="text", size=30, oninput="countText()")}}
+                <br><label for="characters">Characters: </label>
+                <span id="characters"></span>
+                <span>/128</span>
+            <p>
             <p> 
                 {{form.first_name.label}}
                 {{form.first_name(size=30)}}

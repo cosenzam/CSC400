@@ -6,7 +6,7 @@ from wtforms.validators import InputRequired, Length, EqualTo, Optional
 class CreateAccountForm(FlaskForm):
     user_name = StringField('Username', validators = [InputRequired(), Length(min = 6, max = 24)])
     email = StringField('Email', validators = [InputRequired(), Length(min = 8, max = 64)])
-    password = PasswordField('Password', [InputRequired(), EqualTo('confirm', message='Passwords must match')])
+    password = PasswordField('Password', [InputRequired()])
     confirm  = PasswordField('Repeat Password')
 
 class LoginForm(FlaskForm):
@@ -25,8 +25,9 @@ class UserProfileForm(FlaskForm):
     date_of_birth = DateField('Date of Birth', validators = [Optional()])
     
 class UserSettingsForm(FlaskForm):
-    email = StringField('Change email', validators = [Optional(), Length(min = 8, max = 64)])
-    password = PasswordField('New Password', [Optional(), EqualTo('confirm', message='Passwords must match')])
+    email = StringField('New email', validators = [Optional(), Length(min = 8, max = 64)])
+    current_password = PasswordField('Current Password')
+    password = PasswordField('New Password')
     confirm  = PasswordField('Repeat Password')
 
 class PostForm(FlaskForm):

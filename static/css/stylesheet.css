@@ -5,6 +5,8 @@
 .bio{
   font-size: 16px;
   min-height: 80px !important;
+  word-break: break-word;
+  white-space: pre-wrap;
   overflow: hidden;
 }
 
@@ -66,6 +68,11 @@
   min-width: 400px;
 }
 
+.post-icon{
+  font-size: 20px;
+  color: white;
+}
+
 .post-button{
   padding-top: 1%;
 }
@@ -86,4 +93,14 @@ input, textarea{
 
 .dropdown-item:active{
   background-color: rgba(114, 19, 138, 0.25);
+}
+
+.follow-btn{
+  float: right;
+}
+
+label {
+  display: block;
+  text-align: center;
+  line-height: 150%;
 }

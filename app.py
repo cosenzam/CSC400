@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from datetime import timedelta
+from datetime import timedelta, datetime
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
@@ -61,6 +61,38 @@ def valid_pass(password, confirm_password):
     else:
         flash("Passwords must be at least 8 characters in length and contain one number and one letter")
         return False
+
+# Days since post was created
+def getPostRecency(post):
+    d1 = datetime.now()
+    d2 = post.date_posted
+
+    delta = d1 - d2
+    recency_tuple = (delta.seconds, delta.seconds//60, delta.seconds//3600, delta.days)
+
+    return recency_tuple
+
+# Show time since post was created if days <= 7, otherwise show locally formatted date
+# recency_typle = (seconds, mins, hours, days)
+def postDateFormat(post, recency_tuple):
+    seconds = recency_tuple[0]
+    minutes = recency_tuple[1]
+    hours = recency_tuple[2]
+    days = recency_tuple[3]
+    #print(seconds, minutes, hours, days)
+
+    if days < 1:
+        if hours < 1:
+            if minutes < 1:
+                return str(seconds)+"s"
+            else:
+                return str(minutes)+"m"
+        else:
+            return str(hours)+"h"
+    elif days <= 7:
+        return str(days)+"d"
+    else:
+        return post.date_posted.strftime("%x")
 
 @app.route("/")
 def home():
@@ -176,7 +208,8 @@ def user(dynamic_user):
                 #flash("Post Created!")
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form)
+        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form, 
+        getPostRecency = getPostRecency, postDateFormat = postDateFormat)
     # If page is not the logged in user's
     else:
         if exists_user(user_name=dynamic_user):
@@ -184,7 +217,11 @@ def user(dynamic_user):
 
             postings = profile.posts
 
-            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings)
+            for post in postings:
+                print(postDateFormat(post, getDays(post)))
+
+            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, 
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))

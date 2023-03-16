@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Create Account Page {% endblock %}
+{% block title %}Create Account{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
     <div class="col-sm-4 text-center border">
@@ -21,6 +21,12 @@
             <p>{{form.password(size=30)}}</p>
             <p>{{form.confirm.label}}</p>
             <p>{{form.confirm(size=30)}}</p>
+            <div>
+                <span class="text-light">
+                    Already have an account?
+                    <a href="{{ url_for('login') }}" class="text-light">Log in</a>
+                </span>
+            </div>
             <button type="submit" class="btn btn-light text-dark">Create Account</button>
         </form>
     </div>
