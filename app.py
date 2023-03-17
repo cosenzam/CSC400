@@ -65,7 +65,7 @@ def valid_pass(password, confirm_password):
 # Days since post was created
 def getPostRecency(post):
     d1 = datetime.now()
-    d2 = post.date_posted
+    d2 = post.timestamp
 
     delta = d1 - d2
     recency_tuple = (delta.seconds, delta.seconds//60, delta.seconds//3600, delta.days)
@@ -92,7 +92,7 @@ def postDateFormat(post, recency_tuple):
     elif days <= 7:
         return str(days)+"d"
     else:
-        return post.date_posted.strftime("%x")
+        return post.timestamp.strftime("%x")
 
 @app.route("/")
 def home():
@@ -280,23 +280,40 @@ def user_settings():
     if "user" in session:
         user_name = session["user"]
         form = UserSettingsForm()
+        user = get_user(user_name=user_name)
+
+        if request.method == "GET":
+            form.email.data = user.email
+
         if request.method == "POST" and form.validate_on_submit():
-            user = get_user(user_name=user_name)
+            current_password = form.current_password.data
+            new_password = form.password.data
             confirm_password = form.confirm.data
-            if form.email.data and valid_email(form.email.data):
-                user.update(email = form.email.data)
+            email = form.email.data
 
-                flash("Email saved", "info")
-            if form.password.data and valid_pass(form.password.data, confirm_password):
-                hashed_password = sha256_crypt.hash(form.password.data)
-                user.update(password = hashed_password)
+            if email:
+                if email == user.email:
+                    flash("New email cannot be current email", "info")
+                elif valid_email(email):
+                    user.update(email = email)
+                    flash("Email saved", "info")
 
-                flash("Password sucessfully changed", "info")
+            if current_password:
+                if sha256_crypt.verify(current_password, user.password):
+                    if sha256_crypt.verify(new_password, user.password):
+                        flash("New password cannot be old password", "info")
+                    elif new_password and valid_pass(new_password, confirm_password):
+                        hashed_password = sha256_crypt.hash(new_password)
+                        user.update(password = hashed_password)
+                        flash("Password sucessfully changed", "info")
+                else:
+                    flash("Incorrect Password", "info")
+
             return redirect(url_for("user_settings"))
         return render_template("user_settings.html", form = form)
     else:
         return redirect(url_for("login"))
-    
+
 @app.route("/create_post/", methods=["POST", "GET"])
 def create_post():
     if "user" in session:

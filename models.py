@@ -145,6 +145,7 @@ class User(Base):
             if key in fields:
                 print("setting column: " + str(key) + "to value: " + str(value))
                 setattr(self, key, value)
+                session.commit()
 
     #inserts a post by that user. untested.
     #TODO: test
