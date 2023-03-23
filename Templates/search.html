@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %} Create Post {% endblock %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+                <p>{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="row container-fliud justify-content-center align-items-center vh-100 search-bloc">
+        <div class="col-sm-4 text-center border">
+            <h1>Search For:</h1>
+            <br><br>
+            <form action="#" method="post">
+                {{form.csrf_token}}
+                <p>{{form.user_query.label}}</p>
+                <p>{{form.user_query(size=128)}}</p>
+                <br>
+                <p>{{form.text_query.label }}</p>
+                <p>{{form.text_query(size=128)}}</p>
+                <p><input type="submit" value="Submit"></p>
+            </form>
+        </div>
+    </div>
+    {% endblock %}

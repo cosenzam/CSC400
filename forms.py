@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed
-from wtforms import StringField, PasswordField, TextAreaField, DateField, FileField
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, PasswordField, TextAreaField, DateField, SubmitField
 from wtforms.validators import InputRequired, Length, EqualTo, Optional
+
 
 class CreateAccountForm(FlaskForm):
     user_name = StringField('Username', validators = [InputRequired(), Length(min = 6, max = 24)])
@@ -23,7 +24,8 @@ class UserProfileForm(FlaskForm):
     occupation = StringField('Occupation', validators = [Optional(), Length(min = 0, max = 64)])
     location = StringField('Location', validators = [Optional(), Length(min = 0, max = 64)])
     date_of_birth = DateField('Date of Birth', validators = [Optional()])
-    
+    profile_picture_media_id = media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png'])])
+
 class UserSettingsForm(FlaskForm):
     email = StringField('New email', validators = [Optional(), Length(min = 8, max = 64)])
     current_password = PasswordField('Current Password')
@@ -33,3 +35,7 @@ class UserSettingsForm(FlaskForm):
 class PostForm(FlaskForm):
     text = TextAreaField('Write a Post (256 Character limit)', validators = [Optional(), Length(max = 256)])
     media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4'])])
+
+class SearchForm(FlaskForm):
+    user_query = TextAreaField('Username', validators = [Optional(), Length(max = 256)])
+    text_query = TextAreaField('Text', validators = [Optional(), Length(max = 256)])

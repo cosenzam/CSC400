@@ -47,6 +47,9 @@ def exists_user(id=None, user_name=None, email=None):
         return True
     else:
         return False
+    
+def exists_post():
+    return False
 
 #inserts a post, requires a User object and string for text
 def insert_post(user, text):
