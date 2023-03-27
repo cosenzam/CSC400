@@ -11,7 +11,7 @@
         {% endif %}
         {% endwith %}
         <h1 class="text-center"> Edit Profile </h1>
-        <form name="count_text" action="#" method="post">
+        <form name="count_text" action="#" method="post" enctype="multipart/form-data">
             {{form.csrf_token}}
             <p>
                 {{form.user_bio.label}}

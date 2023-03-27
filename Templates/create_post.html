@@ -11,14 +11,15 @@
     <div class="row container-fliud justify-content-center align-items-center vh-100">
         <div class="col-sm-4 text-center border">
             <h1 class="text-center">Create Post</h1>
-            <form action="#" method="post">
+            <form action="#" method="post" enctype="multipart/form-data">
                 {{form.csrf_token}}
                 <p>{{form.text.label}}</p>
-                <p>{{form.text(size=256)}}</p>
-                <br>
-                <p>{{form.media.label }}</p>
-                <p>{{form.media(class='form-control', placeholder='Image URL')}}</p>
-                <p><input type="submit" value="Submit"></p>
+                <p>{{form.text(size=20)}}</p>
+                <p>{{form.media.label}}</p>
+                <p>{{form.media(size=20)}}</p>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-light text-dark">Submit Post</button>
+                </div>
             </form>
         </div>
     </div>

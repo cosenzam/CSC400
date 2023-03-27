@@ -38,6 +38,9 @@
                       <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
                     </ul>
                   </div>
+                  <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('search') }}">Search</a>
+                  </li>
                 </li>
                 {% endif %}
               </ul>
@@ -48,6 +51,9 @@
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('search') }}">Search</a>
                 </li>
                 {% endif %}
               </ul>
