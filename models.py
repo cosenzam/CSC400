@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null, select
+from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from datetime import datetime, date
@@ -47,12 +48,16 @@ def exists_user(id=None, user_name=None, email=None):
         return True
     else:
         return False
+    
+def exists_post():
+    return False
 
 #inserts a post, requires a User object and string for text
 def insert_post(user, text):
     post = Post(
         user_id = user.id,
-        text = text 
+        text = text,
+        timestamp = datetime.now()
     )
 
     session.add(post)
@@ -60,10 +65,54 @@ def insert_post(user, text):
 
     return post
 
+#post getter
+def get_post(id):
+
+    stmt = select(Post).where(Post.id==id)
+
+    try:
+        post = session.scalars(stmt).one()
+        return post
+    except NoResultFound:
+        print("No Post found.")
+        return None
+
+def get_latest_post(User, n=0, replies=False):
+    posts = User.posts
+
+    if not replies:
+        posts = [p for p in posts if p.parent_id is None]
+
+    return posts[n]
+
+def get_latest_posts(User, n=0, replies=False):
+    posts = User.posts
+
+    if not replies:
+        posts = [p for p in posts if p.parent_id is None]
+
+    return posts[0:n]
+
+def follow(to_user, from_user):
+    insert_interaction(to_user, from_user, interaction_type="follow")
+
+
 #probably only gonna be used internally, but logs an interaction
 def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
-    
-    if interaction_type == "reply":
+
+    interaction_types = [
+        "like",
+        "follow",
+        "share",
+        "reply",
+        "message"
+    ]
+
+    if interaction_type not in interaction_types:
+        print("Not a supported interaciton.")
+        return None
+
+    if interaction_type in ["reply", "like", "share"]:
         post_id = post.id
         parent_id = post.parent_id
     else:
@@ -103,7 +152,44 @@ class Interaction(Base):
     parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
-    timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
+    timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
+
+# class Following(Base):
+
+#     __tablename__ = 'following'
+
+#     id: Mapped[int] = mapped_column(
+#         unique = True,
+#         primary_key = True,
+#         nullable = False,
+#         autoincrement = True
+#     )
+
+#     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+#     interaction_id: Mapped[int] = mapped_column(ForeignKey("interactions.id"))
+#     following_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+#     is_mutual: Mapped[bool] = mapped_column(default=False)
+#     timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
+
+class Follows(Base):
+
+    __tablename__ = 'follows'
+
+    id: Mapped[int] = mapped_column(
+        unique = True,
+        primary_key = True,
+        nullable = False,
+        autoincrement = True
+    )
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    interaction_id: Mapped[int] = mapped_column(ForeignKey("interactions.id"))
+    follows_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    is_mutual: Mapped[bool] = mapped_column(default=False)
+    timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
+
+    users = relationship("User", foreign_keys=[user_id])
+    followers = relationship("User", foreign_keys=[follows_user_id])
     
 # Database Tables
 class User(Base):
@@ -128,24 +214,28 @@ class User(Base):
     bio: Mapped[str] = mapped_column(Text, nullable=True, default=Null)
     location: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
     occupation: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    date_created: Mapped[datetime] = mapped_column(default=datetime.now())
-    last_updated: Mapped[datetime] = mapped_column(default=datetime.now())
+    date_created: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
+    last_updated: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
     
-    posts = relationship("Post", back_populates="user")
+    posts = relationship("Post", back_populates="user", order_by="Post.timestamp.desc()")
 
     #returns username
     def get_username(self):
         return self.user_name
     
     #updates any or all fields in a user object
-    #TODO: update last_updated
     def update(self, **kwargs):
+
+        update_time = datetime.now()
+
         fields = self.__table__.c.keys()[1:]
         for key, value in kwargs.items():
             if key in fields:
                 print("setting column: " + str(key) + "to value: " + str(value))
                 setattr(self, key, value)
-                session.commit()
+
+        self.last_updated = update_time
+        session.commit()
 
     #inserts a post by that user. untested.
     #TODO: test
@@ -167,7 +257,8 @@ class Post(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
     text: Mapped[str] = mapped_column(Text, nullable = True)
-    timestamp: Mapped[datetime] = mapped_column(default = datetime.now())
+    timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default = datetime.now())
+    like_count: Mapped[int] = mapped_column(default=0)
     
     user = relationship("User", back_populates="posts")
 
@@ -183,6 +274,14 @@ class Post(Base):
 
         insert_interaction(self.user, user, reply)
         return reply
+
+    #increments like count of a post.
+    #takes in the user object that is liking the post.
+    #maps interaction as a "like" interaction FROM the user liking TO the author of the post.
+    def like(self, user):
+        self.like_count = self.like_count + 1
+        session.commit()
+        insert_interaction(user, self.user, post=self, interaction_type="like")
 
 class MediaCollection(Base):
     __tablename__ = 'media_collections'
@@ -201,7 +300,7 @@ class MediaCollection(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=False, default=0)
     video_count: Mapped[int] = mapped_column(nullable=False, default=0)
-    date_created: Mapped[datetime] =  mapped_column(default=datetime.now())
+    date_created: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
 
     media = relationship("Media", back_populates="media_collection")
 
@@ -220,21 +319,3 @@ class Media(Base):
     file_path: Mapped[str] = mapped_column(String(255), default='')
 
     media_collection = relationship("MediaCollection", back_populates="media")
-
-
-class FollowLookup(Base):
-
-    __tablename__ = 'follow_lookup'
-
-    id: Mapped[int] = mapped_column(
-        unique = True,
-        primary_key = True,
-        nullable = False,
-        autoincrement = True
-    )
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    interaction_id: Mapped[int] = mapped_column(ForeignKey("interactions.id"))
-    following_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    is_mutual: Mapped[bool] = mapped_column(default=False)
-    timestamp: Mapped[datetime] = mapped_column(default=datetime.now())

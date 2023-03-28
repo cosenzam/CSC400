@@ -104,3 +104,10 @@ label {
   text-align: center;
   line-height: 150%;
 }
+
+.search-bloc {
+  height: 500px;
+  width: 1000px;
+  margin: 0px auto;
+  padding: 10px;
+}

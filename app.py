@@ -1,16 +1,19 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, session, flash, request
 from flask_mail import Mail, Message
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
 from datetime import timedelta, datetime, time
 from passlib.hash import sha256_crypt
-from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, RecoveryForm, ResetPasswordForm
+from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, SearchForm, RecoveryForm, ResetPasswordForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, Post, Interaction, Media, MediaCollection, FollowLookup
+from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post
+import os, os.path
+from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "asdf"
@@ -25,6 +28,8 @@ app.config['MAIL_USE_SSL'] = True
 serial = Serializer(app.config['SECRET_KEY'])
 
 app.permanent_session_lifetime = timedelta(days = 7) # session length
+app.config['UPLOAD_FOLDER'] = 'static/images'
+
 
 mail = Mail(app)
 
@@ -224,12 +229,18 @@ def user(dynamic_user):
         user = get_user(id=user_id) #user object
 
         #a user object has a list of post objects made by that user
+
         postings = user.posts
+        #files = media.file_path
 
         if request.method == "POST" and form.validate_on_submit():
             
             text = form.text.data
             media = form.media.data
+
+            if media is not None:
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             if media == "" and text == "":
                 flash("Text and Media Fields cannot both be blank!")
@@ -237,8 +248,10 @@ def user(dynamic_user):
             
             else:
                 #insert_post() returns a post object
+
                 post = insert_post(user, text)
                 #flash("Post Created!")
+                
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
         return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, form = form,
@@ -250,8 +263,8 @@ def user(dynamic_user):
 
             postings = user.posts
 
-            for post in postings:
-                print(postDateFormat(post, getDays(post)))
+            #for post in postings:
+            #    print(postDateFormat(post, getDays(post)))
 
             return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, 
             getPostRecency = getPostRecency, postDateFormat = postDateFormat)
@@ -269,6 +282,7 @@ def edit_profile():
         user = get_user(id=user_id)
 
         if request.method == "GET":
+
             if user.bio != "NULL":
                 form.user_bio.data = user.bio
             if user.first_name != "NULL":
@@ -286,6 +300,13 @@ def edit_profile():
             if user.date_of_birth != "NULL":
                 form.date_of_birth.data = user.date_of_birth
 
+            '''
+            if profile.profile_picture_media_id != "NULL":
+                form.profile_picture_media_id.data = profile.profile_picture_media_id
+                filename = secure_filename(profile.profile_picture_media_id.filename)
+                profile.profile_picture_media_id.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            '''
+
         if request.method == "POST" and form.validate_on_submit():
 
             #profile is a user object, User.update() take kwargs for each of its fields.
@@ -298,6 +319,7 @@ def edit_profile():
                 occupation = form.occupation.data,
                 location = form.location.data,
                 date_of_birth = form.date_of_birth.data
+                #profile_picture_media_id = form.profile_picture_media_id.data
             )
 
             flash("Your profile has been updated", "info")
@@ -347,7 +369,7 @@ def user_settings():
     else:
         return redirect(url_for("login"))
 
-@app.route("/create_post/", methods=["POST", "GET"])
+@app.route("/create_post/", methods=["GET", "POST"])
 def create_post():
     if "user" in session:
         user_id = session["user_id"]
@@ -358,17 +380,38 @@ def create_post():
             text = form.text.data
             media = form.media.data
 
-            if media == "" and text == "":
+            if text == "" and media == "":
                 flash("Text and Media Fields cannot both be blank!")
                 return redirect(url_for("create_post"))
             
-            else:
-
-                insert_post(user, text)
+            elif media == "":
+                insert_post(user=user, text=text)
                 flash("Post Created!")
-                #print(post)
                 return redirect(url_for("home"))
+
+            elif text == "":
+                insert_post(user=user, text=text)
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                media = Media(
+                    file_path = media
+                )
+
+                flash("Post Created!")
+                return redirect(url_for("home"))
+            
+            else:
+                insert_post(user=user, text=text)
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                media = Media(
+                    file_path = media
+                )
+                flash("Post Created!")
+                return redirect(url_for("home"))
+            
         return render_template("create_post.html", form = form)
+    
     else:
         return redirect(url_for("login"))
 
@@ -444,6 +487,21 @@ def reset(token):
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', form = form)
+
+@app.route("/search/", methods=["GET", "POST"])
+def search():
+    form = SearchForm()
+    if request.method == "POST" and form.validate_on_submit():
+        user_data = form.user_query.data
+        #text_data = form.text_query.data
+        if user_data == "":
+            flash("Fields cannot be blank!")
+            return redirect(url_for("search"))
+        
+        elif exists_user(user_name=user_data):
+            return redirect(url_for("user", dynamic_user = user_data))
+        
+    return render_template("search.html", form = form)
 
 if __name__ == "__main__":
     app.run()
