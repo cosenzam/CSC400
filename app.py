@@ -5,7 +5,7 @@ from datetime import timedelta, datetime
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, SearchForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, Post, Interaction, Media, MediaCollection, FollowLookup
+from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
 from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post
@@ -201,8 +201,10 @@ def user(dynamic_user):
             
             text = form.text.data
             media = form.media.data
-            filename = secure_filename(media.filename)
-            media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            if media is not None:
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             if media == "" and text == "":
                 flash("Text and Media Fields cannot both be blank!")
