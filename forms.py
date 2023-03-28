@@ -36,6 +36,14 @@ class PostForm(FlaskForm):
     text = TextAreaField('Write a Post (256 Character limit)', validators = [Optional(), Length(max = 256)])
     media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4'])])
 
+class RecoveryForm(FlaskForm):
+    email = StringField('Email', validators = [InputRequired(), Length(min = 8, max = 64)])
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', [InputRequired()])
+    confirm  = PasswordField('Repeat Password')
+
 class SearchForm(FlaskForm):
     user_query = TextAreaField('Username', validators = [Optional(), Length(max = 256)])
     text_query = TextAreaField('Text', validators = [Optional(), Length(max = 256)])
+

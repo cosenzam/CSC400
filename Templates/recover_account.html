@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Recover Account{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center vertical-height-100">
+    <div class="col-sm-4 text-center border">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p class="text-center">{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <h1 class="text-center account">Recover Account</h1>
+        <form class="account-form" action="#" method="post">
+            {{form.csrf_token}}
+            <p>{{form.email.label}}</p>
+            <p>{{form.email(size=30)}}</p>
+            <button type="submit" class="btn btn-light text-dark">Send Recovery Email</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

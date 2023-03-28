@@ -18,7 +18,7 @@
             <p>{{form.password.label}}</p>
             <p>{{form.password(size=30)}}</p>
             <div>
-                <a href="#" class="text-light">Forgot username or password?</a>
+                <a href="{{ url_for('recover_account') }}" class="text-light">Forgot username or password?</a>
             </div>
             <button type="submit" class="btn btn-light text-dark">Log In</button>
         </form>

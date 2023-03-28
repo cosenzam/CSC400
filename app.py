@@ -1,9 +1,10 @@
 from flask import Flask, redirect, url_for, render_template, session, flash, request
+from flask_mail import Mail, Message
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, time
 from passlib.hash import sha256_crypt
-from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, SearchForm
+from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, SearchForm, RecoveryForm, ResetPasswordForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
@@ -11,13 +12,26 @@ import models
 from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post
 import os, os.path
 from werkzeug.utils import secure_filename
+from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 
-#app settings
+
 app = Flask(__name__)
-app.secret_key = "asdf"
+app.config['SECRET_KEY'] = "asdf"
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'cosenzam.test@gmail.com'
+app.config['MAIL_PASSWORD'] = 'vsfomiiiayzgusks'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+serial = Serializer(app.config['SECRET_KEY'])
+
 app.permanent_session_lifetime = timedelta(days = 7) # session length
 app.config['UPLOAD_FOLDER'] = 'static/images'
 
+
+mail = Mail(app)
 
 #data base connections
 engine = db_connect()
@@ -32,7 +46,7 @@ models.session = db_session
 Base.metadata.create_all(engine)
 
 # Find if email exists in DB and is a valid format
-def valid_email(email):
+def validateEmail(email):
 
     exists = exists_user(email=email)
     if exists:
@@ -50,7 +64,7 @@ def valid_email(email):
     return True
 
 # Verifies password requirements | must contain at least 1 number and 1 letter
-def valid_pass(password, confirm_password):
+def validatePassword(password, confirm_password):
     has_letters = any(c.isalpha() for c in password)
     has_numbers = any(i.isdigit() for i in password)
 
@@ -77,7 +91,7 @@ def getPostRecency(post):
     return recency_tuple
 
 # Show time since post was created if days <= 7, otherwise show locally formatted date
-# recency_typle = (seconds, mins, hours, days)
+# recency_tuple = (seconds, mins, hours, days)
 def postDateFormat(post, recency_tuple):
     seconds = recency_tuple[0]
     minutes = recency_tuple[1]
@@ -97,6 +111,26 @@ def postDateFormat(post, recency_tuple):
         return str(days)+"d"
     else:
         return post.timestamp.strftime("%x")
+
+def get_token(user):
+    token = serial.dumps({'user_id': user.id})
+    return token
+
+def send_recovery_email(token, email):
+    msg = Message("Account Recovery", sender=app.config['MAIL_USERNAME'],
+                        recipients=[email])
+    link = url_for('reset', token=token, _external=True)
+    msg.body = "Your account recovery link: "+link
+    mail.send(msg)
+    return print("Recovery email sent")
+
+def send_signup_email(email):
+    msg = Message("Thank you for signing up!", sender=app.config['MAIL_USERNAME'],
+                        recipients=[email])
+    link = url_for('login',  _external=True)
+    msg.body = "Welcome! Log in here: "+link
+    mail.send(msg)
+    return print("Sign up email sent")
 
 @app.route("/")
 def home():
@@ -118,9 +152,9 @@ def create_account():
         if exists_user(user_name=user_name):
             flash("Username already exists", "info")
             return redirect(url_for("create_account"))
-        elif not valid_email(email):
+        elif not validateEmail(email):
             return redirect(url_for("create_account"))
-        elif not valid_pass(password, confirm_password):
+        elif not validatePassword(password, confirm_password):
             return redirect(url_for("create_account"))
         else: 
             session["user"] = user_name # add user to session
@@ -133,7 +167,8 @@ def create_account():
                 email = email, 
                 password = hashed_password
                 )
-            
+            send_signup_email(email)
+
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
 
@@ -191,10 +226,11 @@ def user(dynamic_user):
         user_id = session["user_id"]
 
         #kept profile variable name the same for now
-        profile = get_user(id=user_id) #user object
+        user = get_user(id=user_id) #user object
 
         #a user object has a list of post objects made by that user
-        postings = profile.posts 
+
+        postings = user.posts
         #files = media.file_path
 
         if request.method == "POST" and form.validate_on_submit():
@@ -211,25 +247,26 @@ def user(dynamic_user):
                 return redirect(url_for("create_post"))
             
             else:
-
                 #insert_post() returns a post object
-                post = insert_post(profile, text)
-                flash("Post Created!")
+
+                post = insert_post(user, text)
+                #flash("Post Created!")
+                
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, form = form, 
+        return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, form = form,
         getPostRecency = getPostRecency, postDateFormat = postDateFormat)
     # If page is not the logged in user's
     else:
         if exists_user(user_name=dynamic_user):
-            profile = get_user(user_name=dynamic_user)
+            user = get_user(user_name=dynamic_user)
 
-            postings = profile.posts
+            postings = user.posts
 
             #for post in postings:
             #    print(postDateFormat(post, getDays(post)))
 
-            return render_template("user.html", profile = profile, dynamic_user = dynamic_user, posts = postings, 
+            return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, 
             getPostRecency = getPostRecency, postDateFormat = postDateFormat)
         else:
             flash("User not found", "info")
@@ -242,35 +279,38 @@ def edit_profile():
         user_id = session["user_id"]
         form = UserProfileForm()
 
-        profile = get_user(id=user_id)
+        user = get_user(id=user_id)
 
         if request.method == "GET":
-            if profile.bio != "NULL":
-                form.user_bio.data = profile.bio
-            if profile.first_name != "NULL":
-                form.first_name.data = profile.first_name
-            if profile.middle_name != "NULL":
-                form.middle_name.data = profile.middle_name
-            if profile.last_name != "NULL":
-                form.last_name.data = profile.last_name
-            if profile.pronouns != "NULL":
-                form.pronouns.data = profile.pronouns
-            if profile.occupation != "NULL":
-                form.occupation.data = profile.occupation
-            if profile.location != "NULL":
-                form.location.data = profile.location
-            if profile.date_of_birth != "NULL":
-                form.date_of_birth.data = profile.date_of_birth
+
+            if user.bio != "NULL":
+                form.user_bio.data = user.bio
+            if user.first_name != "NULL":
+                form.first_name.data = user.first_name
+            if user.middle_name != "NULL":
+                form.middle_name.data = user.middle_name
+            if user.last_name != "NULL":
+                form.last_name.data = user.last_name
+            if user.pronouns != "NULL":
+                form.pronouns.data = user.pronouns
+            if user.occupation != "NULL":
+                form.occupation.data = user.occupation
+            if user.location != "NULL":
+                form.location.data = user.location
+            if user.date_of_birth != "NULL":
+                form.date_of_birth.data = user.date_of_birth
+
             '''
             if profile.profile_picture_media_id != "NULL":
                 form.profile_picture_media_id.data = profile.profile_picture_media_id
                 filename = secure_filename(profile.profile_picture_media_id.filename)
                 profile.profile_picture_media_id.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             '''
+
         if request.method == "POST" and form.validate_on_submit():
 
             #profile is a user object, User.update() take kwargs for each of its fields.
-            profile.update(
+            user.update(
                 bio = form.user_bio.data,
                 first_name = form.first_name.data,
                 middle_name = form.middle_name.data,
@@ -309,7 +349,7 @@ def user_settings():
             if email:
                 if email == user.email:
                     flash("New email cannot be current email", "info")
-                elif valid_email(email):
+                elif validateEmail(email):
                     user.update(email = email)
                     flash("Email saved", "info")
 
@@ -317,7 +357,7 @@ def user_settings():
                 if sha256_crypt.verify(current_password, user.password):
                     if sha256_crypt.verify(new_password, user.password):
                         flash("New password cannot be old password", "info")
-                    elif new_password and valid_pass(new_password, confirm_password):
+                    elif new_password and validatePassword(new_password, confirm_password):
                         hashed_password = sha256_crypt.hash(new_password)
                         user.update(password = hashed_password)
                         flash("Password sucessfully changed", "info")
@@ -375,6 +415,78 @@ def create_post():
     else:
         return redirect(url_for("login"))
 
+@app.route("/<post_id>")
+def view_post(post_id):
+    #user_id = session["user_id"]
+    #user = get_user(id=user_id)
+    form = PostForm()
+
+
+    #print(post_id)
+    # load post from id
+
+    #post.insert_reply(user, form.text.data)
+    # if reply is clicked, open reply window for post immediately
+    # if reply is clicked from a route that is not /<post_id>, no window is opened automatically, redirect and open reply modal
+    return render_template("index.html", form = form, post_id = post_id)
+
+@app.route("/<post_id>/<action>")
+def like(post_id, action):
+    print("liked post: "+str(post_id))
+    return '', 204
+    #return redirect(request.referrer)
+
+@app.route("/recover_account", methods=["POST", "GET"])
+def recover_account():
+    form = RecoveryForm()
+    if "user" not in session:
+        if form.validate_on_submit():
+            email = form.email.data
+            if get_user(email=email):
+                user = get_user(email=email)
+                user_name = user.user_name
+                print(user_name)
+                
+                token = get_token(user)
+                print(token)
+
+                send_recovery_email(token, user.email)
+
+                return redirect(url_for("login"))
+            else:
+                flash("Account not found", "info")
+                return redirect(url_for("recover_account"))
+
+        return render_template("recover_account.html", form = form)
+    else:
+        return redirect(url_for("home"))
+
+@app.route('/reset_password/<token>', methods=['GET','POST'])
+def reset(token):
+    form = ResetPasswordForm()
+    if "user" in session:
+        return redirect(url_for('home'))
+    try:
+        # returns a dict
+        user_id_dict = serial.loads(token, max_age=900)
+    except:
+        flash("Token has expired or is invalid", "info")
+        return redirect(url_for("recover_account"))
+
+    user = get_user(id=user_id_dict['user_id'])
+
+    if form.validate_on_submit():
+
+        password = form.password.data
+        confirm_password = form.confirm.data
+        if validatePassword(password, confirm_password):
+            hashed_password = sha256_crypt.hash(password)
+            user.update(password = hashed_password)
+
+        flash("Password Changed", "info")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form = form)
 
 @app.route("/search/", methods=["GET", "POST"])
 def search():

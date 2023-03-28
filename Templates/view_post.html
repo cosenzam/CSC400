@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Post {{post_id}}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-sm-4 border">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p class="text-center">{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- parent post -->
+        <div class="row justify-content-center post">
+            <span class="col-sm-4 border post-format" style="word-wrap: break-word">
+                <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+                <p style="text-align: left;">
+                    &emsp;{{dynamic_user}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
+                </p>
+                <br>
+                <p>{{post.text}}</p>
+                <div class="text-center">
+                    <a href="{{ url_for('like', post_id=post.id, action='like') }}" class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Like" style="float: left;"></a>
+                    <span class="btn bi bi-arrow-repeat post-icon tt" data-bs-placement="bottom" title="Share"></span>
+                    <!-- this will be a create post/reply modal instead -->
+                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+                </div>
+            </span>
+        </div>
+
+        <!-- child posts (these will be looped though and return url_for('view_post') when reply is clicked) -->
+        
+    </div>
+</div>
+{% endblock %}
