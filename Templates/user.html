@@ -12,7 +12,9 @@
     <div class="col-sm-4 media border profile-min-width">
         <div class="align-self-center">
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
-            <a href="#" class="btn btn-light text-dark follow-btn">Follow</a>
+            {% if session["user"] != dynamic_user %}
+            <a href="{{ url_for('follow_user', dynamic_user = user.user_name) }}" class="btn btn-light text-dark follow-btn">Follow</a>
+            {% endif %} 
         </div>
         <div class="media-body">
             <h4 class="media-heading user-name border">{{dynamic_user}}</h4>
@@ -75,7 +77,7 @@
 {% endif %}
 {% for post in posts %}
 <div class="row justify-content-center post">
-    <span class="col-sm-4 border post-format" style="word-wrap: break-word">
+    <span onclick="window.location='/post/{{post.id}}'" class="col-sm-4 border post-format" style="word-wrap: break-word">
         <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
         <p style="text-align: left;">
             &emsp;{{dynamic_user}}&emsp;{{postDateFormat(post, getPostRecency(post))}}

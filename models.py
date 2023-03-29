@@ -125,7 +125,7 @@ def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
         parent_id = parent_id,
         from_user_id = from_user.id,
         to_user_id = to_user.id,
-        timestamp = post.timestamp
+        timestamp = datetime.now()
     )
     
     session.add(interaction)
@@ -148,8 +148,8 @@ class Interaction(Base):
 
     interaction_type: Mapped[str] = mapped_column(String(255), default="reply")
     # collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
-    post_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    post_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
     from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
     timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
