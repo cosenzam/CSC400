@@ -1,36 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Post {{post_id}}{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-sm-4 border">
-        {% with messages = get_flashed_messages() %}
+
+{% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
                 <p class="text-center">{{msg}}</p>
             {% endfor %}
         {% endif %}
-        {% endwith %}
+{% endwith %}
 
-        <!-- parent post -->
-        <div class="row justify-content-center post">
-            <span class="col-sm-4 border post-format" style="word-wrap: break-word">
-                <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
-                <p style="text-align: left;">
-                    &emsp;{{dynamic_user}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
-                </p>
-                <br>
-                <p>{{post.text}}</p>
-                <div class="text-center">
-                    <a href="{{ url_for('like', post_id=post.id, action='like') }}" class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Like" style="float: left;"></a>
-                    <span class="btn bi bi-arrow-repeat post-icon tt" data-bs-placement="bottom" title="Share"></span>
-                    <!-- this will be a create post/reply modal instead -->
-                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+<!-- parent post -->
+<div class="row justify-content-center post">
+    <span class="col-sm-4 border post-format" style="word-wrap: break-word">
+        <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+        <p style="text-align: left;">
+            &emsp;{{get_user(post.user_id).user_name}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
+        </p>
+        <br>
+        <p>{{post.text}}</p>
+        <div class="text-center">
+            <a href="{{ url_for('like', post_id=post.id, action='like') }}" class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Like" style="float: left;"></a>
+            <span class="btn bi bi-arrow-repeat post-icon tt" data-bs-placement="bottom" title="Share"></span>
+
+            <a type="button" class="btn bi bi-reply post-icon tt" data-bs-placement="bottom" title="Reply" style="float: right;"
+            data-bs-toggle="modal" data-bs-target="#replyModal"></a>
+
+            <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content bg-dark text-light">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="replyModalLabel">Replying to {{get_user(post.user_id).user_name}}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="#" method="post" enctype="multipart/form-data">
+                                {{form.csrf_token}}
+                                <p>{{form.text.label}}</p>
+                                <p>{{form.text(size=20)}}</p>
+                                <p>{{form.media.label}}</p>
+                                <p>{{form.media(size=20)}}</p>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-light text-dark">Submit Reply</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </span>
-        </div>
+            </div>
 
-        <!-- child posts (these will be looped though and return url_for('view_post') when reply is clicked) -->
-        
-    </div>
+        </div>
+    </span>
 </div>
+
+        <!-- child posts (these will be looped though and return url_for('view_post') when post body or reply is clicked) -->
+        
 {% endblock %}

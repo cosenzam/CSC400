@@ -111,3 +111,7 @@ label {
   margin: 0px auto;
   padding: 10px;
 }
+
+span.post-format:hover{
+  background-color: #313538;
+}

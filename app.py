@@ -9,7 +9,7 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow
 import os, os.path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
@@ -415,32 +415,53 @@ def create_post():
     else:
         return redirect(url_for("login"))
 
-@app.route("/<post_id>")
+@app.route("/post/<post_id>", methods=["GET", "POST"])
 def view_post(post_id):
-    #user_id = session["user_id"]
-    #user = get_user(id=user_id)
     form = PostForm()
 
+    post = get_post(post_id)
+    user = get_user(user_name = session["user"])
+    if post != None:
+        print(post_id)
+        replies = 0
+        # load post from id
+        if "user" in session:
+            text = form.text.data
+            media = form.media.data
+            if request.method == "POST" and form.validate_on_submit:
 
-    #print(post_id)
-    # load post from id
+                if text == "" and media == "":
+                    flash("Text and Media Fields cannot both be blank!")
+                    return redirect(url_for("view_post", post_id = post.id))
+                else:
+                    post.insert_reply(user, text)
+                    return redirect(url_for("view_post", post_id = post.id))
+        else:
+            return redirect(url_for("login"))
+        # if reply is clicked, open reply window for post
+        # if reply is clicked from a route that is not /<post_id>, no window is opened automatically, redirect and open reply modal on load
+    else:
+        return redirect(url_for("home"))
 
-    #post.insert_reply(user, form.text.data)
-    # if reply is clicked, open reply window for post immediately
-    # if reply is clicked from a route that is not /<post_id>, no window is opened automatically, redirect and open reply modal
-    return render_template("index.html", form = form, post_id = post_id)
+    return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
+        get_user = get_user, form = form)
 
 @app.route("/<post_id>/<action>")
 def like(post_id, action):
-    print("liked post: "+str(post_id))
-    return '', 204
-    #return redirect(request.referrer)
+    if "user" in session:
+        user = get_user(user_name = session["user"])
+        post = get_post(post_id)
+        
+        print("liked post: "+str(post_id))
+        post.like(user)
+        return '', 204
+        #return redirect(request.referrer)
 
 @app.route("/recover_account", methods=["POST", "GET"])
 def recover_account():
     form = RecoveryForm()
     if "user" not in session:
-        if form.validate_on_submit():
+        if request.method == "POST" and form.validate_on_submit():
             email = form.email.data
             if get_user(email=email):
                 user = get_user(email=email)
@@ -475,7 +496,7 @@ def reset(token):
 
     user = get_user(id=user_id_dict['user_id'])
 
-    if form.validate_on_submit():
+    if request.method == "POST" and form.validate_on_submit():
 
         password = form.password.data
         confirm_password = form.confirm.data
@@ -502,6 +523,21 @@ def search():
             return redirect(url_for("user", dynamic_user = user_data))
         
     return render_template("search.html", form = form)
+
+@app.route("/<dynamic_user>/follow")
+def follow_user(dynamic_user):
+    if "user" in session:
+        if session["user"] == dynamic_user:
+            flash("You cannot follow yourself", "info")
+            return redirect(url_for("user", dynamic_user = dynamic_user))
+        else:
+            from_user = get_user(user_name = session["user"])
+            to_user = get_user(user_name = dynamic_user)
+            follow(to_user, from_user)
+            return redirect(url_for("user", dynamic_user = dynamic_user))
+    else:
+        flash("You must be logged in to follow", "info")
+        return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run()
