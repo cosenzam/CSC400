@@ -189,8 +189,8 @@ def login():
         password = form.password.data
 
         #exists_user() returns simple boolean
-        if exists_user(user_name=user_name): 
-            user = get_user(user_name=user_name)
+        user = exists_user(user_name=user_name)
+        if user: 
             hashed_password = user.password
             if sha256_crypt.verify(password, hashed_password):
                 session.permanent = True
@@ -258,9 +258,8 @@ def user(dynamic_user):
         getPostRecency = getPostRecency, postDateFormat = postDateFormat)
     # If page is not the logged in user's
     else:
-        if exists_user(user_name=dynamic_user):
-            user = get_user(user_name=dynamic_user)
-
+        user = exists_user(user_name=dynamic_user)
+        if user:
             postings = user.posts
 
             #for post in postings:
