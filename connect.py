@@ -21,7 +21,7 @@ def db_connect():
 
     engine = create_engine(
         f"""mysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
-        echo = True
+        echo = False
     )
 
     return engine

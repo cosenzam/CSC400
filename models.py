@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null, select
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from datetime import datetime, date
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 
@@ -10,15 +10,24 @@ global session
 
 #takes in user_name, email, and password strings to create a User object.
 def insert_user(user_name, email, password):
-    user = User(
-        user_name=user_name, 
-        email=email, 
-        password=password
-    )
 
-    session.add(user)
-    session.commit()
-    return user
+    exists = exists_user(user_name=user_name)
+
+    if not exists:
+        print(f"Creating new user with user_name: {user_name}.")
+        user = User(
+            user_name=user_name, 
+            email=email, 
+            password=password
+        )
+
+        session.add(user)
+        session.commit()
+        return user
+    else:
+        print(f"User {user_name} already exists.")
+        return exists
+
 
 #gets a User object based on id, user_name, or email
 def get_user(id=None, user_name=None, email=None):
@@ -33,7 +42,7 @@ def get_user(id=None, user_name=None, email=None):
         print("input a user id, email or user_name.")
         return None
 
-    print(stmt)
+    # print(stmt)
 
     try:
         user = session.scalars(stmt).one()
@@ -44,8 +53,9 @@ def get_user(id=None, user_name=None, email=None):
 
 #uses get_user to check if a user exists
 def exists_user(id=None, user_name=None, email=None):
-    if get_user(id, user_name, email) is not None:
-        return True
+    user = get_user(id, user_name, email)
+    if user is not None:
+        return user
     else:
         return False
     
@@ -125,7 +135,7 @@ def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
         parent_id = parent_id,
         from_user_id = from_user.id,
         to_user_id = to_user.id,
-        timestamp = datetime.now()
+        timestamp = post.timestamp
     )
     
     session.add(interaction)
@@ -148,8 +158,8 @@ class Interaction(Base):
 
     interaction_type: Mapped[str] = mapped_column(String(255), default="reply")
     # collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
-    post_id: Mapped[int] = mapped_column(nullable=True, default=None)
-    parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    post_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
     to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
     timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
@@ -231,14 +241,13 @@ class User(Base):
         fields = self.__table__.c.keys()[1:]
         for key, value in kwargs.items():
             if key in fields:
-                print("setting column: " + str(key) + "to value: " + str(value))
+                print("setting column: " + str(key) + " to value: " + str(value))
                 setattr(self, key, value)
 
         self.last_updated = update_time
         session.commit()
 
-    #inserts a post by that user. untested.
-    #TODO: test
+    #inserts a post by that user.
     def post(self, text):
         post = insert_post(self, text)
         return post
