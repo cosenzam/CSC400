@@ -292,6 +292,16 @@ class Post(Base):
         session.commit()
         insert_interaction(user, self.user, post=self, interaction_type="like")
 
+    def is_liked(self, user):
+
+        stmt = select(Interaction).where(Interaction.interaction_type == "like", Interaction.post_id == self.id, Interaction.from_user_id == user.id)
+
+        try:
+            liked = session.execute(stmt).one()
+            return liked
+        except NoResultFound:
+            return None
+
 class MediaCollection(Base):
     __tablename__ = 'media_collections'
 

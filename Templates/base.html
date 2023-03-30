@@ -26,7 +26,18 @@
                 <li class="nav-item">
                   <a class="nav-link active border-end" aria-current="page" href="#">Following</a>
                 </li>
+                <li class="nav-item">
+                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('search') }}">Search</a>
+                </li>
               </ul>
+              <!--
+              <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
+                <form class="d-flex" role="search">
+                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                  <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+              </ul>
+              -->
               <ul class="nav navbar-nav acc-dropdown-pad">
                 <li class="nav navbar-nav nav-item">
                   <div class="dropdown">
@@ -38,9 +49,6 @@
                       <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
                     </ul>
                   </div>
-                  <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{{ url_for('search') }}">Search</a>
-                  </li>
                 </li>
                 {% endif %}
               </ul>
@@ -57,12 +65,6 @@
                 </li>
               {% endif %}
               </ul>
-              <!--
-              <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-              </form>
-              -->
             </div>
           </div>
         </nav>
