@@ -547,6 +547,3 @@ def follow_user(dynamic_user):
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
-
-if __name__ == "__main__":
-    app.run()
