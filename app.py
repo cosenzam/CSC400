@@ -452,9 +452,18 @@ def like(post_id, action):
         user = get_user(user_name = session["user"])
         post = get_post(post_id)
         
-        print("liked post: "+str(post_id))
-        post.like(user)
-        return '', 204
+        if action == "like":
+            if post.is_liked(user):
+                print("post already liked")
+                return '', 204
+            else:
+                print("liked post: "+str(post_id))
+                post.like(user)
+                return '', 204
+
+        else:
+            flash ("Invalid post action", "info")
+            return redirect(url_for('view_post', post_id = post_id))
         #return redirect(request.referrer)
 
 @app.route("/recover_account", methods=["POST", "GET"])
