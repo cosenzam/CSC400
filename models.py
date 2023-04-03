@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null, select
+from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null, select, delete
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -106,6 +106,45 @@ def get_latest_posts(User, n=0, replies=False):
 def follow(to_user, from_user):
     insert_interaction(to_user, from_user, interaction_type="follow")
 
+def unfollow(to_user, from_user):
+    delete_interaction(to_user, from_user, interaction_type="follow")
+
+def delete_interaction(to_user, from_user, post=None, interaction_type=None):
+
+    interaction_types = [
+        "like",
+        "follow",
+        "share",
+        "reply",
+        "message"
+    ]
+
+    if interaction_type not in interaction_types:
+        print("Not a supported interaciton.")
+        return None
+
+    if interaction_type in ["reply", "like", "share"]:
+            post_id = post.id
+            parent_id = post.parent_id
+    else:
+        post_id = None
+        parent_id = None
+    
+    stmt = delete(Interaction).where(
+        Interaction.interaction_type == interaction_type,
+        Interaction.post_id == post_id,
+        Interaction.parent_id == parent_id,
+        Interaction.from_user_id == from_user.id,
+        Interaction.to_user_id == to_user.id
+    )
+
+    if stmt == 0:
+        print("No interactions fonund")
+    else:
+        session.execute(stmt)
+        session.commit()
+    
+
 
 #probably only gonna be used internally, but logs an interaction
 def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
@@ -135,7 +174,7 @@ def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
         parent_id = parent_id,
         from_user_id = from_user.id,
         to_user_id = to_user.id,
-        timestamp = post.timestamp
+        timestamp = datetime.now()
     )
     
     session.add(interaction)
@@ -158,10 +197,10 @@ class Interaction(Base):
 
     interaction_type: Mapped[str] = mapped_column(String(255), default="reply")
     # collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
-    post_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    parent_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    from_user_id: Mapped[int] = mapped_column(nullable=True, default=Null)
-    to_user_id: Mapped[int] = mapped_column(nullable=True, default=Null) 
+    post_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    from_user_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    to_user_id: Mapped[int] = mapped_column(nullable=True, default=None) 
     timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
 
 # class Following(Base):
@@ -216,14 +255,14 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default='')
-    first_name: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    last_name: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    middle_name: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    pronouns: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
+    first_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    last_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    middle_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    pronouns: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     date_of_birth: Mapped[date] = mapped_column(nullable=True, default=None)
-    bio: Mapped[str] = mapped_column(Text, nullable=True, default=Null)
-    location: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
-    occupation: Mapped[str] = mapped_column(String(255), nullable=True, default=Null)
+    bio: Mapped[str] = mapped_column(Text, nullable=True, default=None)
+    location: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    occupation: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     date_created: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
     last_updated: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
     
@@ -252,6 +291,17 @@ class User(Base):
         post = insert_post(self, text)
         return post
 
+    def is_following(self, to_user):
+        stmt = select(Interaction).where(
+            Interaction.interaction_type == "follow", 
+            Interaction.from_user_id == self.id, 
+            Interaction.to_user_id == to_user.id)
+
+        try:
+            following = session.execute(stmt).one()
+            return following
+        except NoResultFound:
+            return False
                 
 class Post(Base):
     __tablename__ = 'posts'
@@ -291,10 +341,16 @@ class Post(Base):
         self.like_count = self.like_count + 1
         session.commit()
         insert_interaction(user, self.user, post=self, interaction_type="like")
+    
+    def unlike(self, user):
+        delete_interaction(user, self.user, post=self, interaction_type="like")
 
     def is_liked(self, user):
 
-        stmt = select(Interaction).where(Interaction.interaction_type == "like", Interaction.post_id == self.id, Interaction.from_user_id == user.id)
+        stmt = select(Interaction).where(
+            Interaction.interaction_type == "like", 
+            Interaction.post_id == self.id, 
+            Interaction.from_user_id == user.id)
 
         try:
             liked = session.execute(stmt).one()
@@ -314,7 +370,7 @@ class MediaCollection(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     post_id: Mapped[str] = mapped_column(ForeignKey("posts.id"))
-    interaction_id: Mapped[int] = mapped_column(nullable=True, default=Null)
+    interaction_id: Mapped[int] = mapped_column(nullable=True, default=None)
     collection_type: Mapped[str] =  mapped_column(String(255), nullable=False, default="gallery")
     description: Mapped[str] = mapped_column(Text, nullable=True)
     photo_count: Mapped[int] = mapped_column(nullable=False, default=0)
