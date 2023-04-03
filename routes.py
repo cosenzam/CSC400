@@ -9,7 +9,7 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow
 import os, os.path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
@@ -224,6 +224,7 @@ def user(dynamic_user):
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
+        current_user = get_user(user_name=session["user"])
 
         #kept profile variable name the same for now
         user = get_user(id=user_id) #user object
@@ -254,19 +255,21 @@ def user(dynamic_user):
                 
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, form = form,
+        return render_template("user.html", user = user, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
         getPostRecency = getPostRecency, postDateFormat = postDateFormat)
     # If page is not the logged in user's
     else:
         user = exists_user(user_name=dynamic_user)
         if user:
             postings = user.posts
+            if "user" in session:
+                current_user = get_user(user_name=session["user"])
 
             #for post in postings:
             #    print(postDateFormat(post, getDays(post)))
 
-            return render_template("user.html", user = user, dynamic_user = dynamic_user, posts = postings, 
-            getPostRecency = getPostRecency, postDateFormat = postDateFormat)
+            return render_template("user.html", user = user, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = user.is_following)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -282,21 +285,21 @@ def edit_profile():
 
         if request.method == "GET":
 
-            if user.bio != "NULL":
+            if user.bio != None:
                 form.user_bio.data = user.bio
-            if user.first_name != "NULL":
+            if user.first_name != None:
                 form.first_name.data = user.first_name
-            if user.middle_name != "NULL":
+            if user.middle_name != None:
                 form.middle_name.data = user.middle_name
-            if user.last_name != "NULL":
+            if user.last_name != None:
                 form.last_name.data = user.last_name
-            if user.pronouns != "NULL":
+            if user.pronouns != None:
                 form.pronouns.data = user.pronouns
-            if user.occupation != "NULL":
+            if user.occupation != None:
                 form.occupation.data = user.occupation
-            if user.location != "NULL":
+            if user.location != None:
                 form.location.data = user.location
-            if user.date_of_birth != "NULL":
+            if user.date_of_birth != None:
                 form.date_of_birth.data = user.date_of_birth
 
             '''
@@ -448,17 +451,27 @@ def view_post(post_id):
 @app.route("/<post_id>/<action>")
 def like(post_id, action):
     if "user" in session:
-        user = get_user(user_name = session["user"])
+        from_user = get_user(user_name = session["user"])
         post = get_post(post_id)
         
         if action == "like":
-            if post.is_liked(user):
+            if post.is_liked(from_user):
                 print("post already liked")
-                return '', 204
+                return "success", 200
             else:
                 print("liked post: "+str(post_id))
-                post.like(user)
-                return '', 204
+                post.like(from_user)
+                return "success", 200
+
+        if action == "unlike":
+            if not post.is_liked(from_user):
+                print("post is not liked")
+                return "success", 200
+            else:
+                print("unliked post: "+str(post_id))
+                post.unlike(from_user)
+                return "success", 200
+        
 
         else:
             flash ("Invalid post action", "info")
@@ -533,7 +546,7 @@ def search():
         
     return render_template("search.html", form = form)
 
-@app.route("/<dynamic_user>/follow")
+@app.route("/user/<dynamic_user>/follow")
 def follow_user(dynamic_user):
     if "user" in session:
         if session["user"] == dynamic_user:
@@ -542,8 +555,32 @@ def follow_user(dynamic_user):
         else:
             from_user = get_user(user_name = session["user"])
             to_user = get_user(user_name = dynamic_user)
-            follow(to_user, from_user)
-            return redirect(url_for("user", dynamic_user = dynamic_user))
+            if from_user.is_following(to_user):
+                flash("Already following", "info")
+                return redirect(url_for("user", dynamic_user = dynamic_user))
+            else:
+                follow(to_user, from_user)
+                return "success", 200
+                #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
         flash("You must be logged in to follow", "info")
+        return redirect(url_for("login"))
+
+@app.route("/user/<dynamic_user>/unfollow")
+def unfollow_user(dynamic_user):
+    if "user" in session:
+        if session["user"] == dynamic_user:
+            flash("You cannot unfollow yourself", "info")
+            return redirect(url_for("user", dynamic_user = dynamic_user))
+        else:
+            from_user = get_user(user_name = session["user"])
+            to_user = get_user(user_name = dynamic_user)
+            if not from_user.is_following(to_user):
+                flash("Not following user", "info")
+                return redirect(url_for("user", dynamic_user = dynamic_user))
+            else:
+                unfollow(to_user, from_user)
+                return "success", 200
+                #return redirect(url_for("user", dynamic_user = dynamic_user))
+    else:
         return redirect(url_for("login"))
