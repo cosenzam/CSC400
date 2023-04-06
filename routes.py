@@ -243,9 +243,9 @@ def user(dynamic_user):
                 filename = secure_filename(media.filename)
                 media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            if media == "" and text == "":
+            if media == None and text == "":
                 flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("create_post"))
+                return redirect(url_for("user", dynamic_user = dynamic_user))
             
             else:
                 #insert_post() returns a post object
@@ -406,9 +406,9 @@ def create_post():
                 insert_post(user=user, text=text)
                 filename = secure_filename(media.filename)
                 media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                media = Media(
-                    file_path = media
-                )
+                #media = Media(
+                    #file_path = media
+                #)
                 flash("Post Created!")
                 return redirect(url_for("home"))
             
@@ -432,7 +432,7 @@ def view_post(post_id):
             media = form.media.data
             if request.method == "POST" and form.validate_on_submit:
 
-                if text == "" and media == "":
+                if text == "" and media == None:
                     flash("Text and Media Fields cannot both be blank!")
                     return redirect(url_for("view_post", post_id = post.id))
                 else:
@@ -448,34 +448,23 @@ def view_post(post_id):
     return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
         get_user = get_user, form = form)
 
-@app.route("/<post_id>/<action>")
-def like(post_id, action):
+@app.route("/post/<post_id>/like")
+def like(post_id):
     if "user" in session:
+
         from_user = get_user(user_name = session["user"])
         post = get_post(post_id)
-        
-        if action == "like":
-            if post.is_liked(from_user):
-                print("post already liked")
-                return "success", 200
-            else:
-                print("liked post: "+str(post_id))
-                post.like(from_user)
-                return "success", 200
 
-        if action == "unlike":
-            if not post.is_liked(from_user):
-                print("post is not liked")
-                return "success", 200
-            else:
-                print("unliked post: "+str(post_id))
-                post.unlike(from_user)
-                return "success", 200
-        
-
+        if not post.is_liked(from_user):
+            post.like(from_user)
+            return "like", 200
         else:
-            flash ("Invalid post action", "info")
-            return redirect(url_for('view_post', post_id = post_id))
+            post.unlike(from_user)
+            return "unlike", 200
+
+    else:
+        flash("You must be logged in to like", "info")
+        return redirect(url_for("login"))
         #return redirect(request.referrer)
 
 @app.route("/recover_account", methods=["POST", "GET"])
@@ -555,17 +544,17 @@ def follow_user(dynamic_user):
         else:
             from_user = get_user(user_name = session["user"])
             to_user = get_user(user_name = dynamic_user)
-            if from_user.is_following(to_user):
-                flash("Already following", "info")
-                return redirect(url_for("user", dynamic_user = dynamic_user))
-            else:
+            if not from_user.is_following(to_user):
                 follow(to_user, from_user)
-                return "success", 200
+                return "follow", 200
+            else:
+                unfollow(to_user, from_user)
+                return "unfollow", 200
                 #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
-
+'''
 @app.route("/user/<dynamic_user>/unfollow")
 def unfollow_user(dynamic_user):
     if "user" in session:
@@ -584,3 +573,4 @@ def unfollow_user(dynamic_user):
                 #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
         return redirect(url_for("login"))
+'''

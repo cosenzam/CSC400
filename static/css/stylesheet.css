@@ -71,6 +71,7 @@
 .post-icon{
   font-size: 20px;
   color: white;
+  border-radius: 50%;
 }
 
 .post-button{
@@ -114,4 +115,19 @@ label {
 
 span.post-format:hover{
   background-color: #313538;
+}
+
+.like:hover{
+  border-radius: 50%;
+  background-color: rgba(221, 96, 96, 0.315);
+}
+
+.share:hover{
+  border-radius: 50%;
+  background-color: rgba(37, 128, 37, 0.301);
+}
+
+.reply:hover{
+  border-radius: 50%;
+  background-color: rgba(40, 129, 129, 0.281);
 }

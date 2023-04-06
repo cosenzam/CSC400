@@ -14,9 +14,9 @@
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
             {% if "user" in session %}
                 {% if session["user"] != dynamic_user and not current_user.is_following(user) %}
-                    <a href="{{ url_for('follow_user', dynamic_user = user.user_name) }}" class="btn btn-light text-dark follow-btn">Follow</a>
+                    <a id="follow" onclick="ajax_follow('{{dynamic_user}}')" class="btn btn-light text-dark follow-btn">Follow</a>
                 {% elif session["user"] != dynamic_user and current_user.is_following(user) %} 
-                    <a href="{{ url_for('unfollow_user', dynamic_user = user.user_name) }}" class="btn btn-light text-dark follow-btn">Unfollow</a>
+                    <a id="follow" onclick="ajax_follow('{{dynamic_user}}')" class="btn btn-light text-dark follow-btn">Unfollow</a>
                 {% endif %}
             {% else %}
                 <a href="{{ url_for('follow_user', dynamic_user = user.user_name) }}" class="btn btn-light text-dark follow-btn">Follow</a>
@@ -83,7 +83,7 @@
 {% endif %}
 {% for post in posts %}
 <div class="row justify-content-center post">
-    <span onclick="window.location='/post/{{post.id}}'" class="col-sm-4 border post-format" style="word-wrap: break-word">
+    <span onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
         <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
         <p style="text-align: left;">
             &emsp;{{dynamic_user}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
@@ -92,12 +92,12 @@
         <p>{{post.text}}</p>
         <div class="text-center">
             {% if not post.is_liked(current_user) %}
-                <a href="{{ url_for('like', post_id=post.id, action='like') }}" class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Like" style="float: left;"></a>
+                <a id="like_{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
             {% elif post.is_liked(current_user) %}
-                <a href="{{ url_for('like', post_id=post.id, action='unlike') }}" class="btn bi bi-heart post-icon tt" data-bs-placement="bottom" title="Unlike" style="float: left; background-color:red;"></a>
+                <a id="like_{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like" data-bs-placement="bottom" title="Unlike" style="float: left; color: red;"></a>
             {% endif %}
-            <span class="btn bi bi-arrow-repeat post-icon tt" data-bs-placement="bottom" title="Share"></span>
-            <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+            <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+            <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
         </div>
     </span>
 </div>
