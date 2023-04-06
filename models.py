@@ -95,13 +95,13 @@ def get_latest_post(User, n=0, replies=False):
 
     return posts[n]
 
-def get_latest_posts(User, n=0, replies=False):
+def get_latest_posts(User, start=0, end=1, replies=False):
     posts = User.posts
 
     if not replies:
         posts = [p for p in posts if p.parent_id is None]
 
-    return posts[0:n]
+    return posts[start:end]
 
 def follow(to_user, from_user):
     insert_interaction(to_user, from_user, interaction_type="follow")
@@ -333,6 +333,15 @@ class Post(Base):
 
         insert_interaction(self.user, user, reply)
         return reply
+    
+    def get_replies(self):
+        stmt = select(Post).where(
+            Post.parent_id == self.id
+            )
+        
+        replies = session.scalars(stmt).all()
+
+        return replies
 
     #increments like count of a post.
     #takes in the user object that is liking the post.
