@@ -338,11 +338,12 @@ class Post(Base):
     #takes in the user object that is liking the post.
     #maps interaction as a "like" interaction FROM the user liking TO the author of the post.
     def like(self, user):
-        self.like_count = self.like_count + 1
+        self.like_count += 1
         session.commit()
         insert_interaction(user, self.user, post=self, interaction_type="like")
     
     def unlike(self, user):
+        self.like_count -= 1
         delete_interaction(user, self.user, post=self, interaction_type="like")
 
     def is_liked(self, user):

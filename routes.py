@@ -15,21 +15,6 @@ from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
 
-'''
-app = Flask(__name__)
-app.config['SECRET_KEY'] = "asdf"
-
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'cosenzam.test@gmail.com'
-app.config['MAIL_PASSWORD'] = 'vsfomiiiayzgusks'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-
-app.permanent_session_lifetime = timedelta(days = 7) # session length
-app.config['UPLOAD_FOLDER'] = 'static/images'
-'''
-
 serial = Serializer(app.config['SECRET_KEY'])
 mail = Mail(app)
 
@@ -554,23 +539,3 @@ def follow_user(dynamic_user):
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
-'''
-@app.route("/user/<dynamic_user>/unfollow")
-def unfollow_user(dynamic_user):
-    if "user" in session:
-        if session["user"] == dynamic_user:
-            flash("You cannot unfollow yourself", "info")
-            return redirect(url_for("user", dynamic_user = dynamic_user))
-        else:
-            from_user = get_user(user_name = session["user"])
-            to_user = get_user(user_name = dynamic_user)
-            if not from_user.is_following(to_user):
-                flash("Not following user", "info")
-                return redirect(url_for("user", dynamic_user = dynamic_user))
-            else:
-                unfollow(to_user, from_user)
-                return "success", 200
-                #return redirect(url_for("user", dynamic_user = dynamic_user))
-    else:
-        return redirect(url_for("login"))
-'''

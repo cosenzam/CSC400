@@ -48,6 +48,14 @@ function ajax_like(post_id) {
 }
 
 /*
+document.getElementById('search').onkeydown = function(e){
+  if(e.key === 'Enter'){
+    console.log(window.location='/search');
+  }
+};
+*/
+
+/*
 function ajax_follow(dynamic_user) {
   console.log(dynamic_user);
   $.ajax({url: "/user/" + dynamic_user + "/follow", success: function(result){
