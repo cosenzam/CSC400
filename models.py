@@ -2,6 +2,7 @@ from sqlalchemy import Column, Text, String, ForeignKey, Boolean, DateTime, Null
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from typing import Optional, List
 from datetime import datetime, date
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 
@@ -67,6 +68,7 @@ def insert_post(user, text):
     post = Post(
         user_id = user.id,
         text = text,
+        media_collection_id = None,
         timestamp = datetime.now()
     )
 
@@ -144,8 +146,6 @@ def delete_interaction(to_user, from_user, post=None, interaction_type=None):
         session.execute(stmt)
         session.commit()
     
-
-
 #probably only gonna be used internally, but logs an interaction
 def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
 
@@ -181,6 +181,24 @@ def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
     session.commit()
 
     return interaction
+
+def insert_media(user, file_name, post=None, collection=None):
+    
+    media = Media(file_path = file_name)
+    session.add(media)
+    session.commit()
+    return media
+
+def upload_collection(user, post, file_paths, collection=None):
+
+    for file_path in file_paths:
+        media = insert_media(user, file_path, post)
+        if collection is None:
+            collection = media.add_to_collection(user=user, post=post)
+        else:
+            media.add_to_collection(user=user, post=post, collection=collection)
+    
+    return collection
 
 class Base(DeclarativeBase):
     __table_args__ = {'mysql_engine':'InnoDB'}
@@ -267,6 +285,7 @@ class User(Base):
     last_updated: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
     
     posts = relationship("Post", back_populates="user", order_by="Post.timestamp.desc()")
+    media_collections: Mapped[List["MediaCollection"]] = relationship(back_populates="user")
 
     #returns username
     def get_username(self):
@@ -315,10 +334,12 @@ class Post(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     parent_id: Mapped[int] = mapped_column(nullable=True, default=None)
+    media_collection_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_collection.id"), default=None)
     text: Mapped[str] = mapped_column(Text, nullable = True)
     timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default = datetime.now())
     like_count: Mapped[int] = mapped_column(default=0)
     
+    media_collection: Mapped[Optional["MediaCollection"]] = relationship(back_populates="post")
     user = relationship("User", back_populates="posts")
 
     #from a Post object, inserts a nother Post object as a reply.
@@ -368,7 +389,7 @@ class Post(Base):
             return None
 
 class MediaCollection(Base):
-    __tablename__ = 'media_collections'
+    __tablename__ = 'media_collection'
 
     id: Mapped[int] = mapped_column(
         unique = True, 
@@ -378,7 +399,6 @@ class MediaCollection(Base):
     )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    post_id: Mapped[str] = mapped_column(ForeignKey("posts.id"))
     interaction_id: Mapped[int] = mapped_column(nullable=True, default=None)
     collection_type: Mapped[str] =  mapped_column(String(255), nullable=False, default="gallery")
     description: Mapped[str] = mapped_column(Text, nullable=True)
@@ -386,7 +406,15 @@ class MediaCollection(Base):
     video_count: Mapped[int] = mapped_column(nullable=False, default=0)
     date_created: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
 
-    media = relationship("Media", back_populates="media_collection")
+    user: Mapped["User"] = relationship(back_populates="media_collections")
+    media: Mapped[List["Media"]] = relationship(back_populates="media_collection")
+    post: Mapped["Post"] = relationship(back_populates="media_collection")
+
+    def add_media(self, media):
+        media.collection_id = self.id
+        self.media.append(media)
+        session.commit()
+        return media
 
 class Media(Base):
     __tablename__ = 'media'
@@ -398,8 +426,25 @@ class Media(Base):
         autoincrement = True
     )
 
-    collection_id: Mapped[str] = mapped_column(ForeignKey("media_collections.id"))
+    collection_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_collection.id"))
     media_type: Mapped[str] = mapped_column(String(255), default='photo')
-    file_path: Mapped[str] = mapped_column(String(255), default='')
+    file_path: Mapped[str] = mapped_column(String(255), default='\\')
+
+    #adds current media to collection.
+    def add_to_collection(self, user=None, post=None, collection=None):
+
+        if collection is not None:
+            self.collection_id = collection.id
+            session.commit()
+        else:
+            collection = MediaCollection(
+                user_id = user.id,
+                post = post
+            )
+            session.add(collection)
+            session.commit()
+
+            self.add_to_collection(user, post, collection)
+        return collection
 
     media_collection = relationship("MediaCollection", back_populates="media")

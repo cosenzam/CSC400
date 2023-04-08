@@ -9,8 +9,9 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection
 import os, os.path
+from pathlib import Path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
@@ -243,9 +244,9 @@ def user(dynamic_user):
                 filename = secure_filename(media.filename)
                 media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            if media == None and text == "":
+            if media == "" and text == "":
                 flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("user", dynamic_user = dynamic_user))
+                return redirect(url_for("create_post"))
             
             else:
                 #insert_post() returns a post object
@@ -386,29 +387,29 @@ def create_post():
                 flash("Text and Media Fields cannot both be blank!")
                 return redirect(url_for("create_post"))
             
-            elif media == "":
-                insert_post(user=user, text=text)
-                flash("Post Created!")
-                return redirect(url_for("home"))
-
-            elif text == "":
-                insert_post(user=user, text=text)
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                media = Media(
-                    file_path = media
-                )
-
-                flash("Post Created!")
-                return redirect(url_for("home"))
-            
             else:
-                insert_post(user=user, text=text)
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                #media = Media(
-                    #file_path = media
-                #)
+                #we should have a way to get a list of filenames in the upload screen
+                #paths = []
+                #for file in media.filenames:
+                # filename = secure_filename(file)
+                # paths.append(filename)
+                # media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                post = insert_post(user=user, text=text)
+
+                if media != "":
+                    file_paths = []
+
+                    filename = secure_filename(media.filename)
+                    path = Path(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id), filename))
+                    file_paths.append(str(path))
+
+                    #in loop should be path + filename
+                    with open(path, "w") as file:
+                        media.save(file)
+
+                    upload_collection(user, post, file_paths)
+
+                
                 flash("Post Created!")
                 return redirect(url_for("home"))
             
@@ -432,7 +433,7 @@ def view_post(post_id):
             media = form.media.data
             if request.method == "POST" and form.validate_on_submit:
 
-                if text == "" and media == None:
+                if text == "" and media == "":
                     flash("Text and Media Fields cannot both be blank!")
                     return redirect(url_for("view_post", post_id = post.id))
                 else:
@@ -448,23 +449,34 @@ def view_post(post_id):
     return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
         get_user = get_user, form = form)
 
-@app.route("/post/<post_id>/like")
-def like(post_id):
+@app.route("/<post_id>/<action>")
+def like(post_id, action):
     if "user" in session:
-
         from_user = get_user(user_name = session["user"])
         post = get_post(post_id)
+        
+        if action == "like":
+            if post.is_liked(from_user):
+                print("post already liked")
+                return "success", 200
+            else:
+                print("liked post: "+str(post_id))
+                post.like(from_user)
+                return "success", 200
 
-        if not post.is_liked(from_user):
-            post.like(from_user)
-            return "like", 200
+        if action == "unlike":
+            if not post.is_liked(from_user):
+                print("post is not liked")
+                return "success", 200
+            else:
+                print("unliked post: "+str(post_id))
+                post.unlike(from_user)
+                return "success", 200
+        
+
         else:
-            post.unlike(from_user)
-            return "unlike", 200
-
-    else:
-        flash("You must be logged in to like", "info")
-        return redirect(url_for("login"))
+            flash ("Invalid post action", "info")
+            return redirect(url_for('view_post', post_id = post_id))
         #return redirect(request.referrer)
 
 @app.route("/recover_account", methods=["POST", "GET"])
@@ -544,17 +556,17 @@ def follow_user(dynamic_user):
         else:
             from_user = get_user(user_name = session["user"])
             to_user = get_user(user_name = dynamic_user)
-            if not from_user.is_following(to_user):
-                follow(to_user, from_user)
-                return "follow", 200
+            if from_user.is_following(to_user):
+                flash("Already following", "info")
+                return redirect(url_for("user", dynamic_user = dynamic_user))
             else:
-                unfollow(to_user, from_user)
-                return "unfollow", 200
+                follow(to_user, from_user)
+                return "success", 200
                 #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
-'''
+
 @app.route("/user/<dynamic_user>/unfollow")
 def unfollow_user(dynamic_user):
     if "user" in session:
@@ -573,4 +585,3 @@ def unfollow_user(dynamic_user):
                 #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
         return redirect(url_for("login"))
-'''
