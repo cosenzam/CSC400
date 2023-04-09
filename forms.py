@@ -7,7 +7,7 @@ from wtforms.validators import InputRequired, Length, EqualTo, Optional
 class CreateAccountForm(FlaskForm):
     user_name = StringField('Username', validators = [InputRequired(), Length(min = 6, max = 24)])
     email = StringField('Email', validators = [InputRequired(), Length(min = 8, max = 64)])
-    password = PasswordField('Password', [InputRequired()])
+    password = PasswordField('Password', validators = [InputRequired()])
     confirm  = PasswordField('Repeat Password')
 
 class LoginForm(FlaskForm):
@@ -40,10 +40,9 @@ class RecoveryForm(FlaskForm):
     email = StringField('Email', validators = [InputRequired(), Length(min = 8, max = 64)])
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', [InputRequired()])
+    password = PasswordField('Password', validators = [InputRequired()])
     confirm  = PasswordField('Repeat Password')
 
 class SearchForm(FlaskForm):
     user_query = TextAreaField('Username', validators = [Optional(), Length(max = 256)])
     text_query = TextAreaField('Text', validators = [Optional(), Length(max = 256)])
-
