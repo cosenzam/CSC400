@@ -103,6 +103,59 @@ def get_latest_posts(User, start=0, end=1, replies=False):
 
     return posts[start:end]
 
+# get X amount of posts before designated post_id
+def get_user_posts_before(user, post_id, n=5):
+    post = get_post(post_id)
+    
+
+    stmt = select(Post).where(
+        Post.user_id == user.id,
+        Post.parent_id == None,
+        Post.id != post.id,
+        Post.timestamp <= post.timestamp
+        ).limit(n).order_by(Post.timestamp.desc())
+    
+    try:
+        posts = session.scalars(stmt).all()
+        return posts
+    except NoResultFound:
+        return False
+
+def get_latest_replies(post_id, n=7):
+
+    parent_post = get_post(post_id)
+
+    stmt = select(Post).where(
+        Post.parent_id == parent_post.id,
+        Post.id != parent_post.id,
+        Post.timestamp >= parent_post.timestamp
+        ).limit(n).order_by(Post.timestamp.desc())
+    
+    try:
+        replies = session.scalars(stmt).all()
+        #print(replies)
+        return replies
+    except NoResultFound:
+        return False
+
+# get X amount of replies before post_id, for use with ajax and onscroll event
+def get_replies_before(post_id, n=5):
+    child_post = get_post(post_id)
+
+    stmt = select(Post).where(
+        Post.parent_id == child_post.parent_id,
+        Post.parent_id != None,
+        Post.id != child_post.id,
+        Post.timestamp <= child_post.timestamp
+        ).limit(n).order_by(Post.timestamp.desc())
+    
+    try:
+        replies = session.scalars(stmt).all()
+        #print(replies)
+        return replies
+    except NoResultFound:
+        return False
+
 def follow(to_user, from_user):
     insert_interaction(to_user, from_user, interaction_type="follow")
 
@@ -299,7 +352,7 @@ class User(Base):
 
         try:
             following = session.execute(stmt).one()
-            return following
+            return True
         except NoResultFound:
             return False
                 
@@ -327,7 +380,8 @@ class Post(Base):
         reply = Post(
             user_id = user.id,
             parent_id = parent_id,
-            text = reply_text)
+            text = reply_text,
+            timestamp = datetime.now())
         session.add(reply)
         session.commit()
 
@@ -348,12 +402,11 @@ class Post(Base):
     #maps interaction as a "like" interaction FROM the user liking TO the author of the post.
     def like(self, user):
         self.like_count += 1
-        session.commit()
-        insert_interaction(user, self.user, post=self, interaction_type="like")
+        insert_interaction(self.user, user, post=self, interaction_type="like")
     
     def unlike(self, user):
         self.like_count -= 1
-        delete_interaction(user, self.user, post=self, interaction_type="like")
+        delete_interaction(self.user, user, post=self, interaction_type="like")
 
     def is_liked(self, user):
 
@@ -364,9 +417,9 @@ class Post(Base):
 
         try:
             liked = session.execute(stmt).one()
-            return liked
+            return True
         except NoResultFound:
-            return None
+            return False
 
 class MediaCollection(Base):
     __tablename__ = 'media_collections'

@@ -136,3 +136,7 @@ span.post-format:hover{
 .search{
   padding-right: 8%;
 }
+
+.fill-red{
+  color: red;
+}

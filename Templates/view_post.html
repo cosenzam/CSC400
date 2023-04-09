@@ -9,54 +9,87 @@
             {% endfor %}
         {% endif %}
 {% endwith %}
-{% set current_user = get_user(post.user_id) %}
-<!-- parent post -->
-<div class="row justify-content-center post">
-    <span class="col-sm-4 border" style="word-wrap: break-word">
-        <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
-        <p style="text-align: left;">
-            &emsp;{{current_user.user_name}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
-        </p>
-        <br>
-        <p>{{post.text}}</p>
-        <div class="text-center">
-            {% if not post.is_liked(current_user) %}
-                <a id="like_{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
-            {% elif post.is_liked(current_user) %}
-                <a id="like_{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like" data-bs-placement="bottom" title="Unlike" style="float: left; color: red;"></a>
-            {% endif %}
-            <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+{% set post_user = get_user(post.user_id) %}
+{% set current_user = get_user(user_name = session["user"]) %}
+<!-- Parent Post -->
+<div id="replies-container">
+    <div class="row justify-content-center post">
+        <span class="col-sm-4 border" style="word-wrap: break-word">
+            <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+            <p id="name-date" style="text-align: left;">
+                &emsp;{{post_user.user_name}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
+            </p>
+            <br>
+            <p id="content-text">{{post.text}}</p>
+            <div class="text-center">
+                {% if not post.is_liked(post_user) %}
+                    <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
+                {% elif post.is_liked(post_user) %}
+                    <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike" style="float: left;"></a>
+                {% endif %}
+                <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
 
-            <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"
-            data-bs-toggle="modal" data-bs-target="#replyModal"></a>
+                <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"
+                data-bs-toggle="modal" data-bs-target="#replyModal"></a>
 
-            <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark text-light">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="replyModalLabel">Replying to {{current_user.user_name}}</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="#" method="post" enctype="multipart/form-data">
-                                {{form.csrf_token}}
-                                <p>{{form.text.label}}</p>
-                                <p>{{form.text(size=20)}}</p>
-                                <p>{{form.media.label}}</p>
-                                <p>{{form.media(size=20)}}</p>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-light text-dark">Submit Reply</button>
-                                </div>
-                            </form>
+                <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content bg-dark text-light">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="replyModalLabel">Replying to {{post_user.user_name}}</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="#" method="post" enctype="multipart/form-data">
+                                    {{form.csrf_token}}
+                                    <p>{{form.text.label}}</p>
+                                    <p>{{form.text(size=20)}}</p>
+                                    <p>{{form.media.label}}</p>
+                                    <p>{{form.media(size=20)}}</p>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-light text-dark">Submit Reply</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
+        </span>
+    </div>
+
+    <!-- Initial replies rendered on page load, any changes here should also be compared to js_functions -> ajax_get_posts() and the parent post above-->
+    {% if replies %}
+        {% for reply in replies %}
+        <div id="{{reply.id}}" class="row justify-content-center post">
+            <span id="reply-span" onclick="window.location='/post/{{reply.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
+                <img id="profile-picture" src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+                <p id="name-date" style="text-align: left;">
+                    &emsp;{{get_user(id=reply.user_id).user_name}}&emsp;{{postDateFormat(reply, getPostRecency(reply))}}
+                </p>
+                <br>
+                <p id="content-text">{{reply.text}}</p>
+                <div class="text-center">
+                    {% if not reply.is_liked(current_user) %}
+                        <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
+                    {% elif reply.is_liked(current_user) %}
+                        <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike" style="float: left;"></a>
+                    {% endif %}
+                    <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+                    <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+                </div>
+            </span>
         </div>
-    </span>
+        {% endfor %}
+        <!-- Loading Spinner -->
+        <div id="loading-reply">
+            <div id="trigger-{{ last_reply_id }}" class="row justify-content-center">
+                <div class="col-sm-4 spinner-border" role="status"></div>
+            </div>
+        </div>
+
+    {% endif %}
 </div>
 
-        <!-- child posts (these will be looped though and return url_for('view_post') when post body or reply is clicked) -->
-        
 {% endblock %}

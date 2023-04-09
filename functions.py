@@ -1,7 +1,32 @@
-from flask import Flask
+from flask import Flask, url_for, session
 from flask_mail import Mail, Message
 from run import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
+import models
+from models import get_replies_before, get_user, get_user_posts_before
+from datetime import datetime, timedelta
+import json
+
+serial = Serializer(app.config['SECRET_KEY'])
+mail = Mail(app)
+
+# Find if email exists in DB and is a valid format
+def validateEmail(email):
+
+    exists = exists_user(email=email)
+    if exists:
+        flash("Email already in use", "info")
+        return False
+
+    try:
+        validation = validate_email(email)
+        email = validation.email
+    except EmailNotValidError as errorMsg:
+        print(str(errorMsg))
+        flash("Email not valid", "info")
+        return False
+
+    return True
 
 # Verifies password requirements | must contain at least 1 number and 1 letter
 def validatePassword(password, confirm_password):
@@ -71,3 +96,34 @@ def send_signup_email(email):
     msg.body = "Welcome! Log in here: "+link
     mail.send(msg)
     return print("Sign up email sent")
+
+# give ajax the list of dictionary values it needs
+def get_reply_ajax_data(post_id):
+    replies = get_replies_before(post_id)
+    l = []
+    for reply in replies:
+        user = get_user(id = reply.user_id)
+        from_user = get_user(user_name = session["user"])
+        l.append(
+            {"post_id": reply.id,
+            "user_name": user.user_name,
+            "timestamp": reply.timestamp.strftime("%x") + " " + reply.timestamp.strftime("%X"),
+            "recency": postDateFormat(reply, getPostRecency(reply)),
+            "text": reply.text,
+            "is_liked": reply.is_liked(from_user)})
+    return l
+
+def get_post_ajax_data(post_id):
+    from_user = get_user(user_name = session["user"])
+    posts = get_user_posts_before(from_user, post_id)
+    l = []
+    for post in posts:
+        user = get_user(id = post.user_id)
+        l.append(
+            {"post_id": post.id,
+            "user_name": user.user_name,
+            "timestamp": post.timestamp.strftime("%x") + " " + post.timestamp.strftime("%X"),
+            "recency": postDateFormat(post, getPostRecency(post)),
+            "text": post.text,
+            "is_liked": post.is_liked(from_user)})
+    return l

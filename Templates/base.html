@@ -73,7 +73,11 @@
         </nav>
 
       <!-- Main div -->
-      <div class="container-fluid content-nav-pad">
+      <div id="main" class="container-fluid content-nav-pad">
+        <!-- loading spinner -->
+        <div class="position-absolute top-50 start-50 translate-middle">
+          <div id="loading" class="col-sm-4 spinner-border" role="status"></div>
+        </div>
         {% block content %}
         {% endblock %}
       </div>
@@ -85,6 +89,6 @@
           new bootstrap.Tooltip(t)
         })
       </script>
-      <script src="{{url_for('static', filename='js_functions.js')}}"></script>
+      <script src="{{url_for('static', filename='js_functions.js')}}" defer></script>
     </body>
 </html>

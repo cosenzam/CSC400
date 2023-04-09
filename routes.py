@@ -9,14 +9,13 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, get_latest_replies, get_latest_post, get_latest_posts
 import os, os.path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
-
-serial = Serializer(app.config['SECRET_KEY'])
-mail = Mail(app)
+from functions import validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, get_reply_ajax_data, get_post_ajax_data
+import json
 
 #data base connections
 engine = db_connect()
@@ -29,93 +28,6 @@ models.session = db_session
 
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
-
-# Find if email exists in DB and is a valid format
-def validateEmail(email):
-
-    exists = exists_user(email=email)
-    if exists:
-        flash("Email already in use", "info")
-        return False
-
-    try:
-        validation = validate_email(email)
-        email = validation.email
-    except EmailNotValidError as errorMsg:
-        print(str(errorMsg))
-        flash("Email not valid", "info")
-        return False
-
-    return True
-
-# Verifies password requirements | must contain at least 1 number and 1 letter
-def validatePassword(password, confirm_password):
-    has_letters = any(c.isalpha() for c in password)
-    has_numbers = any(i.isdigit() for i in password)
-
-    if password == confirm_password:
-        pass
-    else:
-        flash("Passwords must match!")
-        return False
-
-    if has_letters and has_numbers and len(password) >= 8:
-        return True
-    else:
-        flash("Passwords must be at least 8 characters in length and contain one number and one letter")
-        return False
-
-# Days since post was created
-def getPostRecency(post):
-    d1 = datetime.now()
-    d2 = post.timestamp
-
-    delta = d1 - d2
-    recency_tuple = (delta.seconds, delta.seconds//60, delta.seconds//3600, delta.days)
-
-    return recency_tuple
-
-# Show time since post was created if days <= 7, otherwise show locally formatted date
-# recency_tuple = (seconds, mins, hours, days)
-def postDateFormat(post, recency_tuple):
-    seconds = recency_tuple[0]
-    minutes = recency_tuple[1]
-    hours = recency_tuple[2]
-    days = recency_tuple[3]
-    #print(seconds, minutes, hours, days)
-
-    if days < 1:
-        if hours < 1:
-            if minutes < 1:
-                return str(seconds)+"s"
-            else:
-                return str(minutes)+"m"
-        else:
-            return str(hours)+"h"
-    elif days <= 7:
-        return str(days)+"d"
-    else:
-        return post.timestamp.strftime("%x")
-
-def get_token(user):
-    token = serial.dumps({'user_id': user.id})
-    return token
-
-def send_recovery_email(token, email):
-    msg = Message("Account Recovery", sender=app.config['MAIL_USERNAME'],
-                        recipients=[email])
-    link = url_for('reset', token=token, _external=True)
-    msg.body = "Your account recovery link: "+link
-    mail.send(msg)
-    return print("Recovery email sent")
-
-def send_signup_email(email):
-    msg = Message("Thank you for signing up!", sender=app.config['MAIL_USERNAME'],
-                        recipients=[email])
-    link = url_for('login',  _external=True)
-    msg.body = "Welcome! Log in here: "+link
-    mail.send(msg)
-    return print("Sign up email sent")
 
 @app.route("/")
 def home():
@@ -162,8 +74,7 @@ def create_account():
         if "user" in session:
             #flash("Already logged in", "info")
             return redirect(url_for("user", dynamic_user = session["user"]))
-    return render_template("create_account.html", form = form)
-    
+    return render_template("create_account.html", form = form)   
     
 
 @app.route("/login/", methods=["POST", "GET"])
@@ -209,20 +120,27 @@ def user(dynamic_user):
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
-        current_user = get_user(user_name=session["user"])
-
-        #kept profile variable name the same for now
-        user = get_user(id=user_id) #user object
+        user_profile = get_user(user_name=session["user"])
+        current_user = user_profile
 
         #a user object has a list of post objects made by that user
+        #postings = user_profile.posts
+        postings = get_latest_posts(user_profile, end=7)
 
-        postings = user.posts
+        if len(postings) > 0:
+            last_post_id = postings[len(postings) - 1].id
+        else:
+            last_post_id = 1
         #files = media.file_path
 
         if request.method == "POST" and form.validate_on_submit():
             
             text = form.text.data
             media = form.media.data
+
+            #if get_latest_post(user).timestamp == datetime.now():
+                #flash("Please wait before posting again", "info")
+                #return redirect(url_for("user", dynamic_user = session["user"]))
 
             if media is not None:
                 filename = secure_filename(media.filename)
@@ -240,21 +158,24 @@ def user(dynamic_user):
                 
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", user = user, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
-        getPostRecency = getPostRecency, postDateFormat = postDateFormat)
+        return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
+        getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user)
     # If page is not the logged in user's
     else:
-        user = exists_user(user_name=dynamic_user)
+        user_profile = exists_user(user_name=dynamic_user)
         if user:
-            postings = user.posts
+            postings = user_profile.posts
+
+            if len(postings) > 0:
+                last_post_id = postings[len(postings) - 1].id
+            else:
+                last_post_id = 1
             if "user" in session:
                 current_user = get_user(user_name=session["user"])
 
-            #for post in postings:
-            #    print(postDateFormat(post, getDays(post)))
-
-            return render_template("user.html", user = user, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
-            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = user.is_following)
+            return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = current_user.is_following, last_post_id = last_post_id, 
+            get_user = get_user)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -409,12 +330,26 @@ def view_post(post_id):
     post = get_post(post_id)
     user = get_user(user_name = session["user"])
     if post != None:
-        print(post_id)
-        replies = 0
+        #print(post_id)
+        replies = get_latest_replies(post_id = post.id)
+        #replies.extend(get_replies_before_ajax(post_id = 45))
+        #replies = post.get_replies()
+        #print(replies)
+        # last reply id for ajax to use python function
+        if len(replies) > 0:
+            last_reply_id = replies[len(replies) - 1].id
+        else:
+            last_reply_id = 1
         # load post from id
         if "user" in session:
             text = form.text.data
             media = form.media.data
+
+            # breaks if user doesnt have any posts
+            #if get_latest_post(user).timestamp == datetime.now():
+                #flash("Please wait before posting again", "info")
+                #return redirect(url_for("post", post_id = post.id))
+
             if request.method == "POST" and form.validate_on_submit:
 
                 if text == "" and media == None:
@@ -425,13 +360,11 @@ def view_post(post_id):
                     return redirect(url_for("view_post", post_id = post.id))
         else:
             return redirect(url_for("login"))
-        # if reply is clicked, open reply window for post
-        # if reply is clicked from a route that is not /<post_id>, no window is opened automatically, redirect and open reply modal on load
     else:
         return redirect(url_for("home"))
 
     return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
-        get_user = get_user, form = form)
+        get_user = get_user, form = form, last_reply_id = last_reply_id)
 
 @app.route("/post/<post_id>/like")
 def like(post_id):
@@ -539,3 +472,13 @@ def follow_user(dynamic_user):
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
+
+@app.route("/reply_scroll/<reply_id>")
+def reply_scroll(reply_id):
+    replies = get_reply_ajax_data(reply_id)
+    return replies, 200
+
+@app.route("/post_scroll/<post_id>")
+def post_scroll(post_id):
+    posts = get_post_ajax_data(post_id)
+    return posts, 200
