@@ -9,8 +9,10 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, get_latest_replies, get_latest_post, get_latest_posts
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection
+from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, get_latest_replies, get_latest_post, get_latest_posts
 import os, os.path
+from pathlib import Path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
@@ -146,9 +148,9 @@ def user(dynamic_user):
                 filename = secure_filename(media.filename)
                 media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            if media == None and text == "":
+            if media == "" and text == "":
                 flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("user", dynamic_user = dynamic_user))
+                return redirect(url_for("create_post"))
             
             else:
                 #insert_post() returns a post object
@@ -292,29 +294,29 @@ def create_post():
                 flash("Text and Media Fields cannot both be blank!")
                 return redirect(url_for("create_post"))
             
-            elif media == "":
-                insert_post(user=user, text=text)
-                flash("Post Created!")
-                return redirect(url_for("home"))
-
-            elif text == "":
-                insert_post(user=user, text=text)
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                media = Media(
-                    file_path = media
-                )
-
-                flash("Post Created!")
-                return redirect(url_for("home"))
-            
             else:
-                insert_post(user=user, text=text)
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                #media = Media(
-                    #file_path = media
-                #)
+                #we should have a way to get a list of filenames in the upload screen
+                #paths = []
+                #for file in media.filenames:
+                # filename = secure_filename(file)
+                # paths.append(filename)
+                # media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                post = insert_post(user=user, text=text)
+
+                if media != "":
+                    file_paths = []
+
+                    filename = secure_filename(media.filename)
+                    path = Path(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id), filename))
+                    file_paths.append(str(path))
+
+                    #in loop should be path + filename
+                    with open(path, "w") as file:
+                        media.save(file)
+
+                    upload_collection(user, post, file_paths)
+
+                
                 flash("Post Created!")
                 return redirect(url_for("home"))
             
@@ -352,7 +354,7 @@ def view_post(post_id):
 
             if request.method == "POST" and form.validate_on_submit:
 
-                if text == "" and media == None:
+                if text == "" and media == "":
                     flash("Text and Media Fields cannot both be blank!")
                     return redirect(url_for("view_post", post_id = post.id))
                 else:
@@ -472,6 +474,7 @@ def follow_user(dynamic_user):
     else:
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
+
 
 @app.route("/reply_scroll/<reply_id>")
 def reply_scroll(reply_id):

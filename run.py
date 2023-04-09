@@ -12,7 +12,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 app.permanent_session_lifetime = timedelta(days = 7) # session length
-app.config['UPLOAD_FOLDER'] = 'static/images'
+app.config['UPLOAD_FOLDER'] = 'static/images/'
 
 from routes import *
 
