@@ -96,12 +96,7 @@ function ajax_get_replies(reply_id) {
       $("#loading-reply").remove();
       $('[id^="trigger-"]').remove();
     }
-  }//,
-  //complete:function(result){
-    //if (result.length < 5){
-    //$("#loading-reply").hide();
-    //}
-  //}
+  }
 });
 }
 

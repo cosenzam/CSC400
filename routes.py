@@ -16,7 +16,7 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
-from functions import validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, get_reply_ajax_data, get_post_ajax_data
+from functions import validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, get_reply_ajax_data, get_post_ajax_data, serial, mail
 import json
 
 #data base connections
@@ -155,7 +155,7 @@ def user(dynamic_user):
             else:
                 #insert_post() returns a post object
 
-                post = insert_post(user, text)
+                post = insert_post(user_profile, text)
                 #flash("Post Created!")
                 
                 return redirect(url_for("user", dynamic_user = session["user"]))
@@ -165,8 +165,8 @@ def user(dynamic_user):
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)
-        if user:
-            postings = user_profile.posts
+        if user_profile:
+            postings = get_latest_posts(user_profile, end=7)
 
             if len(postings) > 0:
                 last_post_id = postings[len(postings) - 1].id

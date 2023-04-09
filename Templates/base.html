@@ -53,8 +53,9 @@
                 </li>
               </ul>
               {% endif %}
-              {% if "user" not in session %}
-              <ul class="nav navbar-nav "></ul>
+            </div>
+            {% if "user" not in session %}
+              <ul class="nav navbar-nav ms-auto">
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                 </li>
@@ -66,9 +67,8 @@
                   <a class="nav-link" href="{{ url_for('search') }}">Search</a>
                 </li>
                 -->
-              {% endif %}
               </ul>
-            </div>
+            {% endif %}
           </div>
         </nav>
 

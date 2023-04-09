@@ -3,7 +3,7 @@ from flask_mail import Mail, Message
 from run import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 import models
-from models import get_replies_before, get_user, get_user_posts_before
+from models import get_replies_before, get_user, get_user_posts_before, get_post
 from datetime import datetime, timedelta
 import json
 
@@ -99,11 +99,11 @@ def send_signup_email(email):
 
 # give ajax the list of dictionary values it needs
 def get_reply_ajax_data(post_id):
+    from_user = get_user(user_name = session["user"])
     replies = get_replies_before(post_id)
     l = []
     for reply in replies:
         user = get_user(id = reply.user_id)
-        from_user = get_user(user_name = session["user"])
         l.append(
             {"post_id": reply.id,
             "user_name": user.user_name,
@@ -115,10 +115,11 @@ def get_reply_ajax_data(post_id):
 
 def get_post_ajax_data(post_id):
     from_user = get_user(user_name = session["user"])
-    posts = get_user_posts_before(from_user, post_id)
+    # get user id
+    user = get_user(id = get_post(post_id).user_id)
+    posts = get_user_posts_before(user, post_id)
     l = []
     for post in posts:
-        user = get_user(id = post.user_id)
         l.append(
             {"post_id": post.id,
             "user_name": user.user_name,
