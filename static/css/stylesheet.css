@@ -115,6 +115,7 @@ label {
 
 span.post-format:hover{
   background-color: #313538;
+  cursor: pointer;
 }
 
 .like:hover{
@@ -130,4 +131,12 @@ span.post-format:hover{
 .reply:hover{
   border-radius: 50%;
   background-color: rgba(40, 129, 129, 0.281);
+}
+
+.search{
+  padding-right: 8%;
+}
+
+.fill-red{
+  color: red;
 }
