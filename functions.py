@@ -1,9 +1,10 @@
-from flask import Flask, url_for, session
+from flask import Flask, url_for, session, flash
 from flask_mail import Mail, Message
 from run import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 import models
-from models import get_replies_before, get_user, get_user_posts_before, get_post
+from email_validator import validate_email, EmailNotValidError
+from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user
 from datetime import datetime, timedelta
 import json
 
