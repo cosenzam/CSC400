@@ -487,6 +487,7 @@ def following_list():
         user = get_user(user_name = session["user"])
 
         users = []
+        last_interaction_id = 0
         following_list = user.get_latest_following()
         if len(following_list) > 0:
             last_interaction_id = following_list[len(following_list)-1].interaction_id

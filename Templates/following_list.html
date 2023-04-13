@@ -14,7 +14,7 @@
         {% endwith %}
 
         {% if users %}
-        {% set i = 0 %}
+            {% set i = 0 %}
             {% for user in users %}
                 <div id="{{ following_list[i].interaction_id }} " style="padding-top: 20%;">
                     <a id="user-link" href="{{ url_for('user', dynamic_user = user.user_name) }}"> {{user.user_name}} </a>
