@@ -6,17 +6,18 @@ from datetime import timedelta, datetime, time
 from passlib.hash import sha256_crypt
 from forms import CreateAccountForm, LoginForm, UserProfileForm, UserSettingsForm, PostForm, SearchForm, RecoveryForm, ResetPasswordForm
 from connect import db_connect #connect.py method that handles all connections, returns engine.
-from models import Base, User, Post, Interaction, Media, MediaCollection
+from models import Base, User, Post, Interaction, Media, MediaCollection, Follows
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection
-from models import insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, get_latest_replies, get_latest_post, get_latest_posts
+from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, 
+    get_latest_replies, get_latest_post, get_latest_posts, get_interaction)
 import os, os.path
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
-from functions import validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, get_reply_ajax_data, get_post_ajax_data, serial, mail
+from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
+    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data)
 import json
 
 #data base connections
@@ -124,6 +125,8 @@ def user(dynamic_user):
         user_id = session["user_id"]
         user_profile = get_user(user_name=session["user"])
         current_user = user_profile
+        following_count = current_user.get_following_count()
+        follower_count = current_user.get_follower_count()
 
         #a user object has a list of post objects made by that user
         #postings = user_profile.posts
@@ -161,10 +164,13 @@ def user(dynamic_user):
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
         return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
-        getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user)
+        getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
+        follower_count = follower_count)
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)
+        following_count = user_profile.get_following_count()
+        follower_count = user_profile.get_follower_count()
         if user_profile:
             postings = get_latest_posts(user_profile, end=7)
 
@@ -177,7 +183,7 @@ def user(dynamic_user):
 
             return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
             getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = current_user.is_following, last_post_id = last_post_id, 
-            get_user = get_user)
+            get_user = get_user, following_count = following_count, follower_count = follower_count)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -475,6 +481,26 @@ def follow_user(dynamic_user):
         flash("You must be logged in to follow", "info")
         return redirect(url_for("login"))
 
+@app.route("/following")
+def following_list():
+    if "user" in session:
+        user = get_user(user_name = session["user"])
+
+        users = []
+        following_list = user.get_latest_following()
+        if len(following_list) > 0:
+            last_interaction_id = following_list[len(following_list)-1].interaction_id
+        
+        if following_list:
+            user_ids = []
+            for user in following_list:
+                user_ids.append(user.follows_user_id)
+            users = map(get_user, user_ids)
+
+        return render_template("following_list.html", users = users, following_list = following_list, last_interaction_id = last_interaction_id)
+
+    else:
+        return redirect(url_for("login"))
 
 @app.route("/reply_scroll/<reply_id>")
 def reply_scroll(reply_id):
@@ -485,3 +511,8 @@ def reply_scroll(reply_id):
 def post_scroll(post_id):
     posts = get_post_ajax_data(post_id)
     return posts, 200
+
+@app.route("/follow_scroll/<interaction_id>")
+def follow_scroll(interaction_id):
+    following = get_follow_ajax_data(get_interaction(interaction_id))
+    return following, 200

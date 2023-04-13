@@ -78,6 +78,10 @@
   padding-top: 1%;
 }
 
+#back-btn{
+  font-size: 35px;
+}
+
 input, textarea{
   background-color:#212529;
   border-bottom: solid;

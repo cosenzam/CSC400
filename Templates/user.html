@@ -23,10 +23,13 @@
             {% endif %}
         </div>
         <div class="media-body">
-            <h4 class="media-heading user-name border">{{user_profile.user_name}}</h4>
-            <p class="pronouns border"> 
+            <h4 class="media-heading user-name">{{user_profile.user_name}}</h4>
+            <span class="pronouns"> 
                 {% if user_profile.pronouns != None %}{{user_profile.pronouns}}{% endif %} 
-            </p>
+            </span>
+            <span class="pronouns" style="float: right;">
+                {{ following_count }} following {{ follower_count }} followers
+            </span>
         </div>
     </div>
 </div>
@@ -64,10 +67,13 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="#" method="post" enctype="multipart/form-data">
+                        <form name="count_text" action="#" method="post" enctype="multipart/form-data">
                             {{form.csrf_token}}
                             <p>{{form.text.label}}</p>
-                            <p>{{form.text(size=20)}}</p>
+                            <p>{{form.text(id="text", size=20, oninput="countText()")}}</p>
+                            <p style="float: right;">
+                                <span id="characters"></span><span>/128</span>
+                            </p>
                             <p>{{form.media.label}}</p>
                             <p>{{form.media(size=20)}}</p>
                             <div class="modal-footer">
@@ -95,13 +101,22 @@
                 <br>
                 <p id="content-text">{{post.text}}</p>
                 <div class="text-center">
-                    {% if not post.is_liked(current_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
-                    {% elif post.is_liked(current_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike" style="float: left;"></a>
-                    {% endif %}
-                    <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
-                    <a id="reply-btn" href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+                    <span style="float: left;">
+                        {% if not post.is_liked(current_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                        {% elif post.is_liked(current_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                        {% endif %}
+                        <span id="like_count-{{ post.id }}">{{ post.like_count }}</span>
+                    </span>
+                    <span>
+                        <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+                        <span>0</span>
+                    </span>
+                    <span style="float: right">
+                        <a id="reply-btn" href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                        <span>0</span>
+                    </span>
                 </div>
             </span>
         </div>
