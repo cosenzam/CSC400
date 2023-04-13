@@ -77,10 +77,6 @@ def insert_post(user, text):
 
     return post
 
-def get_media(post):
-    media_list = post.media_collection.media
-    return media_list
-
 #post getter
 def get_post(id):
 
