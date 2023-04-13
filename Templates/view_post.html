@@ -9,6 +9,7 @@
             {% endfor %}
         {% endif %}
 {% endwith %}
+<a id="back-btn" onclick="history.back()" class="bi bi-arrow-left-circle-fill" style="cursor: pointer; color: white;"></a>
 {% set post_user = get_user(post.user_id) %}
 {% set current_user = get_user(user_name = session["user"]) %}
 <!-- Parent Post -->
@@ -22,15 +23,23 @@
             <br>
             <p id="content-text">{{post.text}}</p>
             <div class="text-center">
-                {% if not post.is_liked(post_user) %}
-                    <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
-                {% elif post.is_liked(post_user) %}
-                    <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike" style="float: left;"></a>
-                {% endif %}
-                <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
-
-                <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"
-                data-bs-toggle="modal" data-bs-target="#replyModal"></a>
+                <span style="float: left;">
+                    {% if not post.is_liked(post_user) %}
+                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                    {% elif post.is_liked(post_user) %}
+                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                    {% endif %}
+                    <span id="like_count-{{ post.id }}">{{ post.like_count }}</span>
+                </span>
+                <span>
+                    <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+                    <span>0</span>
+                </span>
+                <span style="float: right;">
+                    <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"
+                    data-bs-toggle="modal" data-bs-target="#replyModal"></a>
+                    <span>0</span>
+                </span>
 
                 <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -71,13 +80,22 @@
                 <br>
                 <p id="content-text">{{reply.text}}</p>
                 <div class="text-center">
-                    {% if not reply.is_liked(current_user) %}
-                        <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like" style="float: left;"></a>
-                    {% elif reply.is_liked(current_user) %}
-                        <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike" style="float: left;"></a>
-                    {% endif %}
-                    <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
-                    <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply" style="float: right;"></a>
+                    <span style="float: left;">
+                        {% if not reply.is_liked(current_user) %}
+                            <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                        {% elif reply.is_liked(current_user) %}
+                            <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                        {% endif %}
+                        <span id="like_count-{{ reply.id }}">{{ reply.like_count }}</span>
+                    </span>
+                    <span>
+                        <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+                        <span>0</span>
+                    </span>
+                    <span style="float: right;">
+                        <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                        <span>0</span>
+                    </span>
                 </div>
             </span>
         </div>
