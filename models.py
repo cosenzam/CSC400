@@ -373,8 +373,11 @@ class User(Base):
         session.commit()
 
     #inserts a post by that user.
-    def post(self, text):
+    def post(self, text, media_path_list=None):
         post = insert_post(self, text)
+
+        if media_path_list is not None:
+            upload_collection(self, post, media_path_list)
         return post
 
     def is_following(self, to_user):
@@ -410,7 +413,7 @@ class Post(Base):
     user = relationship("User", back_populates="posts")
 
     #from a Post object, inserts a nother Post object as a reply.
-    def insert_reply(self, user, reply_text):
+    def insert_reply(self, user, reply_text, media_path_list=None):
         parent_id = self.id
         reply = Post(
             user_id = user.id,
@@ -419,6 +422,9 @@ class Post(Base):
             timestamp = datetime.now())
         session.add(reply)
         session.commit()
+
+        if media_path_list is not None:
+            upload_collection(user, reply, media_path_list)
 
         insert_interaction(self.user, user, reply)
         return reply
@@ -441,6 +447,8 @@ class Post(Base):
     
     def unlike(self, user):
         self.like_count -= 1
+        if self.like_count < 0:
+            self.like_count = 0
         delete_interaction(self.user, user, post=self, interaction_type="like")
 
     def is_liked(self, user):
