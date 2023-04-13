@@ -112,7 +112,7 @@ def get_media(post=None, id=None):
     elif id is None and post is None:
         return None
 
-    media_list = post.mediacollection.media
+    media_list = post.media_collection.media
     return media_list
 
 # get X amount of posts before designated post_id
