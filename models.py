@@ -109,6 +109,16 @@ def get_latest_posts(User, start=0, end=1, replies=False):
 
     return posts[start:end]
 
+def get_media(post=None, id=None):
+
+    if post is None:
+        post = get_post(id)
+    elif id is None and post is None:
+        return None
+
+    media_list = post.mediacollection.media
+    return media_list
+
 # get X amount of posts before designated post_id
 def get_user_posts_before(user, post_id, n=5):
     post = get_post(post_id)
