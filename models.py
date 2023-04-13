@@ -77,6 +77,10 @@ def insert_post(user, text):
 
     return post
 
+def delete_post(post_id):
+
+    return 0
+
 #post getter
 def get_post(id):
 
@@ -88,6 +92,39 @@ def get_post(id):
     except NoResultFound:
         print("No Post found.")
         return None
+
+# get an interaction by interaction id
+def get_interaction(interaction_id):
+
+    stmt = select(Interaction).where(Interaction.id==interaction_id)
+
+    try:
+        interaction = session.scalars(stmt).one()
+        print(interaction.id, interaction.to_user_id)
+        return interaction
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
+
+# get a follow interaction from Interactions table
+def get_follow_interaction(to_user_id, from_user_id):
+    
+    stmt = select(Interaction).where(
+        Interaction.interaction_type == "follow",
+        Interaction.from_user_id == from_user_id,
+        Interaction.to_user_id == to_user_id,
+    )
+
+    try:
+        interaction = session.scalars(stmt).one()
+        print(interaction.from_user_id, interaction.to_user_id, interaction.interaction_type)
+        return interaction
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
+
+
+    return interaction
 
 def get_latest_post(User, n=0, replies=False):
     posts = User.posts
@@ -167,12 +204,70 @@ def get_replies_before(post_id, n=5):
         return replies
     except NoResultFound:
         return False
+# TODO
+# for jquery, get interaction from previous interaction id
+def get_following_before(user_id, interaction, n = 5):
+
+    stmt = select(Follows).where(
+        Follows.user_id == user_id,
+        Follows.follows_user_id != interaction.to_user_id,
+        Follows.timestamp <= interaction.timestamp
+        ).limit(n).order_by(Follows.timestamp.desc())
+    
+    try:
+        following = session.scalars(stmt).all()
+        print(following)
+        return following
+    except NoResultFound:
+        return False
 
 def follow(to_user, from_user):
-    insert_interaction(to_user, from_user, interaction_type="follow")
+    interaction = insert_interaction(to_user, from_user, interaction_type="follow")
+    insert_follows(to_user, from_user, interaction)
 
 def unfollow(to_user, from_user):
+    interaction = get_follow_interaction(to_user_id = to_user.id, from_user_id = from_user.id)
+    delete_follows(to_user, from_user, interaction)
     delete_interaction(to_user, from_user, interaction_type="follow")
+
+# insert a row into follows table
+def insert_follows(to_user, from_user, interaction):
+
+    follow = Follows(
+        user_id = interaction.from_user_id,
+        interaction_id = interaction.id,
+        follows_user_id = interaction.to_user_id,
+        is_mutual = to_user.is_following(from_user),
+        timestamp = datetime.now()
+    )
+    # if user to be followed is followed by from user, set is_mutual = True
+    if (to_user.is_following(from_user)):
+        stmt = select(Follows).where(
+            Follows.user_id == to_user.id,
+            Follows.follows_user_id == from_user.id
+        )
+        mutual = session.scalars(stmt).one()
+        mutual.update(is_mutual = True)
+
+    session.add(follow)
+    session.commit()
+
+def delete_follows(to_user, from_user, interaction):
+    # if user to be followed is followed by from user, set is_mutual = False
+    if (to_user.is_following(from_user)):
+        stmt = select(Follows).where(
+            Follows.user_id == to_user.id,
+            Follows.follows_user_id == from_user.id
+        )
+        mutual = session.scalars(stmt).one()
+        mutual.update(is_mutual = False)
+
+    stmt = delete(Follows).where(
+    Follows.interaction_id == interaction.id
+    )
+
+    session.execute(stmt)
+    session.commit()
 
 def delete_interaction(to_user, from_user, post=None, interaction_type=None):
 
@@ -320,6 +415,19 @@ class Follows(Base):
 
     users = relationship("User", foreign_keys=[user_id])
     followers = relationship("User", foreign_keys=[follows_user_id])
+
+    def update(self, **kwargs):
+
+        update_time = datetime.now()
+
+        fields = self.__table__.c.keys()[1:]
+        for key, value in kwargs.items():
+            if key in fields:
+                print("setting column: " + str(key) + " to value: " + str(value))
+                setattr(self, key, value)
+
+        self.last_updated = update_time
+        session.commit()
     
 # Database Tables
 class User(Base):
@@ -385,6 +493,67 @@ class User(Base):
         try:
             following = session.execute(stmt).one()
             return True
+        except NoResultFound:
+            return False
+
+    # get entire follow list of user (for get_posts_before_timeline function)
+    def get_following(self):
+        stmt = select(Follows.follows_user_id).where(
+            Follows.user_id == self.id,
+        )
+
+        try:
+            following = session.scalars(stmt).all()
+            print (following)
+            return following
+        except:
+            return False
+    
+    def get_following_count(self):
+        stmt = select(Follows.follows_user_id).where(
+            Follows.user_id == self.id,
+        )
+
+        try:
+            following = session.scalars(stmt).all()
+            print (following)
+            return len(following)
+        except:
+            return False
+
+    # get user ids of last n users that current user has followed
+    def get_latest_following(self, n = 3):
+        stmt = select(Follows).where(
+            Follows.user_id == self.id
+        ).limit(n).order_by(Follows.timestamp.desc())
+
+        try:
+            following = session.scalars(stmt).all()
+            return following
+        except NoResultFound:
+            return False
+
+    def get_followers(self):
+        stmt = select(Follows).where(
+            Follows.follows_user_id == self.id
+        )
+
+        try:
+            followers = session.scalars(stmt).all()
+            print(followers)
+            return followers
+        except NoResultFound:
+            return False
+    
+    def get_follower_count(self):
+        stmt = select(Follows).where(
+            Follows.follows_user_id == self.id
+        )
+
+        try:
+            followers = session.scalars(stmt).all()
+            print(followers)
+            return len(followers)
         except NoResultFound:
             return False
                 

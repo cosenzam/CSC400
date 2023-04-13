@@ -3,8 +3,8 @@ from flask_mail import Mail, Message
 from run import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 import models
+from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user, get_following_before, get_interaction
 from email_validator import validate_email, EmailNotValidError
-from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user
 from datetime import datetime, timedelta
 import json
 
@@ -105,13 +105,15 @@ def get_reply_ajax_data(post_id):
     l = []
     for reply in replies:
         user = get_user(id = reply.user_id)
-        l.append(
-            {"post_id": reply.id,
+        l.append({
+            "post_id": reply.id,
             "user_name": user.user_name,
             "timestamp": reply.timestamp.strftime("%x") + " " + reply.timestamp.strftime("%X"),
             "recency": postDateFormat(reply, getPostRecency(reply)),
             "text": reply.text,
-            "is_liked": reply.is_liked(from_user)})
+            "is_liked": reply.is_liked(from_user),
+            "like_count": reply.like_count
+            })
     return l
 
 def get_post_ajax_data(post_id):
@@ -121,11 +123,28 @@ def get_post_ajax_data(post_id):
     posts = get_user_posts_before(user, post_id)
     l = []
     for post in posts:
-        l.append(
-            {"post_id": post.id,
+        l.append({
+            "post_id": post.id,
             "user_name": user.user_name,
             "timestamp": post.timestamp.strftime("%x") + " " + post.timestamp.strftime("%X"),
             "recency": postDateFormat(post, getPostRecency(post)),
             "text": post.text,
-            "is_liked": post.is_liked(from_user)})
+            "is_liked": post.is_liked(from_user),
+            "like_count": post.like_count
+            })
     return l
+
+def get_follow_ajax_data(interaction):
+    user_id = get_user(user_name = session["user"]).id
+    print(interaction.id)
+    follows = get_following_before(user_id, interaction)
+    l = []
+    for follow in follows:
+        l.append({
+            "user_name": get_user(user_id = follow.follows_user_id).user_name
+        })
+    return l
+
+def get_timeline_data(post_id, followed_users):
+    current_user = get_user(user_name = session["user"])
+    

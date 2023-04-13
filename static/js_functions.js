@@ -1,3 +1,6 @@
+// global variables for last id instead of trigger-id (unused)
+var g_interaction_id, g_reply_id, g_post_id;
+
 function countText() {
     let text = document.count_text.text.value;
     document.getElementById('characters').innerText = text.length;
@@ -35,6 +38,7 @@ function ajax_like(post_id) {
                 .addClass("bi-heart-fill")
                 .tooltip('update')
                 .tooltip('show');
+      $("#like_count-" + post_id).text(parseInt($("#like_count-"+post_id).text())+1);
     } else if (result == "unlike"){
       //console.log(result);
       $("#like-" + post_id).attr('data-bs-original-title', 'Like')
@@ -43,6 +47,7 @@ function ajax_like(post_id) {
                 .addClass("bi-heart")
                 .tooltip('update')
                 .tooltip('show');
+      $("#like_count-" + post_id).text(parseInt($("#like_count-"+post_id).text())-1);
     }
   }});
 }
@@ -65,6 +70,7 @@ function ajax_get_replies(reply_id) {
       let text = result[i]["text"];
       let timestamp = result[i]["timestamp"];
       let is_liked = result[i]["is_liked"];
+      let like_count = result[i]["like_count"];
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
@@ -82,13 +88,13 @@ function ajax_get_replies(reply_id) {
         .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
       }
 
+      new_div.find("#like_count-" + before_id).attr('id', "like_count-"+post_id).text(like_count);
+
       new_div.find("#reply-btn").removeAttr('href').attr('onclick', "window.location='/post/"+post_id+"';event.stopPropagation();");
       new_div.appendTo("#replies-container");
       before_id = post_id;
     }
 
-    // append new load trigger to #replies-container if replies.length == 5
-    // appendTo() ? and then change trigger_id
     $('[id^="trigger-"]').attr('id', "trigger-"+before_id).appendTo("#"+before_id);
 
     if (result.length < posts_to_load){
@@ -117,6 +123,8 @@ function ajax_get_posts(post_id) {
       let text = result[i]["text"];
       let timestamp = result[i]["timestamp"];
       let is_liked = result[i]["is_liked"];
+      let like_count = result[i]["like_count"];
+      console.log(post_id, like_count);
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
@@ -134,6 +142,8 @@ function ajax_get_posts(post_id) {
         .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
       }
 
+      new_div.find("#like_count-" + before_id).attr('id', "like_count-"+post_id).text(like_count);
+
       new_div.find("#reply-btn").removeAttr('href').attr('onclick', "window.location='/post/"+post_id+"';event.stopPropagation();");
       new_div.appendTo("#posts-container");
       before_id = post_id;
@@ -144,6 +154,31 @@ function ajax_get_posts(post_id) {
     if (result.length < posts_to_load){
       console.log(result.length);
       $("#loading-post").remove();
+      $('[id^="trigger-"]').remove();
+    }
+  }
+});
+}
+
+function ajax_get_follows(interaction_id) {
+  console.log(interaction_id);
+  $.ajax({url: "/follow_scroll/" + interaction_id, 
+  beforeSend: function(){
+    $("#loading-follows").show();
+  },
+  success: function(result){
+    console.log(result)
+    let before_id = interaction_id;
+    let follows_to_load = 5
+
+    for(i in result){
+    var new_div = $("#"+before_id).clone();
+
+    }
+
+    if (result.length < follows_to_load){
+      console.log(result.length);
+      $("#loading-follows").remove();
       $('[id^="trigger-"]').remove();
     }
   }
@@ -173,6 +208,22 @@ if(window.location.href.includes('/user/') && !window.location.href.includes('/f
     const observer = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_posts((el.id).toString().slice(8));
+            console.log(el.id)
+        } else {
+            console.log("not visible");
+        }
+    });
+
+  observer.observe(el);
+  }
+}
+
+if(window.location.href.includes('/following')){
+  const el = document.querySelector('[id^="trigger-"]');
+  if(el){
+    const observer = new IntersectionObserver((entries) => {
+        if(entries[0].isIntersecting){
+            ajax_get_follows((el.id).toString().slice(8));
             console.log(el.id)
         } else {
             console.log("not visible");
