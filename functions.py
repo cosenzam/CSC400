@@ -78,6 +78,19 @@ def postDateFormat(post, recency_tuple):
     else:
         return post.timestamp.strftime("%x")
 
+# timestamp conversion for post tooltips
+def to_date_and_time(d):
+    date = d.strftime("%x")
+    time = d.strftime("%r")
+
+    if time[0] == '0':
+        time = time[1:]
+        time = time[:4] + time[7:]
+    else:
+        time = time[:5] + time[8:]
+
+    return date + " " + time
+
 def get_token(user):
     token = serial.dumps({'user_id': user.id})
     return token
@@ -108,11 +121,12 @@ def get_reply_ajax_data(post_id):
         l.append({
             "post_id": reply.id,
             "user_name": user.user_name,
-            "timestamp": reply.timestamp.strftime("%x") + " " + reply.timestamp.strftime("%X"),
+            "timestamp": to_date_and_time(reply.timestamp),
             "recency": postDateFormat(reply, getPostRecency(reply)),
             "text": reply.text,
             "is_liked": reply.is_liked(from_user),
-            "like_count": reply.like_count
+            "like_count": reply.like_count,
+            "reply_count": reply.reply_count
             })
     return l
 
@@ -126,11 +140,12 @@ def get_post_ajax_data(post_id):
         l.append({
             "post_id": post.id,
             "user_name": user.user_name,
-            "timestamp": post.timestamp.strftime("%x") + " " + post.timestamp.strftime("%X"),
+            "timestamp": to_date_and_time(post.timestamp),
             "recency": postDateFormat(post, getPostRecency(post)),
             "text": post.text,
             "is_liked": post.is_liked(from_user),
-            "like_count": post.like_count
+            "like_count": post.like_count,
+            "reply_count": post.reply_count
             })
     return l
 
