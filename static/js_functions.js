@@ -71,12 +71,14 @@ function ajax_get_replies(reply_id) {
       let timestamp = result[i]["timestamp"];
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
+      let reply_count = result[i]["reply_count"];
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#reply-span").attr('onclick', "window.location='/post/"+post_id+"';");
       //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
-      new_div.find("#name-date").html("&emsp;"+user_name+"&emsp;"+recency);
+      new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
+      new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
       if (is_liked === false){
@@ -88,7 +90,8 @@ function ajax_get_replies(reply_id) {
         .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
       }
 
-      new_div.find("#like_count-" + before_id).attr('id', "like_count-"+post_id).text(like_count);
+      new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
+      new_div.find("#reply_count-"+before_id).attr('id', "reply_count-"+post_id).text(reply_count);
 
       new_div.find("#reply-btn").removeAttr('href').attr('onclick', "window.location='/post/"+post_id+"';event.stopPropagation();");
       new_div.appendTo("#replies-container");
@@ -124,13 +127,15 @@ function ajax_get_posts(post_id) {
       let timestamp = result[i]["timestamp"];
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
-      console.log(post_id, like_count);
+      let reply_count = result[i]["reply_count"];
+      //console.log(post_id, like_count);
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
       //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
-      new_div.find("#name-date").html("&emsp;"+user_name+"&emsp;"+recency);
+      new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
+      new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
       if (is_liked === false){
@@ -142,7 +147,8 @@ function ajax_get_posts(post_id) {
         .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
       }
 
-      new_div.find("#like_count-" + before_id).attr('id', "like_count-"+post_id).text(like_count);
+      new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
+      new_div.find("#reply_count-"+before_id).attr('id', "reply_count-"+post_id).text(reply_count);
 
       new_div.find("#reply-btn").removeAttr('href').attr('onclick', "window.location='/post/"+post_id+"';event.stopPropagation();");
       new_div.appendTo("#posts-container");

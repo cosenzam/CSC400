@@ -82,6 +82,15 @@
   font-size: 35px;
 }
 
+#name, #date{
+  padding-left: 2%;
+}
+
+#name:hover, #date:hover{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 input, textarea{
   background-color:#212529;
   border-bottom: solid;

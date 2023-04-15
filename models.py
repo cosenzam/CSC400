@@ -573,6 +573,7 @@ class Post(Base):
     text: Mapped[str] = mapped_column(Text, nullable = True)
     timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default = datetime.now())
     like_count: Mapped[int] = mapped_column(default=0)
+    reply_count: Mapped[int] = mapped_column(default=0)
     
     media_collection: Mapped[Optional["MediaCollection"]] = relationship(back_populates="post")
     user = relationship("User", back_populates="posts")
@@ -580,6 +581,7 @@ class Post(Base):
     #from a Post object, inserts a nother Post object as a reply.
     def insert_reply(self, user, reply_text, media_path_list=None):
         parent_id = self.id
+        self.reply_count +=1
         reply = Post(
             user_id = user.id,
             parent_id = parent_id,

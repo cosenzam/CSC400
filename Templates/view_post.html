@@ -17,8 +17,9 @@
     <div class="row justify-content-center post">
         <span class="col-sm-4 border" style="word-wrap: break-word">
             <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
-            <p id="name-date" style="text-align: left;">
-                &emsp;{{post_user.user_name}}&emsp;{{postDateFormat(post, getPostRecency(post))}}
+            <p style="text-align: left;">
+                <span id="name" onclick="window.location='/user/{{ post_user.user_name }}';event.stopPropagation();">{{post_user.user_name}}</span>
+                <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>
             </p>
             <br>
             <p id="content-text">{{post.text}}</p>
@@ -38,7 +39,7 @@
                 <span style="float: right;">
                     <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"
                     data-bs-toggle="modal" data-bs-target="#replyModal"></a>
-                    <span>0</span>
+                    <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
                 </span>
 
                 <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
@@ -71,11 +72,13 @@
     <!-- Initial replies rendered on page load, any changes here should also be compared to js_functions -> ajax_get_posts() and the parent post above-->
     {% if replies %}
         {% for reply in replies %}
+        {% set reply_user = get_user(id=reply.user_id).user_name %}
         <div id="{{reply.id}}" class="row justify-content-center post">
             <span id="reply-span" onclick="window.location='/post/{{reply.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                 <img id="profile-picture" src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
-                <p id="name-date" style="text-align: left;">
-                    &emsp;{{get_user(id=reply.user_id).user_name}}&emsp;{{postDateFormat(reply, getPostRecency(reply))}}
+                <p style="text-align: left;">
+                    <span id="name" onclick="window.location='/user/{{ reply_user }}';event.stopPropagation();">{{ reply_user }}</span>
+                    <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(reply.timestamp) }}">{{postDateFormat(reply, getPostRecency(reply))}}</span>
                 </p>
                 <br>
                 <p id="content-text">{{reply.text}}</p>
@@ -94,7 +97,7 @@
                     </span>
                     <span style="float: right;">
                         <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
-                        <span>0</span>
+                        <span id="reply_count-{{ reply.id }}">{{ reply.reply_count }}</span>
                     </span>
                 </div>
             </span>

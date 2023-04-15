@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
 from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
-    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data)
+    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time)
 import json
 
 #data base connections
@@ -165,7 +165,7 @@ def user(dynamic_user):
 
         return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
         getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
-        follower_count = follower_count)
+        follower_count = follower_count, to_date_and_time = to_date_and_time)
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)
@@ -183,7 +183,7 @@ def user(dynamic_user):
 
             return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
             getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = current_user.is_following, last_post_id = last_post_id, 
-            get_user = get_user, following_count = following_count, follower_count = follower_count)
+            get_user = get_user, following_count = following_count, follower_count = follower_count, to_date_and_time = to_date_and_time)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -372,7 +372,7 @@ def view_post(post_id):
         return redirect(url_for("home"))
 
     return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
-        get_user = get_user, form = form, last_reply_id = last_reply_id)
+        get_user = get_user, form = form, last_reply_id = last_reply_id, to_date_and_time = to_date_and_time)
 
 @app.route("/post/<post_id>/like")
 def like(post_id):
