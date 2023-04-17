@@ -160,6 +160,19 @@ def get_follow_ajax_data(interaction):
         })
     return l
 
-def get_timeline_data(post_id, followed_users):
-    current_user = get_user(user_name = session["user"])
-    
+def get_home_ajax_data(post_id):
+    from_user = get_user(user_name = session["user"])
+    posts = from_user.get_following_posts_before(post_id, from_user.get_following())
+    l=[]
+    for post in posts:
+        l.append({
+            "post_id": post.id,
+            "user_name": get_user(id = post.user_id).user_name,
+            "timestamp": to_date_and_time(post.timestamp),
+            "recency": postDateFormat(post, getPostRecency(post)),
+            "text": post.text,
+            "is_liked": post.is_liked(from_user),
+            "like_count": post.like_count,
+            "reply_count": post.reply_count
+            })
+    return l

@@ -14,11 +14,12 @@
             <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
             {% if "user" in session %}
                 {% if session["user"] != dynamic_user and not current_user.is_following(user_profile) %}
-                    <a id="follow" onclick="ajax_follow('{{dynamic_user}}')" class="btn btn-light text-dark follow-btn">Follow</a>
+                    <a id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Follow</a>
                 {% elif session["user"] != dynamic_user and current_user.is_following(user_profile) %} 
-                    <a id="follow" onclick="ajax_follow('{{dynamic_user}}')" class="btn btn-light text-dark follow-btn">Unfollow</a>
+                    <a id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Unfollow</a>
                 {% endif %}
             {% else %}
+                <!-- for a non logged in user-->
                 <a href="{{ url_for('follow_user', dynamic_user = user.user_name) }}" class="btn btn-light text-dark follow-btn">Follow</a>
             {% endif %}
         </div>
@@ -57,7 +58,7 @@
 <div class="row justify-content-center post-button">
     <span class="col-sm-4 text-center">
             <!-- Button trigger modal -->
-        <button type="button" class="btn btn-light text-dark" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
+        <button type="button" class="btn button-color" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
         <!-- Modal -->
         <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">

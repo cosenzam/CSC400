@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
 from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
-    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time)
+    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time, get_home_ajax_data)
 import json
 
 #data base connections
@@ -34,7 +34,20 @@ Base.metadata.create_all(engine)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    if "user" in session:
+        current_user = get_user(user_name = session["user"])
+        posts = current_user.get_following_posts(current_user.get_following())
+        if len(posts) > 0:
+                last_post_id = posts[len(posts) - 1].id
+        else:
+            last_post_id = 1
+        
+        print(last_post_id)
+
+        return render_template("index.html", current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, postDateFormat = postDateFormat, 
+        last_post_id = last_post_id, to_date_and_time = to_date_and_time)
+    else:
+        return render_template(url_for("login"))
 
 @app.route("/view")
 def view():
@@ -484,21 +497,15 @@ def follow_user(dynamic_user):
 @app.route("/following")
 def following_list():
     if "user" in session:
-        user = get_user(user_name = session["user"])
+        current_user = get_user(user_name = session["user"])
 
         users = []
-        last_interaction_id = 0
-        following_list = user.get_latest_following()
-        if len(following_list) > 0:
-            last_interaction_id = following_list[len(following_list)-1].interaction_id
+        following_list = current_user.get_following()
         
         if following_list:
-            user_ids = []
-            for user in following_list:
-                user_ids.append(user.follows_user_id)
-            users = map(get_user, user_ids)
+            users = map(get_user, following_list)
 
-        return render_template("following_list.html", users = users, following_list = following_list, last_interaction_id = last_interaction_id)
+        return render_template("following_list.html", current_user = current_user, users = users, following_list = following_list)
 
     else:
         return redirect(url_for("login"))
@@ -517,3 +524,8 @@ def post_scroll(post_id):
 def follow_scroll(interaction_id):
     following = get_follow_ajax_data(get_interaction(interaction_id))
     return following, 200
+
+@app.route("/home_scroll/<post_id>")
+def home_scroll(post_id):
+    posts = get_home_ajax_data(post_id)
+    return posts, 200

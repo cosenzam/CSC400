@@ -168,6 +168,7 @@ def get_user_posts_before(user, post_id, n=5):
         posts = session.scalars(stmt).all()
         return posts
     except NoResultFound:
+        session.rollback()
         return False
 
 def get_latest_replies(post_id, n=7):
@@ -203,6 +204,7 @@ def get_replies_before(post_id, n=5):
         #print(replies)
         return replies
     except NoResultFound:
+        session.rollback()
         return False
 # TODO
 # for jquery, get interaction from previous interaction id
@@ -219,6 +221,7 @@ def get_following_before(user_id, interaction, n = 5):
         print(following)
         return following
     except NoResultFound:
+        session.rollback()
         return False
 
 def follow(to_user, from_user):
@@ -500,13 +503,43 @@ class User(Base):
     def get_following(self):
         stmt = select(Follows.follows_user_id).where(
             Follows.user_id == self.id,
-        )
+        ).order_by(Follows.timestamp.desc())
 
         try:
             following = session.scalars(stmt).all()
-            print (following)
             return following
         except:
+            return False
+
+    def get_following_posts(self, following_list, n=10):
+        following_list.append(self.id)
+
+        stmt = select(Post).where(
+            Post.user_id.in_(following_list),
+            Post.parent_id == None
+        ).limit(n).order_by(Post.timestamp.desc())
+
+        try:
+            posts = session.scalars(stmt).all()
+            return posts
+        except:
+            return False
+
+    def get_following_posts_before(self, post_id, following_list, n=10):
+        post = get_post(post_id)
+        following_list.append(self.id)
+
+        stmt = select(Post).where(
+            Post.user_id.in_(following_list),
+            Post.parent_id == None,
+            Post.id != post.id,
+            Post.timestamp <= post.timestamp
+            ).limit(n).order_by(Post.timestamp.desc())
+        
+        try:
+            posts = session.scalars(stmt).all()
+            return posts
+        except NoResultFound:
             return False
     
     def get_following_count(self):
@@ -516,7 +549,6 @@ class User(Base):
 
         try:
             following = session.scalars(stmt).all()
-            print (following)
             return len(following)
         except:
             return False
@@ -540,7 +572,6 @@ class User(Base):
 
         try:
             followers = session.scalars(stmt).all()
-            print(followers)
             return followers
         except NoResultFound:
             return False
@@ -552,7 +583,6 @@ class User(Base):
 
         try:
             followers = session.scalars(stmt).all()
-            print(followers)
             return len(followers)
         except NoResultFound:
             return False

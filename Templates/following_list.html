@@ -2,8 +2,7 @@
 {% block title %}Following List{% endblock %}
 {% block content %}
 <h1 class="text-center account">Following List</h1>
-<div class="row justify-content-center">
-    <div class="col-sm-4 text-center border">
+<div class="row justify-content-center" style="width: 60%; margin: auto;">
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -16,19 +15,26 @@
         {% if users %}
             {% set i = 0 %}
             {% for user in users %}
-                <div id="{{ following_list[i].interaction_id }} " style="padding-top: 20%;">
-                    <a id="user-link" href="{{ url_for('user', dynamic_user = user.user_name) }}"> {{user.user_name}} </a>
+                <div id="{{ following_list[i].interaction_id }}" class="card text-center me-auto" style="width: 18rem; height: 18rem; margin-bottom: 1%;">
+                    <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px; margin: auto">
+                        <img class="card-img-top img-cover" src="/static/images/kitten.jpg" alt="Card image cap">
+                    </div>
+                    <div class="card-body">
+                    <a class="text-center" href="{{ url_for('user', dynamic_user = user.user_name) }}" style="color:white;">
+                        <h5 id="user-link" class="card-title" style="color:white;">{{user.user_name}}</h5>
+                        <div class="card-bio-border"></div>
+                    </a>
+                    <p class="card-text card-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
+                    {% if not current_user.is_following(user) %}
+                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Follow</button>
+                    {% elif current_user.is_following(user) %} 
+                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Unfollow</button>
+                    {% endif %}
+                    </div>
                 </div>
                 {% set i = i + 1 %}
             {% endfor %}
-            <!-- Loading Spinner -->
-            <div id="loading-follows">
-                <div id="trigger-{{ last_interaction_id }}" class="row justify-content-center">
-                    <div class="col-sm-4 spinner-border" role="status"></div>
-                </div>
-            </div>
         {% endif %}
-    </div>
 </div>
 
 {% endblock %}

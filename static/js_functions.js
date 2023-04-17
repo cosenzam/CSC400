@@ -13,15 +13,9 @@ function ajax_follow(dynamic_user) {
   $.ajax({url: "/user/" + dynamic_user + "/follow", success: function(result){
     console.log(result);
     if (result == "follow") {
-      //console.log(result);
-      //dynamic_user = dynamic_user.data
-      $("#follow").text("Unfollow");
-      //console.log(dynamic_user + " followed");
+      $("#follow-" + dynamic_user).text("Unfollow");
     } else if (result == "unfollow"){
-      //console.log(result);
-      //dynamic_user = dynamic_user.data
-      $("#follow").text("Follow");
-      //console.log(dynamic_user + " unfollowed");
+      $("#follow-" + dynamic_user).text("Follow");
     }
   }});
 }
@@ -191,13 +185,112 @@ function ajax_get_follows(interaction_id) {
 });
 }
 
-// listener for scrolling to element | remove trigger id from element when ajax_get_replies is called and re-add to a newer one if necessary
+function ajax_get_timeline(post_id) {
+  console.log(post_id);
+  $.ajax({url: "/home_scroll/" + post_id, 
+  beforeSend: function(){
+    $("#loading-post").show();
+  },
+  success: function(result){
+    //console.log(result);
+    //console.log(post_id);
+    let before_id = post_id;
+    let posts_to_load = 10;
+    for (i in result){
+      let post_id = result[i]["post_id"];
+      let user_name = result[i]["user_name"];
+      let recency = result[i]["recency"];
+      let text = result[i]["text"];
+      let timestamp = result[i]["timestamp"];
+      let is_liked = result[i]["is_liked"];
+      let like_count = result[i]["like_count"];
+      let reply_count = result[i]["reply_count"];
+
+      var new_div = $("#"+before_id).clone();
+      new_div.attr('id', post_id)
+      new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
+      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
+      new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
+      new_div.find("#content-text").text(text);
+
+      if (is_liked === false){
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
+        .removeClass().addClass("btn bi bi-heart post-icon tt like");
+      }
+      else{
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
+        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
+      }
+
+      new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
+      new_div.find("#reply_count-"+before_id).attr('id', "reply_count-"+post_id).text(reply_count);
+
+      new_div.find("#reply-btn").removeAttr('href').attr('onclick', "window.location='/post/"+post_id+"';event.stopPropagation();");
+      new_div.appendTo("#posts-container");
+      before_id = post_id;
+    }
+    
+    $('[id^="trigger-"]').attr('id', "trigger-"+before_id).appendTo("#"+before_id);
+
+    if (result.length < posts_to_load){
+      console.log(result.length);
+      $("#loading-post").remove();
+      $('[id^="trigger-"]').remove();
+    }
+  }
+});
+}
+
+function ajax_get_follows(interaction_id) {
+  console.log(interaction_id);
+  $.ajax({url: "/follow_scroll/" + interaction_id, 
+  beforeSend: function(){
+    $("#loading-follows").show();
+  },
+  success: function(result){
+    console.log(result)
+    let before_id = interaction_id;
+    let follows_to_load = 5
+
+    for(i in result){
+    var new_div = $("#"+before_id).clone();
+
+    }
+
+    if (result.length < follows_to_load){
+      console.log(result.length);
+      $("#loading-follows").remove();
+      $('[id^="trigger-"]').remove();
+    }
+  }
+});
+}
+
+// listener for scrolling to element
 if(window.location.href.includes('/post/')){
   const el = document.querySelector('[id^="trigger-"]');
   if(el){
     const observer = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_replies((el.id).toString().slice(8));
+            console.log(el.id)
+        } else {
+            console.log("not visible");
+        }
+    });
+
+  observer.observe(el);
+  }
+}
+
+var page = window.location.pathname;
+if(page == '/' || page == '/default.aspx'){
+  const el = document.querySelector('[id^="trigger-"]');
+  if(el){
+    const observer = new IntersectionObserver((entries) => {
+        if(entries[0].isIntersecting){
+            ajax_get_timeline((el.id).toString().slice(8));
             console.log(el.id)
         } else {
             console.log("not visible");
