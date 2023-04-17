@@ -566,12 +566,13 @@ class User(Base):
             return False
 
     def get_followers(self):
-        stmt = select(Follows).where(
+        stmt = select(Follows.user_id).where(
             Follows.follows_user_id == self.id
         )
 
         try:
             followers = session.scalars(stmt).all()
+            print(followers)
             return followers
         except NoResultFound:
             return False

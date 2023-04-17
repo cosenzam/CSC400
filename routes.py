@@ -510,6 +510,22 @@ def following_list():
     else:
         return redirect(url_for("login"))
 
+@app.route("/followers")
+def follower_list():
+    if "user" in session:
+        current_user = get_user(user_name = session["user"])
+        users = []
+        follower_list = current_user.get_followers()
+
+        if follower_list:
+            users = map(get_user, follower_list)
+
+        return render_template("follower_list.html", current_user = current_user, users = users, follower_list = follower_list)
+    
+    else:
+        return redirect(url_for("login"))
+
+
 @app.route("/reply_scroll/<reply_id>")
 def reply_scroll(reply_id):
     replies = get_reply_ajax_data(reply_id)
