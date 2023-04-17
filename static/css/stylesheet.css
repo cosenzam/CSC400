@@ -56,6 +56,8 @@
 
 .dropdown-menu{
   min-width: 1rem;
+  background-color: white;
+  border-color: rgb(66, 70, 80);
 }
 
 .post{
@@ -106,7 +108,11 @@ input, textarea{
 }
 
 .dropdown-item:active{
-  background-color: rgba(114, 19, 138, 0.25);
+  background-color:rgb(6, 6, 7);
+}
+
+.dropdown-item:hover{
+  background-color:rgb(3, 172, 3);
 }
 
 .follow-btn{
@@ -152,4 +158,53 @@ span.post-format:hover{
 
 .fill-red{
   color: red;
+}
+
+.card{
+  background-color:rgb(6, 6, 7);
+  border-color: rgb(66, 70, 80);
+  padding-top: 10px;
+}
+
+.card-bio-border{
+  border: bottom;
+  border-style: solid;
+  border-width: thin;
+  border-color: rgb(66, 70, 80);
+}
+
+.card-bio{
+  font-size: 16px;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
+}
+
+.card:hover{
+  background-color:rgba(44, 44, 46, 0.836);
+}
+
+/* new background color */
+body, nav {
+  background-color:rgb(6, 6, 7);
+}
+
+.img-cover{
+  object-fit: cover;
+  object-position: center;
+}
+
+.button-color{
+  background-color: rgb(3, 172, 3);
+  color: white;
+}
+
+.button-color:hover{
+  border-color: rgb(29, 31, 36);
+}
+
+.border{
+  border-color: rgb(66, 70, 80) !important;
 }
