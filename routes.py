@@ -49,9 +49,11 @@ def home():
     else:
         return redirect(url_for("login"))
 
-@app.route("/view")
-def view():
-    return render_template("view.html", values = db_session.query(User).all())
+# pass to base.html
+@app.context_processor
+def base():
+    form = SearchForm()
+    return dict(form = form)
 
 @app.route("/create_account/", methods=["POST", "GET"])
 def create_account():
@@ -462,12 +464,6 @@ def reset(token):
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', form = form)
-
-# pass to base.html
-@app.context_processor
-def base():
-    form = SearchForm()
-    return dict(form = form)
 
 @app.route("/search/", methods=["GET", "POST"])
 def search():

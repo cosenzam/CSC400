@@ -84,12 +84,12 @@ function ajax_get_replies(reply_id) {
       new_div.find("#content-text").text(text);
 
       if (is_liked === false){
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart post-icon tt like");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
+        .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
       else{
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Unlike"})
+        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red").tooltip('update');
       }
 
       new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
@@ -138,12 +138,12 @@ function ajax_get_posts(post_id) {
       new_div.find("#content-text").text(text);
 
       if (is_liked === false){
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart post-icon tt like");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
+        .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
       else{
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Unlike"})
+        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red").tooltip('update');
       }
 
       new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
@@ -217,12 +217,12 @@ function ajax_get_timeline(post_id) {
       new_div.find("#content-text").text(text);
 
       if (is_liked === false){
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart post-icon tt like");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
+        .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
       else{
-        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();"})
-        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red");
+        new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Unlike"})
+        .removeClass().addClass("btn bi bi-heart-fill post-icon tt like fill-red").tooltip('update');
       }
 
       new_div.find("#like_count-"+before_id).attr('id', "like_count-"+post_id).text(like_count);
