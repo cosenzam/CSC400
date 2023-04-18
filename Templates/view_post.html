@@ -11,7 +11,6 @@
 {% endwith %}
 <a id="back-btn" onclick="history.back()" class="bi bi-arrow-left-circle-fill" style="cursor: pointer; color: white;"></a>
 {% set post_user = get_user(post.user_id) %}
-{% set current_user = get_user(user_name = session["user"]) %}
 <!-- Parent Post -->
 <div id="replies-container">
     <div class="row justify-content-center post">
@@ -25,10 +24,14 @@
             <p id="content-text">{{post.text}}</p>
             <div class="text-center">
                 <span style="float: left;">
-                    {% if not post.is_liked(post_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
-                    {% elif post.is_liked(post_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                    {% if "user" not in session %}
+                            <a id="like-{{ post.id }}" onclick="like_alert();event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                    {% else %}
+                        {% if not post.is_liked(post_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                        {% elif post.is_liked(post_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                        {% endif %}
                     {% endif %}
                     <span id="like_count-{{ post.id }}">{{ post.like_count }}</span>
                 </span>
@@ -37,14 +40,19 @@
                     <span>0</span>
                 </span>
                 <span style="float: right;">
-                    <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"
-                    data-bs-toggle="modal" data-bs-target="#replyModal"></a>
-                    <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
+                    {% if "user" not in session %}
+                        <a id="reply-btn" onclick="reply_alert();event.stopPropagation();" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                        <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
+                    {% else %}
+                        <a type="button" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"
+                        data-bs-toggle="modal" data-bs-target="#replyModal"></a>
+                        <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
+                    {% endif %}
                 </span>
 
                 <div class="modal fade" id="replyModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content bg-dark text-light">
+                        <div class="modal-content border text-light">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="replyModalLabel">Replying to {{post_user.user_name}}</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -57,7 +65,7 @@
                                     <p>{{form.media.label}}</p>
                                     <p>{{form.media(size=20)}}</p>
                                     <div class="modal-footer">
-                                        <button type="submit" class="btn btn-light text-dark">Submit Reply</button>
+                                        <button type="submit" class="btn button-color">Submit Reply</button>
                                     </div>
                                 </form>
                             </div>
@@ -84,10 +92,14 @@
                 <p id="content-text">{{reply.text}}</p>
                 <div class="text-center">
                     <span style="float: left;">
-                        {% if not reply.is_liked(current_user) %}
-                            <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
-                        {% elif reply.is_liked(current_user) %}
-                            <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                        {% if "user" not in session %}
+                            <a id="like-{{ reply.id }}" onclick="like_alert();event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                        {% else %}
+                            {% if not reply.is_liked(current_user) %}
+                                <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                            {% elif reply.is_liked(current_user) %}
+                                <a id="like-{{ reply.id }}" onclick="ajax_like('{{reply.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                            {% endif %}
                         {% endif %}
                         <span id="like_count-{{ reply.id }}">{{ reply.like_count }}</span>
                     </span>
@@ -96,15 +108,20 @@
                         <span>0</span>
                     </span>
                     <span style="float: right;">
-                        <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
-                        <span id="reply_count-{{ reply.id }}">{{ reply.reply_count }}</span>
+                        {% if "user" not in session %}
+                            <a id="reply-btn" onclick="reply_alert();event.stopPropagation();" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                            <span id="reply_count-{{ reply.id }}">{{ reply.reply_count }}</span>
+                        {% else %}
+                            <a id="reply-btn" href="{{ url_for('view_post', post_id=reply.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                            <span id="reply_count-{{ reply.id }}">{{ reply.reply_count }}</span>
+                        {% endif %}
                     </span>
                 </div>
             </span>
         </div>
         {% endfor %}
         <!-- Loading Spinner -->
-        <div id="loading-reply">
+        <div id="loading-posts">
             <div id="trigger-{{ last_reply_id }}" class="row justify-content-center">
                 <div class="col-sm-4 spinner-border" role="status"></div>
             </div>

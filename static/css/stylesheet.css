@@ -187,8 +187,12 @@ span.post-format:hover{
 }
 
 /* new background color */
-body, nav {
+body, nav, .modal-content {
   background-color:rgb(6, 6, 7);
+}
+
+.modal-header, .modal-footer{
+  border-color: rgb(66, 70, 80) !important;
 }
 
 .img-cover{
@@ -197,14 +201,33 @@ body, nav {
 }
 
 .button-color{
-  background-color: rgb(3, 172, 3);
-  color: white;
+  background-color: rgb(3, 172, 3) !important;
+  color: white !important;
 }
 
 .button-color:hover{
-  border-color: rgb(29, 31, 36);
+  background-color:rgb(6, 6, 7) !important;
+  border-color: rgb(66, 70, 80);
 }
 
 .border{
   border-color: rgb(66, 70, 80) !important;
+}
+
+.tabs-color{
+  background-color:rgb(6, 6, 7) !important;
+  color: white;
+}
+
+.tabs-color:hover{
+  background-color:rgba(44, 44, 46, 0.836);
+}
+
+.nav-tabs {
+  border-bottom: 0px solid transparent;
+}
+
+.nav-tabs button.active {
+  background-color: rgba(44, 44, 46, 0.836) !important;
+  border-bottom: 2px solid rgb(3, 172, 3) !important;
 }

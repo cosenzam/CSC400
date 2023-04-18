@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Following List{% endblock %}
+{% block title %}Followers List{% endblock %}
 {% block content %}
-<h1 class="text-center account">Following List</h1>
+<h1 class="text-center account">Followers List</h1>
 <div class="row justify-content-center" style="width: 60%; margin: auto;">
 
         {% with messages = get_flashed_messages() %}
@@ -15,7 +15,7 @@
         {% if users %}
             {% set i = 0 %}
             {% for user in users %}
-                <div id="{{ following_list[i].interaction_id }}" class="card text-center" style="width: 18rem; height: 18rem; margin-bottom: 1%; margin-left: 3%;">
+                <div id="{{ follower_list[i].interaction_id }}" class="card text-center" style="width: 18rem; height: 18rem; margin-bottom: 1%; margin-left: 3%;">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px; margin: auto">
                         <img class="card-img-top img-cover" src="/static/images/kitten.jpg" alt="Card image cap">
                     </div>

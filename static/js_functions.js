@@ -20,6 +20,10 @@ function ajax_follow(dynamic_user) {
   }});
 }
 
+function follow_alert(){
+  alert("You must be logged in to Follow")
+}
+
 function ajax_like(post_id) {
   console.log(post_id);
   $.ajax({url: "/post/" + post_id + "/like", success: function(result){
@@ -46,13 +50,17 @@ function ajax_like(post_id) {
   }});
 }
 
-// attach id="reply_id" to the last element so ajax can get it for the next call?
+function like_alert(){
+  alert("You must be logged in to like")
+}
+
+function reply_alert(){
+  alert("You must be logged in to reply")
+}
+
 function ajax_get_replies(reply_id) {
   console.log(reply_id);
   $.ajax({url: "/reply_scroll/" + reply_id, 
-  beforeSend: function(){
-    $("#loading-reply").show();
-  },
   success: function(result){
     //console.log(result);
     let before_id = reply_id;
@@ -96,7 +104,7 @@ function ajax_get_replies(reply_id) {
 
     if (result.length < posts_to_load){
       console.log(result.length);
-      $("#loading-reply").remove();
+      $("#loading-posts").remove();
       $('[id^="trigger-"]').remove();
     }
   }
@@ -105,10 +113,7 @@ function ajax_get_replies(reply_id) {
 
 function ajax_get_posts(post_id) {
   console.log(post_id);
-  $.ajax({url: "/post_scroll/" + post_id, 
-  beforeSend: function(){
-    $("#loading-post").show();
-  },
+  $.ajax({url: "/post_scroll/" + post_id,
   success: function(result){
     //console.log(result);
     let before_id = post_id;
@@ -188,9 +193,6 @@ function ajax_get_follows(interaction_id) {
 function ajax_get_timeline(post_id) {
   console.log(post_id);
   $.ajax({url: "/home_scroll/" + post_id, 
-  beforeSend: function(){
-    $("#loading-post").show();
-  },
   success: function(result){
     //console.log(result);
     //console.log(post_id);
@@ -235,7 +237,7 @@ function ajax_get_timeline(post_id) {
 
     if (result.length < posts_to_load){
       console.log(result.length);
-      $("#loading-post").remove();
+      $("#loading-posts").remove();
       $('[id^="trigger-"]').remove();
     }
   }
