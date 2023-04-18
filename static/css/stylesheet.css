@@ -10,6 +10,29 @@
   overflow: hidden;
 }
 
+.search-bio{
+  font-size: 16px;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
+  margin-top: 1%;
+}
+
+.search-user{
+  padding-bottom: .5%;
+}
+
+.search-user-name{
+  color:white; 
+  display: inline-block; 
+  vertical-align: middle;
+}
+
+.search-user:hover{
+  background-color:rgba(44, 44, 46, 0.836);
+  cursor: pointer;
+}
+
 .content-nav-pad{
   padding-top: 0.5%;
 }
@@ -210,7 +233,7 @@ body, nav, .modal-content {
   border-color: rgb(66, 70, 80);
 }
 
-.border{
+.border, .border-start, .border-end{
   border-color: rgb(66, 70, 80) !important;
 }
 
@@ -225,6 +248,10 @@ body, nav, .modal-content {
 
 .nav-tabs {
   border-bottom: 0px solid transparent;
+  margin-left: auto; 
+  margin-right: auto; 
+  margin-bottom: 1%; 
+  margin-top: 1%;
 }
 
 .nav-tabs button.active {
