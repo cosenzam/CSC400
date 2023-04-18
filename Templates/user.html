@@ -10,42 +10,47 @@
 {% endwith %}
 <div class="row justify-content-center">
     <div class="col-sm-4 media border profile-min-width">
-        <div class="align-self-center">
-            <img src="/static/images/kitten.jpg" class="media-object" style="width:80px">
-            {% if "user" not in session %}
-                <!-- for a non logged in user-->
-                <!-- Onclick event for open alert-->
-                <a id="follow-{{dynamic_user}}" onclick="follow_alert()" class="btn button-color follow-btn">Follow</a>
-            {% else %}
-                {% if session["user"] != dynamic_user and not is_following(current_user, user_profile) %}
-                    <a id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Follow</a>
-                {% elif session["user"] != dynamic_user and is_following(current_user, user_profile) %} 
-                    <a id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Unfollow</a>
-                {% endif %}
-        
+        {% if "user" not in session %}
+            <!-- for a non logged in user-->
+            <!-- Onclick event for open alert-->
+            <button id="follow-{{dynamic_user}}" onclick="follow_alert()" class="btn button-color follow-btn">Follow</button>
+        {% else %}
+            {% if session["user"] != dynamic_user and not is_following(current_user, user_profile) %}
+                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Follow</button>
+            {% elif session["user"] != dynamic_user and is_following(current_user, user_profile) %} 
+                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Unfollow</button>
             {% endif %}
+        {% endif %}
+        <div class="align-self-center" style="padding-top: 2%;">
+            <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px;">
+                <img class="img-cover" src="/static/images/kitten.jpg">
+            </div>
         </div>
+        
         <div class="media-body">
-            <h4 class="media-heading user-name">{{user_profile.user_name}}</h4>
-            <span class="pronouns"> 
-                {% if user_profile.pronouns != None %}{{user_profile.pronouns}}{% endif %} 
-            </span>
-            <span class="pronouns" style="float: right;">
-                {{ following_count }} following {{ follower_count }} followers
+            <h4 class="media-heading user-name">{{user_profile.user_name}}
+                <span class="pronouns profile-info" style="float: right;">
+                    {{ following_count }} following {{ follower_count }} followers
+                </span>
+            </h4>
+            <span class="pronouns">
+                ({% if user_profile.pronouns != None %}{{user_profile.pronouns}}{% endif %})
             </span>
         </div>
     </div>
 </div>
 <div class="row justify-content-center">
-    <span class="col-sm-1 profile-info border">
-        {% if user_profile.first_name != None %}{{user_profile.first_name}}{% endif %}
-        {% if user_profile.last_name != None %}{{user_profile.last_name}}{% endif %}
-    </span>
-    <span class="col-sm-1 profile-info border">
-        {% if user_profile.location != None %}{{user_profile.location}}{% endif %}
-    </span>
-    <span class="col-sm-2 profile-info border">
-        {% if user_profile.occupation != None %}{{user_profile.occupation}}{% endif %}
+    <span class="col-sm-4 profile-info border-start border-end">
+        {% if user_profile.first_name != None and user_profile.middle_name != None and user_profile.last_name != None %}
+        <span class="bi bi-person-badge-fill">
+            &nbsp;{% if user_profile.first_name != None %} {{user_profile.first_name}} {% endif %}
+            {% if user_profile.middle_name != None %} {{user_profile.middle_name}} {% endif %}
+            {% if user_profile.last_name != None %} {{user_profile.last_name}} {% endif %}
+            &nbsp;
+        <span>
+        {% endif %}
+        {% if user_profile.location != None %} <span class="bi bi-geo-alt-fill"> &nbsp;{{user_profile.location}}&nbsp;</span>{% endif %}
+        {% if user_profile.occupation != None %} <span class="bi bi-briefcase-fill"> &nbsp;{{user_profile.occupation}}</span>{% endif %}
     </span>
     <!--
     <span class="col-sm-1 profile-info border">
@@ -99,7 +104,9 @@
         {% set user_name = get_user(id = post.user_id).user_name %}
         <div id="{{post.id}}" class="row justify-content-center post">
             <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
-                <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+                <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
+                    <img class="img-cover" src="/static/images/kitten.jpg">
+                </div>
                 <p style="text-align: left;">
                     <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name }}</span>
                     <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>

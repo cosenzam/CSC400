@@ -108,7 +108,7 @@
 }
 
 #name, #date{
-  padding-left: 2%;
+  margin-left: 3%;
 }
 
 #name:hover, #date:hover{
@@ -140,6 +140,7 @@ input, textarea{
 
 .follow-btn{
   float: right;
+  margin-top: 2%;
 }
 
 label {
