@@ -47,7 +47,7 @@ def home():
         return render_template("index.html", current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, postDateFormat = postDateFormat, 
         last_post_id = last_post_id, to_date_and_time = to_date_and_time)
     else:
-        return render_template(url_for("login"))
+        return redirect(url_for("login"))
 
 @app.route("/view")
 def view():
