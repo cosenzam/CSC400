@@ -15,28 +15,29 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
                 {% if "user" in session %}
                 <li class="nav-item">
                   <a class="nav-link active border-start border-end" aria-current="page" href="{{ url_for('home') }}">Home</a>
                 </li>
+                <!--
                 <li class="nav-item">
                   <a class="nav-link active border-end" aria-current="page" href="{{ url_for('create_post') }}">Post</a>
                 </li>
+                -->
                 <li class="nav-item">
                   <a class="nav-link active border-end" aria-current="page" href="{{ url_for('following_list') }}">Following</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('search') }}">Search</a>
+                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('follower_list') }}">Followers</a>
                 </li>
               </ul>
-              <ul class="nav navbar-nav me-auto search">
-                <form id="search" class="d-flex" role="search" action="{{ url_for('search') }}">
-
-                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                  <button class="btn btn-outline-success" type="submit">Search</button>
-
+              <ul class="nav navbar-nav me-auto search" style="margin-left: 1%;">
+                <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
+                  {{ form.hidden_tag() }}
+                  <input class="form-control me-2 text-center" type="search" placeholder="Search" aria-label="Search" name = "search">
                 </form>
               </ul>
               <ul class="nav navbar-nav acc-dropdown-pad">
@@ -54,20 +55,24 @@
               </ul>
               {% endif %}
             </div>
+
             {% if "user" not in session %}
-              <ul class="nav navbar-nav ms-auto">
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
-                </li>
-                <!--
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('search') }}">Search</a>
-                </li>
-                -->
-              </ul>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="nav navbar-nav justify-content-center me-auto search" style="margin-left: 6%;">
+                  <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
+                    {{ form.hidden_tag() }}
+                    <input class="form-control me-2 text-center" type="search" placeholder="Search" aria-label="Search" name="search">
+                  </form>
+                </ul>
+                <ul class="nav navbar-nav ms-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
+                  </li>
+                </ul>
+              </div>
             {% endif %}
           </div>
         </nav>

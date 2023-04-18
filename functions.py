@@ -113,7 +113,10 @@ def send_signup_email(email):
 
 # give ajax the list of dictionary values it needs
 def get_reply_ajax_data(post_id):
-    from_user = get_user(user_name = session["user"])
+    if "user" in session:
+        from_user = get_user(user_name = session["user"])
+    else:
+        from_user = ""
     replies = get_replies_before(post_id)
     l = []
     for reply in replies:
@@ -131,7 +134,10 @@ def get_reply_ajax_data(post_id):
     return l
 
 def get_post_ajax_data(post_id):
-    from_user = get_user(user_name = session["user"])
+    if "user" in session:
+        from_user = get_user(user_name = session["user"])
+    else:
+        from_user = ""
     # get user id
     user = get_user(id = get_post(post_id).user_id)
     posts = get_user_posts_before(user, post_id)

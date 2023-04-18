@@ -59,6 +59,25 @@ def exists_user(id=None, user_name=None, email=None):
         return user
     else:
         return False
+
+# search for user name by substring
+def search_users(s):
+    stmt = select(User).where(User.user_name.contains(s))
+
+    try:
+        users = session.scalars(stmt).all()
+        return users
+    except NoResultFound:
+        return False
+
+def search_posts(s):
+    stmt = select(Post).where(Post.text.contains(s)).order_by(Post.timestamp.desc())
+
+    try:
+        posts = session.scalars(stmt).all()
+        return posts
+    except NoResultFound:
+        return False
     
 def exists_post():
     return False
@@ -168,7 +187,6 @@ def get_user_posts_before(user, post_id, n=5):
         posts = session.scalars(stmt).all()
         return posts
     except NoResultFound:
-        session.rollback()
         return False
 
 def get_latest_replies(post_id, n=7):
@@ -233,21 +251,36 @@ def unfollow(to_user, from_user):
     delete_follows(to_user, from_user, interaction)
     delete_interaction(to_user, from_user, interaction_type="follow")
 
+def is_following(from_user, to_user):
+    if from_user == "":
+        return False
+
+    stmt = select(Interaction).where(
+        Interaction.interaction_type == "follow", 
+        Interaction.from_user_id == from_user.id, 
+        Interaction.to_user_id == to_user.id)
+
+    try:
+        following = session.execute(stmt).one()
+        return True
+    except NoResultFound:
+        return False
+
 # insert a row into follows table
-def insert_follows(to_user, from_user, interaction):
+def insert_follows(from_user, to_user, interaction):
 
     follow = Follows(
         user_id = interaction.from_user_id,
         interaction_id = interaction.id,
         follows_user_id = interaction.to_user_id,
-        is_mutual = to_user.is_following(from_user),
+        is_mutual = is_following(from_user, to_user),
         timestamp = datetime.now()
     )
     # if user to be followed is followed by from user, set is_mutual = True
-    if (to_user.is_following(from_user)):
+    if is_following(from_user, to_user):
         stmt = select(Follows).where(
-            Follows.user_id == to_user.id,
-            Follows.follows_user_id == from_user.id
+            Follows.user_id == from_user.id,
+            Follows.follows_user_id == to_user.id
         )
         mutual = session.scalars(stmt).one()
         mutual.update(is_mutual = True)
@@ -255,12 +288,12 @@ def insert_follows(to_user, from_user, interaction):
     session.add(follow)
     session.commit()
 
-def delete_follows(to_user, from_user, interaction):
+def delete_follows(from_user, to_user, interaction):
     # if user to be followed is followed by from user, set is_mutual = False
-    if (to_user.is_following(from_user)):
+    if is_following(from_user, to_user):
         stmt = select(Follows).where(
-            Follows.user_id == to_user.id,
-            Follows.follows_user_id == from_user.id
+            Follows.user_id == from_user.id,
+            Follows.follows_user_id == to_user.id
         )
         mutual = session.scalars(stmt).one()
         mutual.update(is_mutual = False)
@@ -487,18 +520,6 @@ class User(Base):
             upload_collection(self, post, media_path_list)
         return post
 
-    def is_following(self, to_user):
-        stmt = select(Interaction).where(
-            Interaction.interaction_type == "follow", 
-            Interaction.from_user_id == self.id, 
-            Interaction.to_user_id == to_user.id)
-
-        try:
-            following = session.execute(stmt).one()
-            return True
-        except NoResultFound:
-            return False
-
     # get entire follow list of user (for get_posts_before_timeline function)
     def get_following(self):
         stmt = select(Follows.follows_user_id).where(
@@ -568,7 +589,7 @@ class User(Base):
     def get_followers(self):
         stmt = select(Follows.user_id).where(
             Follows.follows_user_id == self.id
-        )
+        ).order_by(Follows.timestamp.desc())
 
         try:
             followers = session.scalars(stmt).all()
@@ -650,6 +671,8 @@ class Post(Base):
         delete_interaction(self.user, user, post=self, interaction_type="like")
 
     def is_liked(self, user):
+        if user == "":
+            return False
 
         stmt = select(Interaction).where(
             Interaction.interaction_type == "like", 

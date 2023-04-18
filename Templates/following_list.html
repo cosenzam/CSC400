@@ -15,7 +15,7 @@
         {% if users %}
             {% set i = 0 %}
             {% for user in users %}
-                <div id="{{ following_list[i].interaction_id }}" class="card text-center me-auto" style="width: 18rem; height: 18rem; margin-bottom: 1%;">
+                <div id="{{ following_list[i].interaction_id }}" class="card text-center" style="width: 18rem; height: 18rem; margin-bottom: 1%; margin-left: 3%;">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px; margin: auto">
                         <img class="card-img-top img-cover" src="/static/images/kitten.jpg" alt="Card image cap">
                     </div>
@@ -25,9 +25,9 @@
                         <div class="card-bio-border"></div>
                     </a>
                     <p class="card-text card-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
-                    {% if not current_user.is_following(user) %}
+                    {% if not is_following(current_user, user) %}
                         <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Follow</button>
-                    {% elif current_user.is_following(user) %} 
+                    {% elif is_following(current_user, user) %} 
                         <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Unfollow</button>
                     {% endif %}
                     </div>

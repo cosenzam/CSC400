@@ -10,7 +10,7 @@ from models import Base, User, Post, Interaction, Media, MediaCollection, Follow
 from email_validator import validate_email, EmailNotValidError
 import models
 from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, 
-    get_latest_replies, get_latest_post, get_latest_posts, get_interaction)
+    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following)
 import os, os.path
 from pathlib import Path
 from werkzeug.utils import secure_filename
@@ -182,9 +182,9 @@ def user(dynamic_user):
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)
-        following_count = user_profile.get_following_count()
-        follower_count = user_profile.get_follower_count()
         if user_profile:
+            following_count = user_profile.get_following_count()
+            follower_count = user_profile.get_follower_count()
             postings = get_latest_posts(user_profile, end=7)
 
             if len(postings) > 0:
@@ -193,9 +193,11 @@ def user(dynamic_user):
                 last_post_id = 1
             if "user" in session:
                 current_user = get_user(user_name=session["user"])
+            else:
+                current_user = ""
 
             return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
-            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = current_user.is_following, last_post_id = last_post_id, 
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = is_following, last_post_id = last_post_id, 
             get_user = get_user, following_count = following_count, follower_count = follower_count, to_date_and_time = to_date_and_time)
         else:
             flash("User not found", "info")
@@ -349,7 +351,12 @@ def view_post(post_id):
     form = PostForm()
 
     post = get_post(post_id)
-    user = get_user(user_name = session["user"])
+
+    if "user" in session:
+        current_user = get_user(user_name = session["user"])
+    else:
+        current_user = ""
+
     if post != None:
         #print(post_id)
         replies = get_latest_replies(post_id = post.id)
@@ -377,18 +384,17 @@ def view_post(post_id):
                     flash("Text and Media Fields cannot both be blank!")
                     return redirect(url_for("view_post", post_id = post.id))
                 else:
-                    post.insert_reply(user, text)
+                    post.insert_reply(current_user, text)
                     return redirect(url_for("view_post", post_id = post.id))
-        else:
-            return redirect(url_for("login"))
     else:
         return redirect(url_for("home"))
 
-    return render_template("view_post.html", post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
+    return render_template("view_post.html", current_user = current_user, post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
         get_user = get_user, form = form, last_reply_id = last_reply_id, to_date_and_time = to_date_and_time)
 
 @app.route("/post/<post_id>/like")
 def like(post_id):
+
     if "user" in session:
 
         from_user = get_user(user_name = session["user"])
@@ -402,9 +408,7 @@ def like(post_id):
             return "unlike", 200
 
     else:
-        flash("You must be logged in to like", "info")
-        return redirect(url_for("login"))
-        #return redirect(request.referrer)
+        return "", 400
 
 @app.route("/recover_account", methods=["POST", "GET"])
 def recover_account():
@@ -459,20 +463,32 @@ def reset(token):
 
     return render_template('reset_password.html', form = form)
 
+# pass to base.html
+@app.context_processor
+def base():
+    form = SearchForm()
+    return dict(form = form)
+
 @app.route("/search/", methods=["GET", "POST"])
 def search():
     form = SearchForm()
+    users = []
+    posts = []
+    if "user" in session:
+        current_user = get_user(user_name=session["user"])
+    else:
+        current_user = ""
     if request.method == "POST" and form.validate_on_submit():
-        user_data = form.user_query.data
-        #text_data = form.text_query.data
-        if user_data == "":
-            flash("Fields cannot be blank!")
-            return redirect(url_for("search"))
+        text = form.search.data
+        print(text)
+        # do user serch from text
+        users = search_users(text)
+        posts = search_posts(text)
+        for user in users:
+            print(user.user_name+",")
         
-        elif exists_user(user_name=user_data):
-            return redirect(url_for("user", dynamic_user = user_data))
-        
-    return render_template("search.html", form = form)
+    return render_template("search.html", current_user = current_user, form = form, users = users, posts = posts, to_date_and_time = to_date_and_time, 
+    postDateFormat = postDateFormat, getPostRecency = getPostRecency, get_user = get_user)
 
 @app.route("/user/<dynamic_user>/follow")
 def follow_user(dynamic_user):
@@ -483,7 +499,7 @@ def follow_user(dynamic_user):
         else:
             from_user = get_user(user_name = session["user"])
             to_user = get_user(user_name = dynamic_user)
-            if not from_user.is_following(to_user):
+            if not is_following(from_user, to_user):
                 follow(to_user, from_user)
                 return "follow", 200
             else:
@@ -491,8 +507,7 @@ def follow_user(dynamic_user):
                 return "unfollow", 200
                 #return redirect(url_for("user", dynamic_user = dynamic_user))
     else:
-        flash("You must be logged in to follow", "info")
-        return redirect(url_for("login"))
+        return "", 400
 
 @app.route("/following")
 def following_list():
@@ -505,7 +520,7 @@ def following_list():
         if following_list:
             users = map(get_user, following_list)
 
-        return render_template("following_list.html", current_user = current_user, users = users, following_list = following_list)
+        return render_template("following_list.html", current_user = current_user, users = users, following_list = following_list, is_following = is_following)
 
     else:
         return redirect(url_for("login"))
@@ -520,7 +535,7 @@ def follower_list():
         if follower_list:
             users = map(get_user, follower_list)
 
-        return render_template("follower_list.html", current_user = current_user, users = users, follower_list = follower_list)
+        return render_template("follower_list.html", current_user = current_user, users = users, follower_list = follower_list, is_following = is_following)
     
     else:
         return redirect(url_for("login"))
