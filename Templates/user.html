@@ -99,7 +99,7 @@
 
 <!-- Initial user posts rendered on page load, any changes here should also be compared to js_functions -> ajax_get_posts() -->
 {% if posts %}
-    <div id="posts-container">
+    <div id="posts-container" style="padding-top: 0.5%;">
         {% for post in posts %}
         {% set user_name = get_user(id = post.user_id).user_name %}
         <div id="{{post.id}}" class="row justify-content-center post">
