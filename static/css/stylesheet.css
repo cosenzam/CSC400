@@ -10,6 +10,30 @@
   overflow: hidden;
 }
 
+.search-bio{
+  font-size: 16px;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow: hidden;
+  padding-left: 3%;
+}
+
+.search-user{
+  padding-bottom: .5%;
+}
+
+.search-user-name{
+  color:white; 
+  display: inline-block; 
+  vertical-align: middle;
+  margin-left: 3%;
+}
+
+.search-user:hover{
+  background-color:rgba(44, 44, 46, 0.836);
+  cursor: pointer;
+}
+
 .content-nav-pad{
   padding-top: 0.5%;
 }
@@ -61,7 +85,7 @@
 }
 
 .post{
-  padding-top: 1%;
+  padding-top: 0.5%;
   min-width: 100px;
 }
 
@@ -85,7 +109,7 @@
 }
 
 #name, #date{
-  padding-left: 2%;
+  margin-left: 3%;
 }
 
 #name:hover, #date:hover{
@@ -94,10 +118,41 @@
 }
 
 input, textarea{
-  background-color:#212529;
+  /*background-color:#212529; */
+  background-color: #313538;
+  /*
   border-bottom: solid;
   border-width: thin;
+  */
   color: #FFF;
+  border: none;
+  outline: none;
+  height: 35px;
+  width: 350px;
+}
+
+input:focus, textarea:focus{
+  outline: solid rgb(3, 172, 3) thin;
+  background-color: #1c1f20;
+}
+
+#search > input::placeholder{
+  color: white;
+}
+
+.search-bar{
+  background-color: #313538;
+  color: #FFF;
+  border: none;
+  outline: none;
+  height: 35px;
+  width: 250px;
+}
+
+#search > input:focus, textarea:focus{
+  background-color: #313538;
+  color: #FFF;
+  outline: solid rgb(3, 172, 3) thin;
 }
 
 .dropdown-menu-center {
@@ -117,6 +172,7 @@ input, textarea{
 
 .follow-btn{
   float: right;
+  margin-top: 2%;
 }
 
 label {
@@ -210,7 +266,7 @@ body, nav, .modal-content {
   border-color: rgb(66, 70, 80);
 }
 
-.border{
+.border, .border-start, .border-end{
   border-color: rgb(66, 70, 80) !important;
 }
 
@@ -225,6 +281,10 @@ body, nav, .modal-content {
 
 .nav-tabs {
   border-bottom: 0px solid transparent;
+  margin-left: auto; 
+  margin-right: auto; 
+  margin-bottom: 1%; 
+  margin-top: 1%;
 }
 
 .nav-tabs button.active {

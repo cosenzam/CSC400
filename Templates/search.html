@@ -16,26 +16,25 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs justify-content-center nav-fill" id="myTab" role="tablist" style="width: 35%; margin: auto;">
+    <ul class="nav nav-tabs justify-content-center nav-fill col-sm-4" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link btn active tabs-color text-white border" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">Users</button>
+        <button class="nav-link btn active tabs-color text-white border" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true" style="margin-left: -1%;">Users</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link btn tabs-color text-white border" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="profile" aria-selected="false">Posts</button>
+        <button class="nav-link btn tabs-color text-white border" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="profile" aria-selected="false" style="margin-left: 1%;">Posts</button>
     </li>
     </ul>
     <div class="tab-content" id="myTabContent">
     <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
         {% if users %}
             {% for user in users %}
-            <div class="row border justify-content-center" style="width: 35%; margin: auto;">
-                <div class="row border">
-                    <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px;">
+            <div class="row justify-content-center">
+                <div class="col-sm-4 search-user" onclick="window.location='/user/{{user.user_name}}'">
+                    <h5 class="search-user-name">{{user.user_name}}</h5>
+                    <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 60px; height: 60px; float: left; margin-top: 1%;">
                         <img class="img-cover" src="/static/images/kitten.jpg">
                     </div>
-                    <a class="text-center" href="{{ url_for('user', dynamic_user = user.user_name) }}" style="color:white; width: 10%; height: 5%;">
-                        <h5 id="user-link" style="color:white;">{{user.user_name}}</h5>
-                    </a>
+                    <p class="search-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
                 </div>
             </div>
             {% endfor %}

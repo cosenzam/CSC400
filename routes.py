@@ -49,9 +49,11 @@ def home():
     else:
         return redirect(url_for("login"))
 
-@app.route("/view")
-def view():
-    return render_template("view.html", values = db_session.query(User).all())
+# pass to base.html
+@app.context_processor
+def base():
+    form = SearchForm()
+    return dict(form = form)
 
 @app.route("/create_account/", methods=["POST", "GET"])
 def create_account():
@@ -239,6 +241,21 @@ def edit_profile():
             '''
 
         if request.method == "POST" and form.validate_on_submit():
+
+            if form.user_bio.data == "":
+                form.user_bio.data = None
+            if form.first_name.data == "":
+                form.first_name.data = None
+            if form.middle_name.data == "":
+                form.middle_name.data = None
+            if form.last_name.data == "":
+                form.last_name.data = None
+            if form.pronouns.data == "":
+                form.pronouns.data = None
+            if form.occupation.data == "":
+                form.occupation.data = None
+            if form.location.data == "":
+                form.location.data = None
 
             #profile is a user object, User.update() take kwargs for each of its fields.
             user.update(
@@ -462,12 +479,6 @@ def reset(token):
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', form = form)
-
-# pass to base.html
-@app.context_processor
-def base():
-    form = SearchForm()
-    return dict(form = form)
 
 @app.route("/search/", methods=["GET", "POST"])
 def search():

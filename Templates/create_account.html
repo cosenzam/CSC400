@@ -2,7 +2,7 @@
 {% block title %}Create Account{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
-    <div class="col-sm-4 text-center border">
+    <div class="col-sm-4 text-center">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
@@ -27,7 +27,7 @@
                     <a href="{{ url_for('login') }}" class="text-light">Log in</a>
                 </span>
             </div>
-            <button type="submit" class="btn button-color">Create Account</button>
+            <button type="submit" class="btn button-color" style="margin-top: 3%;">Create Account</button>
         </form>
     </div>
 </div>

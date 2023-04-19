@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Settings{% endblock %}
 {% block content %}
-<div class="row justify-content-center align-items-center vertical-height-100">
-    <div class="col-sm-4 text-center border">
+<div class="row justify-content-center">
+    <div class="col-sm-4 text-center">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
@@ -12,12 +12,12 @@
         {% endwith %}
         <h1 class="text-center"> Settings </h1>
 
-        <div style="padding-bottom: 1%;">
+        <div style="padding-bottom: 1%; padding-top: 5%;">
             <button type="button" class="btn button-color" data-bs-toggle="modal" data-bs-target="#emailModal">Change Email</button>
             <!-- Modal -->
             <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark text-light">
+                    <div class="modal-content border text-light">
                         <div class="modal-header">
                             <h5 class="modal-title" id="emailModalLabel">Change Email</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -27,7 +27,7 @@
                                 {{form.csrf_token}}
                                 <p>
                                     {{form.email.label}}
-                                    {{form.email(size=30)}}
+                                    {{form.email()}}
                                 </p>
                                 <div class="modal-footer">
                                     <button type="submit" class="btn button-color">Change Email</button>
@@ -39,12 +39,12 @@
             </div>
         </div>
 
-        <div>
+        <div style="padding-top: 3%;">
             <button type="button" class="btn button-color" data-bs-toggle="modal" data-bs-target="#passwordModal">Change Password</button>
             <!-- Modal -->
             <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark text-light">
+                    <div class="modal-content border text-light">
                         <div class="modal-header">
                             <h5 class="modal-title" id="passwordModalLabel">Change Password</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -54,15 +54,15 @@
                                 {{form.csrf_token}}
                                 <p>
                                     {{form.current_password.label}}
-                                    {{form.current_password(size=30)}}
+                                    {{form.current_password()}}
                                 </p>
                                 <p>
                                     {{form.password.label}}
-                                    {{form.password(size=30)}}
+                                    {{form.password()}}
                                 </p>
                                 <p>
                                     {{form.confirm.label}}
-                                    {{form.confirm(size=30)}}
+                                    {{form.confirm()}}
                                 </p>
                                 <div class="modal-footer">
                                     <button type="submit" class="btn button-color">Change Password</button>

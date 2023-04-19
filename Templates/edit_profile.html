@@ -2,7 +2,7 @@
 {% block title %}Edit Profile{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
-    <div class="col-sm-4 text-center border">
+    <div class="col-sm-6 text-center">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
@@ -15,38 +15,38 @@
             {{form.csrf_token}}
             <p>
                 {{form.user_bio.label}}
-                {{form.user_bio(id="text", size=30, oninput="countText()")}}
+                {{form.user_bio(id="text", oninput="countText()")}}
                 <br><label for="characters">Characters: </label>
                 <span id="characters"></span>
                 <span>/128</span>
             <p>
             <p> 
                 {{form.first_name.label}}
-                {{form.first_name(size=30)}}
+                {{form.first_name()}}
             </p>
             <p> 
                 {{form.middle_name.label}}
-                {{form.middle_name(size=30)}}
+                {{form.middle_name()}}
             </p>
             <p> 
                 {{form.last_name.label}}
-                {{form.last_name(size=30)}}
+                {{form.last_name()}}
             </p>
             <p> 
                 {{form.pronouns.label}}
-                {{form.pronouns(size=30)}}
+                {{form.pronouns()}}
             </p>
             <p> 
                 {{form.occupation.label}}
-                {{form.occupation(size=30)}}
+                {{form.occupation()}}
             </p>
             <p>
                 {{form.location.label}}
-                {{form.location(size=30)}}
+                {{form.location()}}
             </p>
             <p> 
                 {{form.date_of_birth.label}}
-                {{form.date_of_birth(size=30)}}
+                {{form.date_of_birth(class="text-center")}}
             </p>
             <button type="submit" class="btn button-color">Save Changes</button>
         </form>
