@@ -30,11 +30,11 @@
             {% for user in users %}
             <div class="row justify-content-center">
                 <div class="col-sm-4 search-user" onclick="window.location='/user/{{user.user_name}}'">
-                    <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 60px; height: 60px; float: left;">
+                    <h5 class="search-user-name">{{user.user_name}}</h5>
+                    <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 60px; height: 60px; float: left; margin-top: 1%;">
                         <img class="img-cover" src="/static/images/kitten.jpg">
                     </div>
-                    <h5 class="search-user-name">{{user.user_name}}</h5>
-                    <p class="search-bio" style="float: left;">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
+                    <p class="search-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
                 </div>
             </div>
             {% endfor %}

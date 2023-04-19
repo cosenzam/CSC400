@@ -9,7 +9,7 @@
     {% endif %}
 {% endwith %}
 <div class="row justify-content-center">
-    <div class="col-sm-4 media border profile-min-width">
+    <div class="col-sm-4 media border border-bottom-0 profile-min-width">
         {% if "user" not in session %}
             <!-- for a non logged in user-->
             <!-- Onclick event for open alert-->
@@ -34,7 +34,7 @@
                 </span>
             </h4>
             <span class="pronouns">
-                ({% if user_profile.pronouns != None %}{{user_profile.pronouns}}{% endif %})
+                {% if user_profile.pronouns != None %}({{user_profile.pronouns}}){% endif %}
             </span>
         </div>
     </div>

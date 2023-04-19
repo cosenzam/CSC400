@@ -15,7 +15,7 @@
   word-break: break-word;
   white-space: pre-wrap;
   overflow: hidden;
-  margin-top: 1%;
+  padding-left: 3%;
 }
 
 .search-user{
@@ -26,6 +26,7 @@
   color:white; 
   display: inline-block; 
   vertical-align: middle;
+  margin-left: 3%;
 }
 
 .search-user:hover{
@@ -117,10 +118,41 @@
 }
 
 input, textarea{
-  background-color:#212529;
+  /*background-color:#212529; */
+  background-color: #313538;
+  /*
   border-bottom: solid;
   border-width: thin;
+  */
   color: #FFF;
+  border: none;
+  outline: none;
+  height: 35px;
+  width: 350px;
+}
+
+input:focus, textarea:focus{
+  outline: solid rgb(3, 172, 3) thin;
+  background-color: #1c1f20;
+}
+
+#search > input::placeholder{
+  color: white;
+}
+
+.search-bar{
+  background-color: #313538;
+  color: #FFF;
+  border: none;
+  outline: none;
+  height: 35px;
+  width: 250px;
+}
+
+#search > input:focus, textarea:focus{
+  background-color: #313538;
+  color: #FFF;
+  outline: solid rgb(3, 172, 3) thin;
 }
 
 .dropdown-menu-center {

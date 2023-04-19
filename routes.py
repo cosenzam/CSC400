@@ -242,6 +242,21 @@ def edit_profile():
 
         if request.method == "POST" and form.validate_on_submit():
 
+            if form.user_bio.data == "":
+                form.user_bio.data = None
+            if form.first_name.data == "":
+                form.first_name.data = None
+            if form.middle_name.data == "":
+                form.middle_name.data = None
+            if form.last_name.data == "":
+                form.last_name.data = None
+            if form.pronouns.data == "":
+                form.pronouns.data = None
+            if form.occupation.data == "":
+                form.occupation.data = None
+            if form.location.data == "":
+                form.location.data = None
+
             #profile is a user object, User.update() take kwargs for each of its fields.
             user.update(
                 bio = form.user_bio.data,
