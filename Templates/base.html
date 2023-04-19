@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE HTML>
 <html>
     <head>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesheet.css') }}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
         <script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
         <title>{% block title %}{% endblock %}</title>
     </head>
     
@@ -20,7 +21,7 @@
               <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
                 {% if "user" in session %}
                 <li class="nav-item">
-                  <a class="nav-link active border-start border-end" aria-current="page" href="{{ url_for('home') }}">Home</a>
+                  <a class="nav-link active border-start" aria-current="page" href="{{ url_for('home') }}">Home</a>
                 </li>
                 <!--
                 <li class="nav-item">
@@ -28,18 +29,23 @@
                 </li>
                 -->
                 <li class="nav-item">
-                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('following_list') }}">Following</a>
+                  <a class="nav-link active" aria-current="page" href="{{ url_for('following_list') }}">Following</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('follower_list') }}">Followers</a>
+                  <a class="nav-link active" aria-current="page" href="{{ url_for('follower_list') }}">Followers</a>
                 </li>
               </ul>
+              &emsp;
               <ul class="nav navbar-nav me-auto search" style="margin-left: 1%;">
                 <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
                   {{ form.hidden_tag() }}
                   <input class="form-control me-2 text-center" type="search" placeholder="Search" aria-label="Search" name = "search">
                 </form>
               </ul>
+              <li>
+                <i class="bi-moon" id="toggleButton"></i>
+              </li>
+              &ensp;
               <ul class="nav navbar-nav acc-dropdown-pad">
                 <li class="nav navbar-nav nav-item">
                   <div class="dropdown">
@@ -58,6 +64,7 @@
 
             {% if "user" not in session %}
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                &ensp;
                 <ul class="nav navbar-nav justify-content-center me-auto search" style="margin-left: 6%;">
                   <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
                     {{ form.hidden_tag() }}
@@ -65,6 +72,9 @@
                   </form>
                 </ul>
                 <ul class="nav navbar-nav ms-auto mb-2 mb-lg-0">
+                  <li>
+                    <i class="bi-moon" id="toggleButton"></i>
+                  </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                   </li>

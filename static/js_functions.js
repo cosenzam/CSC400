@@ -339,3 +339,53 @@ if(window.location.href.includes('/following')){
 $(document).ready(function() {
   $("#loading").hide();
 });
+
+//toggle theme
+const icon = document.getElementById('toggleButton');
+const baseNavbar = document.querySelector('nav');
+const elements = document.querySelector('body');
+
+icon.addEventListener('click', function() {
+
+  this.classList.toggle('bi-moon');
+  var navv = document.querySelectorAll('.nav-link'), j;
+  var textv = document.querySelectorAll('.col-sm-4'), k;
+    
+  if (this.classList.toggle('bi-brightness-high-fill')) {
+
+    for (j = 0; j < navv.length; j++) {
+      navv[j].style.color = 'black';
+    }
+
+    for (k = 0; k < textv.length; k++) {
+      textv[k].style.color = 'black';
+      textv[k].style.transition = '2s';
+    }
+
+    baseNavbar.style.background = 'lightgrey';
+    elements.style.background = 'linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.15) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.40) 120%) #989898';
+    baseNavbar.style.transition = '2s';
+    elements.style.transition = '2s';
+    icon.style.color = 'black';
+    //implement localstorage so selected theme doesn't reset
+    }
+
+  else {
+
+    for (j = 0; j < navv.length; j++) {
+      navv[j].style.color = 'white';
+    }
+    for (k = 0; k < textv.length; k++) {
+      textv[k].style.color = 'white';
+      textv[k].style.transition = '2s';
+    }
+
+    baseNavbar.style.background = 'black';
+    elements.style.background = 'black';
+    baseNavbar.style.transition = '2s';
+    elements.style.transition = '2s';
+    icon.style.color = 'white';
+    localStorage.setItem('bi-moon',this.icon)
+    //implement localstorage so selected theme doesn't reset
+  }
+});

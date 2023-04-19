@@ -231,3 +231,9 @@ body, nav, .modal-content {
   background-color: rgba(44, 44, 46, 0.836) !important;
   border-bottom: 2px solid rgb(3, 172, 3) !important;
 }
+
+i {
+  font-size: 25px;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
