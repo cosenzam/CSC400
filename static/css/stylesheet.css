@@ -262,7 +262,8 @@ body, nav, .modal-content {
 }
 
 .button-color:hover{
-  background-color:rgb(6, 6, 7) !important;
+  background-color:white !important;
+  color: black !important;
   border-color: rgb(66, 70, 80);
 }
 
