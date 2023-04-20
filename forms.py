@@ -15,7 +15,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators = [InputRequired()])
 
 class UserProfileForm(FlaskForm):
-    user_bio = StringField('Bio', validators = [Optional(), Length(max = 128)])
+    user_bio = StringField('Bio', validators = [Optional(), Length(max = 180)])
     first_name = StringField('First name', validators = [Optional(), Length(min = 0, max = 128)])
     middle_name = StringField('Middle name', validators = [Optional(), Length(min = 0, max = 128)])
     last_name = StringField('Last name', validators = [Optional(), Length(min = 0, max = 128)])
@@ -33,7 +33,7 @@ class UserSettingsForm(FlaskForm):
     confirm  = PasswordField('Repeat Password')
 
 class PostForm(FlaskForm):
-    text = TextAreaField('Write a Post', validators = [Optional(), Length(max = 256)])
+    text = TextAreaField('Write a Post', validators = [Optional(), Length(max = 260)])
     media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'mp4'])])
 
 class RecoveryForm(FlaskForm):

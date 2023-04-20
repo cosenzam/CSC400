@@ -15,10 +15,7 @@
             {{form.csrf_token}}
             <p>
                 {{form.user_bio.label}}
-                {{form.user_bio(id="text", oninput="countText()")}}
-                <br><label for="characters">Characters: </label>
-                <span id="characters"></span>
-                <span>/128</span>
+                {{form.user_bio()}}
             </p>
             <p> 
                 {{form.first_name.label}}

@@ -1,12 +1,19 @@
 .user-name{
-  font-size: 24px;
+  font-size: 26px;
   }
 
 .bio{
+  padding-top: 0.5%;
   font-size: 16px;
   min-height: 80px !important;
   word-break: break-word;
   white-space: pre-wrap;
+  overflow: hidden;
+}
+
+.profile-info{
+  padding-top: 0.5%;
+  word-break: break-word;
   overflow: hidden;
 }
 
@@ -51,11 +58,8 @@
   min-width: 400px;
 }
 
-.profile-info{
+.profile-font-size-2{
   font-size: 16px;
-  min-height: 26px;
-  min-width: 100px;
-  overflow: hidden;
 }
 
 .login{
@@ -102,6 +106,11 @@
   min-width: 400px;
 }
 
+.post-format-view{
+  font-size: 16px;
+  min-width: 400px;
+}
+
 .post-icon{
   font-size: 20px;
   color: white;
@@ -111,6 +120,10 @@
 .post-button{
   padding-top: 0.5%;
   min-height: 60px;
+}
+
+.post-button-font{
+  font-size: 20px;
 }
 
 .post-modal-btn:hover{
@@ -143,11 +156,16 @@ input, textarea{
   outline: none;
   height: 35px;
   width: 350px;
+  resize: none;
 }
 
 input:focus, textarea:focus{
   outline: solid rgb(3, 172, 3) thin;
   background-color: #1c1f20;
+}
+
+label:hover{
+  cursor: text;
 }
 
 #search > input::placeholder{
@@ -166,6 +184,7 @@ input:focus, textarea:focus{
 #search > input:focus, textarea:focus{
   background-color: #313538;
   color: #FFF;
+  box-shadow: none;
   outline: solid rgb(3, 172, 3) thin;
 }
 
@@ -256,9 +275,18 @@ span.post-format:hover{
 body, nav, .modal-content {
   background-color:rgb(6, 6, 7);
 }
+/* font */
+body{
+  font-family: 'Arial';
+}
 
 .modal-header, .modal-footer{
   border-color: rgb(66, 70, 80) !important;
+}
+
+.modal-form{
+  height: 125px;
+  width: 350px;
 }
 
 .img-cover{
