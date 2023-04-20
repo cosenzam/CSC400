@@ -9,7 +9,7 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection, Follows
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, 
+from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, insert_media, exists_post, get_post, follow, unfollow, upload_collection, get_media,
     get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following)
 import os, os.path
 from pathlib import Path
@@ -19,6 +19,7 @@ from run import app
 from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
     get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time, get_home_ajax_data)
 import json
+
 
 #data base connections
 engine = db_connect()
@@ -85,6 +86,13 @@ def create_account():
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
 
+            #make directory specific to user upon creating acct
+            user_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))
+            os.mkdir(user_path)
+
+            profile_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id), "profile")
+            os.mkdir(profile_path)
+
             return redirect(url_for("user", dynamic_user = session["user"]))
     else:
         if "user" in session:
@@ -136,6 +144,7 @@ def user(dynamic_user):
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
+        user = get_user(id=user_id)
         user_profile = get_user(user_name=session["user"])
         current_user = user_profile
         following_count = current_user.get_following_count()
@@ -152,29 +161,31 @@ def user(dynamic_user):
         #files = media.file_path
 
         if request.method == "POST" and form.validate_on_submit():
-            
+
             text = form.text.data
             media = form.media.data
 
-            #if get_latest_post(user).timestamp == datetime.now():
-                #flash("Please wait before posting again", "info")
-                #return redirect(url_for("user", dynamic_user = session["user"]))
+            if text != None and media != None:
+                post = insert_post(user=user, text=text)
 
-            if media is not None:
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                if media != None:
 
-            if media == "" and text == "":
-                flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("create_post"))
+                    post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id), str(post.id))
+                    os.mkdir(post_path)
+
+                    file_paths = []
+                    filename = secure_filename(media.filename)
+                    path = media.save(os.path.join(post_path, filename))
+                    file_paths.append(str(path))
+
+                    upload_collection(user, post, file_paths)
+
+                flash("Post Created!")
+                return redirect(url_for("home"))
             
             else:
-                #insert_post() returns a post object
-
-                post = insert_post(user_profile, text)
-                #flash("Post Created!")
-                
-                return redirect(url_for("user", dynamic_user = session["user"]))
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("create_post"))
 
         return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
         getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
@@ -230,15 +241,23 @@ def edit_profile():
                 form.location.data = user.location
             if user.date_of_birth != None:
                 form.date_of_birth.data = user.date_of_birth
-
+                '''
+            if user.profile_picture != None:
+                form.profile_picture.data = user.profile_picture
+'''
             '''
-            if profile.profile_picture_media_id != "NULL":
-                form.profile_picture_media_id.data = profile.profile_picture_media_id
+
                 filename = secure_filename(profile.profile_picture_media_id.filename)
                 profile.profile_picture_media_id.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             '''
 
         if request.method == "POST" and form.validate_on_submit():
+            
+            media = form.profile_picture.data 
+
+            if media is not None:
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), 'profile', filename))
 
             #profile is a user object, User.update() take kwargs for each of its fields.
             user.update(
@@ -249,8 +268,8 @@ def edit_profile():
                 pronouns = form.pronouns.data,
                 occupation = form.occupation.data,
                 location = form.location.data,
-                date_of_birth = form.date_of_birth.data
-                #profile_picture_media_id = form.profile_picture_media_id.data
+                date_of_birth = form.date_of_birth.data,
+                profile_picture = filename
             )
 
             flash("Your profile has been updated", "info")
@@ -311,35 +330,28 @@ def create_post():
             text = form.text.data
             media = form.media.data
 
-            if text == "" and media == "":
-                flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("create_post"))
-            
-            else:
-                #we should have a way to get a list of filenames in the upload screen
-                #paths = []
-                #for file in media.filenames:
-                # filename = secure_filename(file)
-                # paths.append(filename)
-                # media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if text != None and media != None:
                 post = insert_post(user=user, text=text)
 
-                if media != "":
-                    file_paths = []
+                if media != None:
 
+                    post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id), str(post.id))
+                    os.mkdir(post_path)
+
+                    file_paths = []
                     filename = secure_filename(media.filename)
-                    path = Path(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id), filename))
+                    insert_media(user, filename, post)
+                    path = media.save(os.path.join(post_path, filename))
                     file_paths.append(str(path))
 
-                    #in loop should be path + filename
-                    with open(path, "w") as file:
-                        media.save(file)
+                    #upload_collection(user, post, file_paths)
 
-                    upload_collection(user, post, file_paths)
-
-                
                 flash("Post Created!")
                 return redirect(url_for("home"))
+            
+            else:
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("create_post"))
             
         return render_template("create_post.html", form = form)
     
@@ -389,8 +401,8 @@ def view_post(post_id):
     else:
         return redirect(url_for("home"))
 
-    return render_template("view_post.html", current_user = current_user, post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
-        get_user = get_user, form = form, last_reply_id = last_reply_id, to_date_and_time = to_date_and_time)
+    return render_template("view_post.html", current_user = current_user, post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat, get_media = get_media,
+        get_user = get_user, form = form, media = media, last_reply_id = last_reply_id, to_date_and_time = to_date_and_time)
 
 @app.route("/post/<post_id>/like")
 def like(post_id):

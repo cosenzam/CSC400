@@ -15,12 +15,24 @@
 <div id="replies-container">
     <div class="row justify-content-center post">
         <span class="col-sm-4 border" style="word-wrap: break-word">
-            <img src="/static/images/kitten.jpg" class="media-object" style="height:60px; width:60px; float:left">
+            {% if post_user.profile_picture == '' %} 
+                <img src="/static/images/kitten.jpg" class="media-object" style="height:80px; width:80px; float:left; border-radius: 20%">
+            {% else %}
+                <img src="/static/images/{{post_user.id}}/profile/{{post_user.profile_picture}}" class="media-object" style="height:80px; width:80px; float:left; border-radius: 35%">
+            {% endif %}
             <p style="text-align: left;">
                 <span id="name" onclick="window.location='/user/{{ post_user.user_name }}';event.stopPropagation();">{{post_user.user_name}}</span>
                 <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>
             </p>
             <br>
+            <!-- call get_media here
+            {% if post.filename %}
+                <br>
+                <img src="/static/images/{{post.user_id}}/{{post.id}}/{{media.filename}}" class="media-object" style="height:270px; width:300px; margin-left: auto">
+                <br>
+            {% endif %}
+            -->
+                <br>
             <p id="content-text">{{post.text}}</p>
             <div class="text-center">
                 <span style="float: left;">
