@@ -9,7 +9,11 @@
             {% endfor %}
         {% endif %}
 {% endwith %}
-<a id="back-btn" onclick="history.back()" class="bi bi-arrow-left-circle-fill" style="cursor: pointer; color: white;"></a>
+<div class="row justify-content-center">
+    <div class="col-sm-4">
+        <a id="back-btn" onclick="history.back()" class="bi bi-arrow-left-circle-fill" style="cursor: pointer; color: white;"></a>
+    </div>
+</div>
 {% set post_user = get_user(post.user_id) %}
 <!-- Parent Post -->
 <div id="replies-container">
