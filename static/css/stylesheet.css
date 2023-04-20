@@ -10,6 +10,10 @@
   overflow: hidden;
 }
 
+.search{
+  padding-right: 15%;
+}
+
 .search-bio{
   font-size: 16px;
   word-break: break-word;
@@ -58,6 +62,10 @@
   padding-bottom: 25%;
 }
 
+.forms-shadow{
+  box-shadow: 0 0 12px rgb(42, 48, 42);
+}
+
 .account{
   padding-bottom: 5%;
 }
@@ -101,7 +109,13 @@
 }
 
 .post-button{
-  padding-top: 1%;
+  padding-top: 0.5%;
+  min-height: 60px;
+}
+
+.post-modal-btn:hover{
+  background-color: #313538;
+  cursor: pointer;
 }
 
 #back-btn{
@@ -208,10 +222,6 @@ span.post-format:hover{
   background-color: rgba(40, 129, 129, 0.281);
 }
 
-.search{
-  padding-right: 8%;
-}
-
 .fill-red{
   color: red;
 }
@@ -291,4 +301,20 @@ body, nav, .modal-content {
 .nav-tabs button.active {
   background-color: rgba(44, 44, 46, 0.836) !important;
   border-bottom: 2px solid rgb(3, 172, 3) !important;
+}
+
+.nav-item > .active{
+  font-size: 20px;
+}
+
+.nav-link{
+  color: white;
+}
+
+.nav-item > .active:hover{
+  background-color: #313538;
+}
+
+.dropdown > button{
+  font-size: 18px;
 }

@@ -63,9 +63,7 @@
 </div>
 {% if dynamic_user == session["user"] %}
 <div class="row justify-content-center post-button">
-    <span class="col-sm-4 text-center">
-            <!-- Button trigger modal -->
-        <button type="button" class="btn button-color" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
+    <button type="button" class="col-sm-4 text-center btn button-color" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
         <!-- Modal -->
         <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -93,13 +91,13 @@
                 </div>
             </div>
         </div>
-    </span>
+    
 </div>
 {% endif %}
 
 <!-- Initial user posts rendered on page load, any changes here should also be compared to js_functions -> ajax_get_posts() -->
 {% if posts %}
-    <div id="posts-container" style="padding-top: 0.5%;">
+    <div id="posts-container">
         {% for post in posts %}
         {% set user_name = get_user(id = post.user_id).user_name %}
         <div id="{{post.id}}" class="row justify-content-center post">
