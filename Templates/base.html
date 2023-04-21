@@ -20,7 +20,7 @@
               <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
                 {% if "user" in session %}
                 <li class="nav-item">
-                  <a class="nav-link active border-start border-end" aria-current="page" href="{{ url_for('home') }}">Home</a>
+                   <a class="nav-link active border-start border-end bi bi-house-fill" aria-current="page" href="{{ url_for('home') }}"> Home</a>
                 </li>
                 <!--
                 <li class="nav-item">
@@ -28,13 +28,13 @@
                 </li>
                 -->
                 <li class="nav-item">
-                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('following_list') }}">Following</a>
+                  <a class="nav-link active border-end bi bi-chat-right-heart-fill" aria-current="page" href="{{ url_for('following_list') }}"> Following</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link active border-end" aria-current="page" href="{{ url_for('follower_list') }}">Followers</a>
+                  <a class="nav-link active border-end bi bi-chat-left-heart-fill" aria-current="page" href="{{ url_for('follower_list') }}"> Followers</a>
                 </li>
               </ul>
-              <ul class="nav navbar-nav me-auto search" style="margin-left: -1%;">
+              <ul class="nav navbar-nav me-auto search">
                 <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
                   {{ form.hidden_tag() }}
                   <input class="form-control me-2 text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
@@ -64,7 +64,7 @@
                     <input class="form-control me-2 text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
                   </form>
                 </ul>
-                <ul class="nav navbar-nav ms-auto mb-2 mb-lg-0">
+                <ul class="nav navbar-nav ms-auto mb-2 mb-lg-0 text-light">
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login') }}">Login</a>
                   </li>

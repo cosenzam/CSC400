@@ -135,6 +135,7 @@ def logout():
 @app.route("/user/<dynamic_user>/", methods=["POST", "GET"])
 def user(dynamic_user):
     # If page is the logged in user's, give appropriate permissions
+    dynamic_user = dynamic_user.lower()
     if "user" in session and dynamic_user == session["user"]:
         form = PostForm()
         user_id = session["user_id"]
@@ -180,7 +181,7 @@ def user(dynamic_user):
 
         return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
         getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
-        follower_count = follower_count, to_date_and_time = to_date_and_time)
+        follower_count = follower_count, to_date_and_time = to_date_and_time, is_following = is_following)
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)

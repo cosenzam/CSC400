@@ -2,7 +2,7 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <div class="row justify-content-center align-items-center vertical-height-100">
-    <div class="col-sm-4 text-center">
+    <div class="col-sm-4 text-center forms-shadow">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
@@ -18,7 +18,7 @@
             <p>{{form.password.label}}</p>
             <p>{{form.password(size=30)}}</p>
             <div>
-                <a href="{{ url_for('recover_account') }}" class="text-light">Forgot username or password?</a>
+                <a href="{{ url_for('recover_account') }}" class="text-light">Forgot your password?</a>
             </div>
             <button type="submit" class="btn button-color" style="margin-top: 3%;">Log In</button>
         </form>

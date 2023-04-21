@@ -8,8 +8,8 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<div>
-    <h1> Homepage </h1>
+<div class="row justify-content-center">
+    <h2 class="col-sm-4 justify-content-start">Home</h2>
 </div>
 
 <div id="posts-container">
@@ -50,7 +50,7 @@
     <!-- Loading Spinner -->
     <div id="loading-posts">
         <div id="trigger-{{ last_post_id }}" class="row justify-content-center">
-            <div class="col-sm-4 spinner-border" role="status"></div>
+            <div class="col-sm-4" style="height: 50px;"></div>
         </div>
     </div>
 

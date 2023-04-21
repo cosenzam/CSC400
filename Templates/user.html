@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{{dynamic_user}}'s Page{% endblock %}
 {% block content %}
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+<div class="row justify-content-center">
+    <div class="col-sm-4 text-center">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p>{{msg}}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+</div>
 <div class="row justify-content-center">
     <div class="col-sm-4 media border border-bottom-0 profile-min-width">
         {% if "user" not in session %}
@@ -28,11 +32,11 @@
         </div>
         
         <div class="media-body">
-            <h4 class="media-heading user-name">{{user_profile.user_name}}
-                <span class="pronouns profile-info" style="float: right;">
+            <div class="media-heading user-name">{{user_profile.user_name}}
+                <span class="pronouns profile-font-size-2" style="float: right;">
                     {{ following_count }} following {{ follower_count }} followers
                 </span>
-            </h4>
+            </div>
             <span class="pronouns">
                 {% if user_profile.pronouns != None %}({{user_profile.pronouns}}){% endif %}
             </span>
@@ -40,8 +44,8 @@
     </div>
 </div>
 <div class="row justify-content-center">
-    <span class="col-sm-4 profile-info border-start border-end">
-        {% if user_profile.first_name != None and user_profile.middle_name != None and user_profile.last_name != None %}
+    <span class="col-sm-4 border-start border-end profile-min-width profile-info">
+        {% if user_profile.first_name != None or user_profile.middle_name != None or user_profile.last_name != None %}
         <span class="bi bi-person-badge-fill">
             &nbsp;{% if user_profile.first_name != None %} {{user_profile.first_name}} {% endif %}
             {% if user_profile.middle_name != None %} {{user_profile.middle_name}} {% endif %}
@@ -63,13 +67,11 @@
 </div>
 {% if dynamic_user == session["user"] %}
 <div class="row justify-content-center post-button">
-    <span class="col-sm-4 text-center">
-            <!-- Button trigger modal -->
-        <button type="button" class="btn button-color" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
+    <button type="button" class="col-sm-4 text-center btn button-color profile-min-width post-button-font" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
         <!-- Modal -->
         <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content border text-light">
+                <div class="modal-content border text-light text-center">
                     <div class="modal-header">
                         <h5 class="modal-title" id="postModalLabel">Create Post</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -78,9 +80,9 @@
                         <form name="count_text" action="#" method="post" enctype="multipart/form-data">
                             {{form.csrf_token}}
                             <p>{{form.text.label}}</p>
-                            <p>{{form.text(id="text", size=20, oninput="countText()")}}</p>
+                            <p>{{form.text(id="text", size=20, oninput="countText()", class="modal-form")}}</p>
                             <p style="float: right;">
-                                <span id="characters"></span><span>/128</span>
+                                <span id="characters"></span><span>/260</span>
                             </p>
                             <br>
                             <p>{{form.media.label}}</p>
@@ -93,13 +95,13 @@
                 </div>
             </div>
         </div>
-    </span>
+    
 </div>
 {% endif %}
 
 <!-- Initial user posts rendered on page load, any changes here should also be compared to js_functions -> ajax_get_posts() -->
 {% if posts %}
-    <div id="posts-container" style="padding-top: 0.5%;">
+    <div id="posts-container">
         {% for post in posts %}
         {% set user_name = get_user(id = post.user_id).user_name %}
         <div id="{{post.id}}" class="row justify-content-center post">
@@ -148,10 +150,16 @@
         <!-- Loading Spinner -->
         <div id="loading-posts">
             <div id="trigger-{{ last_post_id }}" class="row justify-content-center">
-                <div class="col-sm-4 spinner-border" role="status"></div>
+                <div class="col-sm-4" style="height: 50px;"></div>
             </div>
         </div>
 
+    </div>
+{% else %}
+    <div class="row justify-content-center" style="padding-top: 3%;">
+        <h5 class="col-sm-4 text-center">
+            This user has no posts.
+        </h5>
     </div>
 {% endif %}
 {% endblock %}
