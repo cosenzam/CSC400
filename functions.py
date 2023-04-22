@@ -3,7 +3,7 @@ from flask_mail import Mail, Message
 from run import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 import models
-from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user, get_following_before, get_interaction
+from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user, get_following_before, get_interaction, get_likes_before, get_likes_by_id, get_user_by_likes_id, get_likes_by_post_id
 from email_validator import validate_email, EmailNotValidError
 from datetime import datetime, timedelta
 import json
@@ -155,6 +155,28 @@ def get_post_ajax_data(post_id):
             })
     return l
 
+def get_user_reply_ajax_data(post_id):
+    if "user" in session:
+        from_user = get_user(user_name = session["user"])
+    else:
+        from_user = ""
+    # get user id
+    user = get_user(id = get_post(post_id).user_id)
+    posts = get_user_posts_before(user, post_id, replies=True)
+    l = []
+    for post in posts:
+        l.append({
+            "post_id": post.id,
+            "user_name": user.user_name,
+            "timestamp": to_date_and_time(post.timestamp),
+            "recency": postDateFormat(post, getPostRecency(post)),
+            "text": post.text,
+            "is_liked": post.is_liked(from_user),
+            "like_count": post.like_count,
+            "reply_count": post.reply_count
+            })
+    return l
+
 def get_follow_ajax_data(interaction):
     user_id = get_user(user_name = session["user"]).id
     print(interaction.id)
@@ -181,4 +203,41 @@ def get_home_ajax_data(post_id):
             "like_count": post.like_count,
             "reply_count": post.reply_count
             })
+    return l
+
+def get_likes_ajax_data(likes_id):
+    if "user" in session:
+        from_user = get_user(user_name = session["user"])
+    else:
+        from_user = ""
+    print("user id: " +str(get_user_by_likes_id(likes_id)))
+    dynamic_user_id = get_user(get_user_by_likes_id(likes_id)).id
+    posts = []
+    likes_list = get_likes_before(likes_id, dynamic_user_id)
+    print("likes list: "+str(likes_list))
+
+    if len(likes_list) > 0:
+        last_likes_id = get_likes_by_post_id(likes_list[len(likes_list) - 1], dynamic_user_id)
+    else:
+        last_likes_id = 1
+
+    if likes_list:
+        posts = map(get_post, likes_list)
+
+    l = []
+    for post in posts:
+        user = get_user(id = post.user_id)
+        l.append({
+            "post_id": post.id,
+            "user_name": user.user_name,
+            "timestamp": to_date_and_time(post.timestamp),
+            "recency": postDateFormat(post, getPostRecency(post)),
+            "text": post.text,
+            "is_liked": post.is_liked(from_user),
+            "like_count": post.like_count,
+            "reply_count": post.reply_count,
+            "last_likes_id": last_likes_id
+            })
+    for obj in l:
+        print(obj["post_id"])
     return l

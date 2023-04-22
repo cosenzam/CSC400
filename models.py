@@ -143,7 +143,65 @@ def get_follow_interaction(to_user_id, from_user_id):
         return False
 
 
-    return interaction
+def get_likes_interaction(post_id, from_user_id):
+    
+    stmt = select(Interaction).where(
+        Interaction.interaction_type == "like",
+        Interaction.from_user_id == from_user_id,
+        Interaction.post_id == post_id,
+    )
+
+    try:
+        interaction = session.scalars(stmt).one()
+        print(interaction.from_user_id, interaction.to_user_id, interaction.interaction_type)
+        return interaction
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
+
+
+def get_likes_by_id(like_id):
+
+    stmt = select(Likes).where(
+        Likes.id == like_id
+    )
+
+    try:
+        like = session.scalars(stmt).one()
+        print(like)
+        return like
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
+
+def get_likes_by_post_id(post_id, user_id):
+
+    stmt = select(Likes.id).where(
+        Likes.likes_post_id == post_id,
+        Likes.user_id == user_id
+    )
+
+    try:
+        like = session.scalars(stmt).one()
+        print(like)
+        return like
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
+
+def get_user_by_likes_id(likes_id):
+
+    stmt = select(Likes.user_id).where(
+        Likes.id == likes_id
+    )
+
+    try:
+        like = session.scalars(stmt).one()
+        print(like)
+        return like
+    except NoResultFound:
+        print("No Interaction found.")
+        return False
 
 def get_latest_post(User, n=0, replies=False):
     posts = User.posts
@@ -171,25 +229,34 @@ def get_media(post=None, id=None):
     media_list = post.media_collection.media
     return media_list
 
-# get X amount of posts before designated post_id
-def get_user_posts_before(user, post_id, n=5):
+# get X amount of posts before designated post_id (JQuery)
+def get_user_posts_before(user, post_id, replies=False, n=10):
     post = get_post(post_id)
     
-
-    stmt = select(Post).where(
-        Post.user_id == user.id,
-        Post.parent_id == None,
-        Post.id != post.id,
-        Post.timestamp <= post.timestamp
-        ).limit(n).order_by(Post.timestamp.desc())
+    if replies:
+        stmt = select(Post).where(
+            Post.user_id == user.id,
+            Post.parent_id != None,
+            Post.id != post.id,
+            Post.timestamp <= post.timestamp
+            ).limit(n).order_by(Post.timestamp.desc())
+    else:    
+        stmt = select(Post).where(
+            Post.user_id == user.id,
+            Post.parent_id == None,
+            Post.id != post.id,
+            Post.timestamp <= post.timestamp
+            ).limit(n).order_by(Post.timestamp.desc())
     
     try:
         posts = session.scalars(stmt).all()
+        for post in posts:
+            print(post.id)
         return posts
     except NoResultFound:
         return False
 
-def get_latest_replies(post_id, n=7):
+def get_latest_replies(post_id, n=10):
 
     parent_post = get_post(post_id)
 
@@ -206,8 +273,54 @@ def get_latest_replies(post_id, n=7):
     except NoResultFound:
         return False
 
+def get_user_latest_replies(user_id, n=10):
+
+    stmt = select(Post).where(
+        Post.parent_id != None,
+        Post.user_id == user_id,
+        ).limit(n).order_by(Post.timestamp.desc())
+    
+    try:
+        replies = session.scalars(stmt).all()
+        #print(replies)
+        return replies
+    except NoResultFound:
+        return False
+
+def get_user_likes(user_id, n=10):
+
+    stmt = select(Likes.likes_post_id).where(
+        Likes.user_id == user_id
+    ).limit(n).order_by(Likes.timestamp.desc())
+
+    try:
+        likes = session.scalars(stmt).all()
+        for like in likes:
+            print(like)
+        return likes
+    except NoResultFound:
+        return False
+
+def get_likes_before(likes_id, user_id, n=10):
+
+    like = get_likes_by_id(likes_id)
+
+    stmt = select(Likes.likes_post_id).where(
+        Likes.id != like.id,
+        Likes.user_id == user_id,
+        Likes.timestamp <= like.timestamp
+    ).limit(n).order_by(Likes.timestamp.desc())
+
+    try:
+        likes = session.scalars(stmt).all()
+        print(likes)
+        return likes
+    except NoResultFound:
+        return False
+
+
 # get X amount of replies before post_id, for use with ajax and onscroll event
-def get_replies_before(post_id, n=5):
+def get_replies_before(post_id, n=10):
     child_post = get_post(post_id)
 
     stmt = select(Post).where(
@@ -286,6 +399,28 @@ def insert_follows(from_user, to_user, interaction):
         mutual.update(is_mutual = True)
 
     session.add(follow)
+    session.commit()
+
+# insert a row into follows table
+def insert_likes(from_user, to_post, interaction):
+
+    like = Likes(
+        user_id = interaction.from_user_id,
+        interaction_id = interaction.id,
+        likes_post_id = interaction.post_id,
+        timestamp = datetime.now()
+    )
+
+    session.add(like)
+    session.commit()
+
+def delete_likes(interaction):
+
+    stmt = delete(Likes).where(
+    Likes.interaction_id == interaction.id
+    )
+
+    session.execute(stmt)
     session.commit()
 
 def delete_follows(from_user, to_user, interaction):
@@ -431,6 +566,38 @@ class Interaction(Base):
 #     following_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 #     is_mutual: Mapped[bool] = mapped_column(default=False)
 #     timestamp: Mapped[datetime] = mapped_column(default=datetime.now())
+
+class Likes(Base):
+
+    __tablename__ = 'likes'
+
+    id: Mapped[int] = mapped_column(
+        unique = True,
+        primary_key = True,
+        nullable = False,
+        autoincrement = True
+    )
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    interaction_id: Mapped[int] = mapped_column(ForeignKey("interactions.id"))
+    likes_post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    timestamp: Mapped[datetime] = mapped_column(DATETIME(fsp=6), default=datetime.now())
+
+    users = relationship("User", foreign_keys=[user_id])
+    posts = relationship("Post", foreign_keys=[likes_post_id])
+
+    def update(self, **kwargs):
+
+        update_time = datetime.now()
+
+        fields = self.__table__.c.keys()[1:]
+        for key, value in kwargs.items():
+            if key in fields:
+                print("setting column: " + str(key) + " to value: " + str(value))
+                setattr(self, key, value)
+
+        self.last_updated = update_time
+        session.commit()
 
 class Follows(Base):
 
@@ -662,12 +829,15 @@ class Post(Base):
     #maps interaction as a "like" interaction FROM the user liking TO the author of the post.
     def like(self, user):
         self.like_count += 1
-        insert_interaction(self.user, user, post=self, interaction_type="like")
+        interaction = insert_interaction(self.user, user, post=self, interaction_type="like")
+        insert_likes(user, self, interaction)
     
     def unlike(self, user):
         self.like_count -= 1
         if self.like_count < 0:
             self.like_count = 0
+        interaction = get_likes_interaction(self.id, user.id)
+        delete_likes(interaction)
         delete_interaction(self.user, user, post=self, interaction_type="like")
 
     def is_liked(self, user):
