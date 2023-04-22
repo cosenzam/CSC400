@@ -31,6 +31,8 @@
 
 .search-user{
   padding-bottom: .5%;
+  max-height: 130px;
+  overflow: hidden;
 }
 
 .search-user-name{
@@ -355,4 +357,9 @@ body{
 
 .dropdown > button{
   font-size: 18px;
+}
+
+.col-sm-4{
+  min-width: 400px;
+  max-width: 700px;
 }
