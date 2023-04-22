@@ -10,14 +10,14 @@ from models import Base, User, Post, Interaction, Media, MediaCollection, Follow
 from email_validator import validate_email, EmailNotValidError
 import models
 from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, 
-    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following)
+    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following, get_user_latest_replies, get_user_likes, get_likes_by_id, get_likes_by_post_id)
 import os, os.path
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 from run import app
 from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
-    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time, get_home_ajax_data)
+    get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time, get_home_ajax_data, get_user_reply_ajax_data, get_likes_ajax_data)
 import json
 
 #data base connections
@@ -147,11 +147,31 @@ def user(dynamic_user):
         #a user object has a list of post objects made by that user
         #postings = user_profile.posts
         postings = get_latest_posts(user_profile, end=7)
+        replies = get_user_latest_replies(user_profile.id)
+
+        likes = []
+        likes_list = get_user_likes(user_profile.id)
+
+        if len(likes_list) > 0:
+            last_likes_id = get_likes_by_post_id(likes_list[len(likes_list) - 1], user_profile.id)
+            last_likes_post_id = likes_list[len(likes_list) - 1]
+        else:
+            last_likes_id = 1
+            last_likes_post_id = 1
+    
+        if likes_list:
+            likes = map(get_post, likes_list)
 
         if len(postings) > 0:
             last_post_id = postings[len(postings) - 1].id
         else:
             last_post_id = 1
+        
+        if len(replies) > 0:
+            last_reply_id = replies[len(replies) - 1].id
+        else:
+            last_reply_id = 1
+        
         #files = media.file_path
 
         if request.method == "POST" and form.validate_on_submit():
@@ -179,9 +199,9 @@ def user(dynamic_user):
                 
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
-        return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, form = form,
-        getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
-        follower_count = follower_count, to_date_and_time = to_date_and_time, is_following = is_following)
+        return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, replies = replies, likes = likes,
+        form = form, getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
+        follower_count = follower_count, to_date_and_time = to_date_and_time, is_following = is_following, last_reply_id = last_reply_id, last_likes_id = last_likes_id, last_likes_post_id = last_likes_post_id)
     # If page is not the logged in user's
     else:
         user_profile = exists_user(user_name=dynamic_user)
@@ -189,19 +209,39 @@ def user(dynamic_user):
             following_count = user_profile.get_following_count()
             follower_count = user_profile.get_follower_count()
             postings = get_latest_posts(user_profile, end=7)
+            replies = get_user_latest_replies(user_profile.id)
+
+            likes = []
+            likes_list = get_user_likes(user_profile.id)
+
+            if len(likes_list) > 0:
+                last_likes_id = get_likes_by_post_id(likes_list[len(likes_list) - 1], user_profile.id)
+                last_likes_post_id = likes_list[len(likes_list) - 1]
+            else:
+                last_likes_id = 1
+                last_likes_post_id = 1
+        
+            if likes_list:
+                likes = map(get_post, likes_list)
 
             if len(postings) > 0:
                 last_post_id = postings[len(postings) - 1].id
             else:
                 last_post_id = 1
+
+            if len(replies) > 0:
+                last_reply_id = replies[len(replies) - 1].id
+            else:
+                last_reply_id = 1
+                
             if "user" in session:
                 current_user = get_user(user_name=session["user"])
             else:
                 current_user = ""
 
-            return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, 
-            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = is_following, last_post_id = last_post_id, 
-            get_user = get_user, following_count = following_count, follower_count = follower_count, to_date_and_time = to_date_and_time)
+            return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, replies = replies, likes = likes,
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = is_following, last_post_id = last_post_id, last_likes_post_id = last_likes_post_id,
+            get_user = get_user, following_count = following_count, follower_count = follower_count, to_date_and_time = to_date_and_time, last_reply_id = last_reply_id, last_likes_id = last_likes_id)
         else:
             flash("User not found", "info")
             return redirect(url_for("home"))
@@ -557,6 +597,16 @@ def follower_list():
 def reply_scroll(reply_id):
     replies = get_reply_ajax_data(reply_id)
     return replies, 200
+
+@app.route("/user_reply_scroll/<reply_id>")
+def user_reply_scroll(reply_id):
+    replies = get_user_reply_ajax_data(reply_id)
+    return replies, 200
+
+@app.route("/likes_scroll/<likes_id>")
+def likes_scroll(likes_id):
+    likes = get_likes_ajax_data(likes_id)
+    return likes, 200
 
 @app.route("/post_scroll/<post_id>")
 def post_scroll(post_id):

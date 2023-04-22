@@ -2,7 +2,7 @@
 {% block title %}Followers List{% endblock %}
 {% block content %}
 <h1 class="text-center account">Followers List</h1>
-<div class="row justify-content-center" style="width: 60%; margin: auto;">
+<div class="row justify-content-center" style="width: 60%; margin: auto; min-width: 1000px;">
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -34,6 +34,12 @@
                 </div>
                 {% set i = i + 1 %}
             {% endfor %}
+        {% else %}
+            <div class="row justify-content-center" style="padding-top: 3%;">
+                <h5 class="col-sm-4 text-center">
+                    No followers to show.
+                </h5>
+            </div>
         {% endif %}
 </div>
 

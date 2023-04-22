@@ -33,9 +33,9 @@
                     {% if "user" not in session %}
                             <a id="like-{{ post.id }}" onclick="like_alert();event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
                     {% else %}
-                        {% if not post.is_liked(post_user) %}
+                        {% if not post.is_liked(current_user) %}
                             <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
-                        {% elif post.is_liked(post_user) %}
+                        {% elif post.is_liked(current_user) %}
                             <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
                         {% endif %}
                     {% endif %}
