@@ -2,6 +2,7 @@ import json
 import pathlib
 import os
 from sqlalchemy import create_engine
+import logging
 
 def db_connect():
 
@@ -38,7 +39,7 @@ def db_connect():
     # response = client.access_secret_version(request={"name": name})
 
     credentials = json.loads(os.environ["CLOUD_SQL_CREDENTIALS_SECRET"])
-    print(credentials)
+    logging.info(credentials)
 
     GCP_USER = credentials["GCP_USER"]
     GCP_PASS = credentials["GCP_PASS"]
