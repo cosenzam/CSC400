@@ -10,7 +10,7 @@ app.config['MAIL_USERNAME'] = 'cosenzam.test@gmail.com'
 app.config['MAIL_PASSWORD'] = 'vsfomiiiayzgusks'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-
+app.config['EXPLAIN_TEMPLATE_LOADING'] = True
 app.permanent_session_lifetime = timedelta(days = 7) # session length
 app.config['UPLOAD_FOLDER'] = 'static/images/'
 
