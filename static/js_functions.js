@@ -84,7 +84,7 @@ function ajax_get_replies(reply_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -136,7 +136,7 @@ function ajax_get_user_replies(reply_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -189,7 +189,7 @@ function ajax_get_posts(post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -244,7 +244,7 @@ function ajax_get_likes(likes_id, post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -261,7 +261,7 @@ function ajax_get_likes(likes_id, post_id) {
       before_id = post_id;
     }
     
-    if (result.len > 0){
+    if (result.length > 0){
       $('[id^="trigger_likes-"]').attr('id', "trigger_likes-"+result[i]["last_likes_id"]+"-"+post_id).appendTo("#"+before_id);
     }
     else{
@@ -302,7 +302,7 @@ function ajax_get_timeline(post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }

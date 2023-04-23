@@ -393,6 +393,7 @@ body{
 
 .nav-link-hover > .nav-item{
   font-size: 20px;
+  min-width: 100px;
 }
 
 .dropdown > button{

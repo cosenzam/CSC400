@@ -18,7 +18,7 @@
 
             {% if "user" in session %}
             <div class="collapse navbar-collapse container-fluid text-center" id="navbarSupportedContent">
-              <a class="navbar-brand" href="#">Logo</a>
+              <a class="navbar-brand" onclick="window.scrollTo(0, 0)">Logo</a>
               <ul class="nav navbar-nav nav-link-hover container-fluid">
                 <li class="nav-item">
                    <a class="nav-link active bi bi-house-fill" aria-current="page" href="{{ url_for('home') }}"> Home</a>
@@ -59,7 +59,7 @@
 
             {% if "user" not in session %}
             <div class="collapse navbar-collapse container-fluid justify-content-center text-center" id="navbarSupportedContent">
-              <a class="navbar-brand" href="#">Logo</a>
+              <a class="navbar-brand" onclick="window.scrollTo(0, 0)">Logo</a>
               <ul class="nav navbar-nav container-fluid justify-content-end" style="margin-left: 13.5%;">
                 <form id="search" method="POST" role="search" action="{{ url_for('search') }}">
                   {{ form.hidden_tag() }}
