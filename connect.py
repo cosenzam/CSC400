@@ -18,10 +18,17 @@ def db_connect():
     MYSQL_USER = credentials["MYSQL_USER"]
     MYSQL_PASS = credentials["MYSQL_PASS"]
     MYSQL_DB = credentials["MYSQL_DB"]
+    # if os.environ.get ('GAE_INSTANCE'):
+    # MYSQL_IP = credentials["MYSQL_IP"]
+    # MYSQL_PORT = credentials["MYSQL_PORT"]
+    # MYSQL_USER = credentials["MYSQL_USER"]
+    # MYSQL_PASS = credentials["MYSQL_PASS"]
+    # MYSQL_DB = credentials["MYSQL_DB"]
 
     engine = create_engine(
-        f"""mysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
+        f"""mysql+pymysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
         echo = False
     )
+
 
     return engine
