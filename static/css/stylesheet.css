@@ -293,6 +293,10 @@ nav{
   background-color:rgb(6, 6, 7);
 }
 
+.navbar-brand{
+  cursor: pointer;
+}
+
 /* font */
 body{
   font-family: 'Arial';
