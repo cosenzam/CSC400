@@ -9,45 +9,44 @@ def db_connect():
 
     #I'm storing it here, but keeping original functionality
 
-    
-    try:
-        if not pathlib.Path(path).is_file():
-            path = "secrets/credentials.json"
-        with open(path) as file:
-            credentials = json.load(file)
 
-        MYSQL_IP = credentials["MYSQL_IP"]
-        MYSQL_PORT = credentials["MYSQL_PORT"]
-        MYSQL_USER = credentials["MYSQL_USER"]
-        MYSQL_PASS = credentials["MYSQL_PASS"]
-        MYSQL_DB = credentials["MYSQL_DB"]
+    # if not pathlib.Path(path).is_file():
+    #     path = "secrets/credentials.json"
+    # with open(path) as file:
+    #     credentials = json.load(file)
 
-        engine = create_engine(
-            f"""mysql+pymysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
-            echo = False
-        )
+    # MYSQL_IP = credentials["MYSQL_IP"]
+    # MYSQL_PORT = credentials["MYSQL_PORT"]
+    # MYSQL_USER = credentials["MYSQL_USER"]
+    # MYSQL_PASS = credentials["MYSQL_PASS"]
+    # MYSQL_DB = credentials["MYSQL_DB"]
 
-    except:
-        from google.cloud import secretmanager
-        client = secretmanager.SecretManagerServiceClient()
+    # engine = create_engine(
+    #     f"""mysql+pymysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
+    #     echo = False
+    # )
 
 
-        project_id ="cryptic-saga-384600"
-        secret_id = "CLOUD_SQL_CREDENTIALS_SECRET"
-        version_id="lastest"
-        name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-        response = client.access_secret_version(request={"name": name})
+    from google.cloud import secretmanager
+    client = secretmanager.SecretManagerServiceClient()
 
-        credentials = json.load(response.payload.data.decode("UTF-8"))
 
-        GCP_USER = credentials["GCP_USER"]
-        GCP_PASS = credentials["GCP_PASS"]
-        GCP_DB = credentials["GCP_DB"]
-        GCP_CONNECTION_NAME = credentials["GCP_CONNECTION_NAME"]
+    project_id ="cryptic-saga-384600"
+    secret_id = "CLOUD_SQL_CREDENTIALS_SECRET"
+    version_id="lastest"
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+    response = client.access_secret_version(request={"name": name})
 
-        engine = create_engine(
-            f"""mysql+pymysql://{GCP_USER}:{GCP_PASS}@/{GCP_DB}?unix_socket=/cloudsql/{GCP_CONNECTION_NAME}""",
-            echo = False
-        )
+    credentials = json.load(response.payload.data.decode("UTF-8"))
+
+    GCP_USER = credentials["GCP_USER"]
+    GCP_PASS = credentials["GCP_PASS"]
+    GCP_DB = credentials["GCP_DB"]
+    GCP_CONNECTION_NAME = credentials["GCP_CONNECTION_NAME"]
+
+    engine = create_engine(
+        f"""mysql+pymysql://{GCP_USER}:{GCP_PASS}@/{GCP_DB}?unix_socket=/cloudsql/{GCP_CONNECTION_NAME}""",
+        echo = False
+    )
 
     return engine
