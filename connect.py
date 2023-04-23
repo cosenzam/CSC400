@@ -37,7 +37,7 @@ def db_connect():
     # name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
     # response = client.access_secret_version(request={"name": name})
 
-    credentials = json.load(os.environ["CLOUD_SQL_CREDENTIALS_SECRET"])
+    credentials = json.loads(os.environ["CLOUD_SQL_CREDENTIALS_SECRET"])
 
     GCP_USER = credentials["GCP_USER"]
     GCP_PASS = credentials["GCP_PASS"]
