@@ -27,7 +27,7 @@ def db_connect():
 
     if os.environ.get('GAE_INSTANCE'):
         engine = create_engine(
-            f"""mysql+pymysql://{GCP_USER}:{GCP_PASS}@/{GCP_DB}?unix_socket=/cloudsql/{GCP_CONNECTION_NAME}""",
+            f"""mysql+pymysql://{GCP_USER}:{GCP_PASS}@{GCP_DB}?unix_socket=/cloudsql/{GCP_CONNECTION_NAME}""",
             echo = False
         )
 
