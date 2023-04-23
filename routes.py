@@ -32,9 +32,10 @@ models.session = db_session
 # Create all database tables in models.pygi
 Base.metadata.create_all(engine)
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
     if "user" in session:
+        form = PostForm()
         current_user = get_user(user_name = session["user"])
         posts = current_user.get_following_posts(current_user.get_following())
         if len(posts) > 0:
@@ -44,7 +45,28 @@ def home():
         
         print(last_post_id)
 
-        return render_template("index.html", current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, postDateFormat = postDateFormat, 
+        if request.method == "POST" and form.validate_on_submit():
+            
+            text = form.text.data
+            media = form.media.data
+
+            if media is not None:
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            if media == "" and text == "":
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("create_post"))
+            
+            else:
+                #insert_post() returns a post object
+
+                post = insert_post(current_user, text)
+                #flash("Post Created!")
+            
+            return redirect(url_for("home"))
+
+        return render_template("index.html", form = form, current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, postDateFormat = postDateFormat, 
         last_post_id = last_post_id, to_date_and_time = to_date_and_time)
     else:
         return redirect(url_for("login"))
@@ -111,7 +133,7 @@ def login():
                 session["user"] = user_name
                 session["user_id"] = user.id
                 #flash("Login Success", "info")
-                return redirect(url_for("user", dynamic_user = session["user"]))
+                return redirect(url_for("home"))
             else:
                 flash("Incorrect Password", "info")
                 return redirect(url_for("login"))
@@ -121,7 +143,7 @@ def login():
     else:
         if "user" in session:
             #flash("Already Logged in", "info")
-            return redirect(url_for("user", dynamic_user = session["user"]))
+            return redirect(url_for("home"))
     return render_template("login.html", form = form)
 
 @app.route("/logout/")
@@ -174,6 +196,7 @@ def user(dynamic_user):
         
         #files = media.file_path
 
+        form = PostForm()
         if request.method == "POST" and form.validate_on_submit():
             
             text = form.text.data

@@ -9,50 +9,92 @@
     {% endif %}
 {% endwith %}
 <div class="row justify-content-center">
-    <h2 class="col-sm-4 justify-content-start">Home</h2>
+    <div class="col-sm-4 text-center">
+        <h1>Home</h1>
+        <br>
+        <br>
+    </div>
 </div>
 
-<div id="posts-container">
-    {% for post in posts %}
-    {% set user_name = get_user(id = post.user_id).user_name %}
-    <div id="{{post.id}}" class="row justify-content-center post">
-        <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
-            <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                <img class="img-cover" src="/static/images/kitten.jpg">
+<div class="row justify-content-center post-button">
+    <button type="button" class="col-sm-4 text-center btn button-color profile-min-width post-button-font" data-bs-toggle="modal" data-bs-target="#postModal">Create Post</button>
+        <!-- Modal -->
+        <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content border text-light text-center">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="postModalLabel">Create Post</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form name="count_text" action="#" method="post" enctype="multipart/form-data">
+                            {{form.csrf_token}}
+                            <p>{{form.text.label}}</p>
+                            <p>{{form.text(id="text", size=20, oninput="countText()", class="modal-form")}}</p>
+                            <p style="float: right;">
+                                <span id="characters"></span><span>/260</span>
+                            </p>
+                            <br>
+                            <p>{{form.media.label}}</p>
+                            <p>{{form.media(size=20)}}</p>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn button-color button-submit-shape">Submit Post</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <p style="text-align: left;">
-                <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name }}</span>
-                <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>
-            </p>
-            <br>
-            <p id="content-text">{{post.text}}</p>
-            <div class="text-center">
-                <span style="float: left;">
-                    {% if not post.is_liked(current_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
-                    {% elif post.is_liked(current_user) %}
-                        <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
-                    {% endif %}
-                    <span id="like_count-{{ post.id }}">{{ post.like_count }}</span>
-                </span>
-                <span>
-                    <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
-                    <span>0</span>
-                </span>
-                <span style="float: right">
-                    <a id="reply-btn" href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
-                    <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
-                </span>
+         </div>
+</div>
+
+{% if posts %}
+    <div id="posts-container">
+        {% for post in posts %}
+        {% set user_name = get_user(id = post.user_id).user_name %}
+        <div id="{{post.id}}" class="row justify-content-center post">
+            <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
+                <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
+                    <img class="img-cover" src="/static/images/kitten.jpg">
+                </div>
+                <p style="text-align: left;">
+                    <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name }}</span>
+                    <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>
+                </p>
+                <br>
+                <p id="content-text">{{post.text}}</p>
+                <div class="text-center">
+                    <span style="float: left;">
+                        {% if not post.is_liked(current_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart post-icon tt like" data-bs-placement="bottom" title="Like"></a>
+                        {% elif post.is_liked(current_user) %}
+                            <a id="like-{{ post.id }}" onclick="ajax_like('{{post.id}}');event.stopPropagation();" class="btn bi bi-heart-fill post-icon tt like fill-red" data-bs-placement="bottom" title="Unlike"></a>
+                        {% endif %}
+                        <span id="like_count-{{ post.id }}">{{ post.like_count }}</span>
+                    </span>
+                    <span>
+                        <span class="btn bi bi-arrow-repeat post-icon tt share" data-bs-placement="bottom" title="Share"></span>
+                        <span>0</span>
+                    </span>
+                    <span style="float: right">
+                        <a id="reply-btn" href="{{ url_for('view_post', post_id=post.id) }}" class="btn bi bi-reply post-icon tt reply" data-bs-placement="bottom" title="Reply"></a>
+                        <span id="reply_count-{{ post.id }}">{{ post.reply_count }}</span>
+                    </span>
+                </div>
+            </span>
+        </div>
+        {% endfor %}
+        <!-- Loading Spinner -->
+        <div id="loading-posts">
+            <div id="trigger-{{ last_post_id }}" class="row justify-content-center">
+                <div class="col-sm-4" style="height: 50px;"></div>
             </div>
-        </span>
-    </div>
-    {% endfor %}
-    <!-- Loading Spinner -->
-    <div id="loading-posts">
-        <div id="trigger-{{ last_post_id }}" class="row justify-content-center">
-            <div class="col-sm-4" style="height: 50px;"></div>
         </div>
     </div>
-
-</div>
+{% else %}
+    <div class="row justify-content-center" style="margin-top: 3%;">
+        <h5 class="col-sm-4 text-center">
+            No posts to show.
+        </h5>
+    </div>
+{% endif %}
 {% endblock %}
