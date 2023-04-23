@@ -33,7 +33,7 @@ def db_connect():
 
     project_id ="cryptic-saga-384600"
     secret_id = "CLOUD_SQL_CREDENTIALS_SECRET"
-    version_id="lastest"
+    version_id="latest"
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
     response = client.access_secret_version(request={"name": name})
 
