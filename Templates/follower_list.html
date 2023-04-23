@@ -26,9 +26,9 @@
                     </a>
                     <p class="card-text card-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
                     {% if not is_following(current_user, user) %}
-                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Follow</button>
+                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color button-submit-shape">Follow</button>
                     {% elif is_following(current_user, user) %} 
-                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color">Unfollow</button>
+                        <button id="follow-{{user.user_name}}" onclick="ajax_follow('{{user.user_name}}')" class="btn button-color button-submit-shape">Unfollow</button>
                     {% endif %}
                     </div>
                 </div>

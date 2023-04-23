@@ -9,18 +9,19 @@
     </head>
     
     <body class="text-light" onload="countText()">
-      <nav class="nav navbar navbar-dark navbar-expand-lg sticky-top border-bottom border-light d-flex">
+      <nav class="nav navbar navbar-dark navbar-expand-lg sticky-top border-bottom">
           <div class="container-fluid">
-            <a class="navbar-brand" href="#">Logo</a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <ul class="nav navbar-nav me-auto mb-2 mb-lg-0">
-                {% if "user" in session %}
+            {% if "user" in session %}
+            <div class="collapse navbar-collapse container-fluid text-center" id="navbarSupportedContent">
+              <a class="navbar-brand" onclick="window.scrollTo(0, 0)">Logo</a>
+              <ul class="nav navbar-nav nav-link-hover container-fluid">
                 <li class="nav-item">
-                   <a class="nav-link active border-start border-end bi bi-house-fill" aria-current="page" href="{{ url_for('home') }}"> Home</a>
+                   <a class="nav-link active bi bi-house-fill" aria-current="page" href="{{ url_for('home') }}"> Home</a>
                 </li>
                 <!--
                 <li class="nav-item">
@@ -28,22 +29,22 @@
                 </li>
                 -->
                 <li class="nav-item">
-                  <a class="nav-link active border-end bi bi-chat-right-heart-fill" aria-current="page" href="{{ url_for('following_list') }}"> Following</a>
+                  <a class="nav-link active bi bi-chat-right-heart-fill" aria-current="page" href="{{ url_for('following_list') }}"> Following</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link active border-end bi bi-chat-left-heart-fill" aria-current="page" href="{{ url_for('follower_list') }}"> Followers</a>
+                  <a class="nav-link active bi bi-chat-left-heart-fill" aria-current="page" href="{{ url_for('follower_list') }}"> Followers</a>
                 </li>
               </ul>
-              <ul class="nav navbar-nav me-auto search">
-                <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
+              <ul class="nav navbar-nav search container-fluid justify-content-center">
+                <form id="search" method="POST" role="search" action="{{ url_for('search') }}">
                   {{ form.hidden_tag() }}
-                  <input class="form-control me-2 text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
+                  <input class="form-control text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
                 </form>
               </ul>
-              <ul class="nav navbar-nav acc-dropdown-pad">
+              <ul class="nav navbar-nav acc-dropdown-pad container-fluid justify-content-end">
                 <li class="nav navbar-nav nav-item">
                   <div class="dropdown">
-                    <button class="btn button-color dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Account</button>
+                    <button class="btn button-color dropdown-toggle account-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">Account</button>
                     <ul class="dropdown-menu dropdown-menu-center">
                       <li><a class="dropdown-item" href="{{ url_for('user', dynamic_user = session['user']) }}">My Profile</a></li>
                       <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}">Edit Profile</a></li>
@@ -53,27 +54,29 @@
                   </div>
                 </li>
               </ul>
-              {% endif %}
             </div>
+            {% endif %}
 
             {% if "user" not in session %}
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="nav navbar-nav justify-content-center me-auto search" style="margin-left: 6%;">
-                  <form id="search" method="POST" class="d-flex" role="search" action="{{ url_for('search') }}">
-                    {{ form.hidden_tag() }}
-                    <input class="form-control me-2 text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
-                  </form>
-                </ul>
-                <ul class="nav navbar-nav ms-auto mb-2 mb-lg-0 text-light">
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
-                  </li>
-                </ul>
-              </div>
-            {% endif %}
+            <div class="collapse navbar-collapse container-fluid justify-content-center text-center" id="navbarSupportedContent">
+              <a class="navbar-brand" onclick="window.scrollTo(0, 0)">Logo</a>
+              <ul class="nav navbar-nav container-fluid justify-content-end" style="margin-left: 13.5%;">
+                <form id="search" method="POST" role="search" action="{{ url_for('search') }}">
+                  {{ form.hidden_tag() }}
+                  <input class="form-control text-center search-bar" type="search" placeholder="Search" aria-label="Search" name="search">
+                </form>
+              </ul>
+              <ul class="nav navbar-nav text-light container-fluid justify-content-end nav-link-hover">
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('create_account') }}">Create account</a>
+                </li>
+              </ul>
+            </div>
+              {% endif %}
+
           </div>
         </nav>
 
@@ -81,7 +84,7 @@
       <div id="main" class="container-fluid content-nav-pad">
         <!-- loading spinner -->
         <div class="position-absolute top-50 start-50 translate-middle">
-          <div id="loading" class="col-sm-4 spinner-border" role="status"></div>
+          <div id="loading" class="spinner-border" role="status"></div>
         </div>
         {% block content %}
         {% endblock %}

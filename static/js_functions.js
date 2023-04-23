@@ -9,9 +9,9 @@ function countText() {
   }
 
 function ajax_follow(dynamic_user) {
-  console.log(dynamic_user);
+  //console.log(dynamic_user);
   $.ajax({url: "/user/" + dynamic_user + "/follow", success: function(result){
-    console.log(result);
+    //console.log(result);
     if (result == "follow") {
       $("#follow-" + dynamic_user).text("Unfollow");
     } else if (result == "unfollow"){
@@ -25,9 +25,9 @@ function follow_alert(){
 }
 
 function ajax_like(post_id) {
-  console.log(post_id);
+  //console.log(post_id);
   $.ajax({url: "/post/" + post_id + "/like", success: function(result){
-    console.log(result);
+    //console.log(result);
     if (result == "like") {
       //console.log(result);
       $("#like-" + post_id).attr('data-bs-original-title', 'Unlike')
@@ -59,7 +59,7 @@ function reply_alert(){
 }
 
 function ajax_get_replies(reply_id) {
-  console.log(reply_id);
+  //console.log(reply_id);
   $.ajax({url: "/reply_scroll/" + reply_id, 
   success: function(result){
     //console.log(result);
@@ -84,7 +84,7 @@ function ajax_get_replies(reply_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -104,7 +104,7 @@ function ajax_get_replies(reply_id) {
     $('[id^="trigger-"]').attr('id', "trigger-"+before_id).appendTo("#"+before_id);
 
     if (result.length < posts_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger-"]').remove();
     }
   }
@@ -112,7 +112,7 @@ function ajax_get_replies(reply_id) {
 }
 
 function ajax_get_user_replies(reply_id) {
-  console.log(reply_id);
+  //console.log(reply_id);
   $.ajax({url: "/user_reply_scroll/" + reply_id, 
   success: function(result){
     //console.log(result);
@@ -136,7 +136,7 @@ function ajax_get_user_replies(reply_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -156,7 +156,7 @@ function ajax_get_user_replies(reply_id) {
     $('[id^="trigger_replies-"]').attr('id', "trigger_replies-"+before_id).appendTo("#"+before_id);
 
     if (result.length < posts_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger_replies-"]').remove();
     }
   }
@@ -164,7 +164,7 @@ function ajax_get_user_replies(reply_id) {
 }
 
 function ajax_get_posts(post_id) {
-  console.log(post_id);
+  //console.log(post_id);
   $.ajax({url: "/post_scroll/" + post_id,
   success: function(result){
     //console.log(result);
@@ -189,7 +189,7 @@ function ajax_get_posts(post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -209,7 +209,7 @@ function ajax_get_posts(post_id) {
     $('[id^="trigger_posts-"]').attr('id', "trigger_posts-"+before_id).appendTo("#"+before_id);
 
     if (result.length < posts_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger_posts-"]').remove();
     }
   }
@@ -217,11 +217,11 @@ function ajax_get_posts(post_id) {
 }
 
 function ajax_get_likes(likes_id, post_id) {
-  console.log(likes_id);
-  console.log(post_id)
+  //console.log(likes_id);
+  //console.log(post_id)
   $.ajax({url: "/likes_scroll/" + likes_id,
   success: function(result){
-    console.log(result);
+    //console.log(result);
     let before_id = post_id;
     let posts_to_load = 10;
     for (i in result){
@@ -236,7 +236,7 @@ function ajax_get_likes(likes_id, post_id) {
       //console.log(post_id, like_count);
 
       var new_div = $("#"+before_id).clone();
-      console.log(new_div.id);
+      //console.log(new_div.id);
       new_div.attr('id', post_id)
       new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
       //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
@@ -244,7 +244,7 @@ function ajax_get_likes(likes_id, post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -261,7 +261,7 @@ function ajax_get_likes(likes_id, post_id) {
       before_id = post_id;
     }
     
-    if (result.len > 0){
+    if (result.length > 0){
       $('[id^="trigger_likes-"]').attr('id', "trigger_likes-"+result[i]["last_likes_id"]+"-"+post_id).appendTo("#"+before_id);
     }
     else{
@@ -269,7 +269,7 @@ function ajax_get_likes(likes_id, post_id) {
     }
 
     if (result.length < posts_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger_likes-"]').remove();
     }
   }
@@ -277,7 +277,7 @@ function ajax_get_likes(likes_id, post_id) {
 }
 
 function ajax_get_timeline(post_id) {
-  console.log(post_id);
+  //console.log(post_id);
   $.ajax({url: "/home_scroll/" + post_id, 
   success: function(result){
     //console.log(result);
@@ -302,7 +302,7 @@ function ajax_get_timeline(post_id) {
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
 
-      if (is_liked === false){
+      if (is_liked == false){
         new_div.find("#like-"+before_id).attr({'id': "like-"+post_id, 'onclick': "ajax_like("+post_id+");event.stopPropagation();", 'data-bs-placement': "bottom", 'title': "Like"})
         .removeClass().addClass("btn bi bi-heart post-icon tt like").tooltip('update');
       }
@@ -322,7 +322,7 @@ function ajax_get_timeline(post_id) {
     $('[id^="trigger-"]').attr('id', "trigger-"+before_id).appendTo("#"+before_id);
 
     if (result.length < posts_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger-"]').remove();
     }
   }
@@ -330,10 +330,10 @@ function ajax_get_timeline(post_id) {
 }
 
 function ajax_get_follows(interaction_id) {
-  console.log(interaction_id);
+  //console.log(interaction_id);
   $.ajax({url: "/follow_scroll/" + interaction_id, 
   success: function(result){
-    console.log(result)
+    //console.log(result)
     let before_id = interaction_id;
     let follows_to_load = 5
 
@@ -343,7 +343,7 @@ function ajax_get_follows(interaction_id) {
     }
 
     if (result.length < follows_to_load){
-      console.log(result.length);
+      //console.log(result.length);
       $('[id^="trigger-"]').remove();
     }
   }
@@ -357,9 +357,9 @@ if(window.location.href.includes('/post/')){
     const observer = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_replies((el.id).toString().slice(8));
-            console.log(el.id)
+            //console.log(el.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
 
@@ -374,9 +374,9 @@ if(page == '/' || page == '/default.aspx'){
     const observer = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_timeline((el.id).toString().slice(8));
-            console.log(el.id)
+            //console.log(el.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
 
@@ -392,9 +392,9 @@ if(window.location.href.includes('/user/') && !window.location.href.includes('/f
     const observer1 = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_posts((el1.id).toString().slice(14));
-            console.log(el1.id)
+            //console.log(el1.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
   observer1.observe(el1);
@@ -403,12 +403,12 @@ if(window.location.href.includes('/user/') && !window.location.href.includes('/f
     const observer2 = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             var [trigger, likes_id, post_id] = (el2.id).split('-');
-            console.log(likes_id)
-            console.log(post_id)
+            //console.log(likes_id)
+            //console.log(post_id)
             ajax_get_likes(likes_id, post_id);
-            console.log(el2.id)
+            //console.log(el2.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
   observer2.observe(el2);
@@ -417,9 +417,9 @@ if(window.location.href.includes('/user/') && !window.location.href.includes('/f
     const observer3 = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_user_replies((el3.id).toString().slice(16));
-            console.log(el3.id)
+            //console.log(el3.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
   observer3.observe(el3);
@@ -432,9 +432,9 @@ if(window.location.href.includes('/following')){
     const observer = new IntersectionObserver((entries) => {
         if(entries[0].isIntersecting){
             ajax_get_follows((el3.id).toString().slice(8));
-            console.log(el.id)
+            //console.log(el.id)
         } else {
-            console.log("not visible");
+            //console.log("not visible");
         }
     });
 
