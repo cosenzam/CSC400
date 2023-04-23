@@ -1,6 +1,6 @@
 from flask import Flask, url_for, session, flash
 from flask_mail import Mail, Message
-from run import app
+from main import app
 from itsdangerous import URLSafeTimedSerializer as Serializer, SignatureExpired
 import models
 from models import get_replies_before, get_user, get_user_posts_before, get_post, exists_user, get_following_before, get_interaction, get_likes_before, get_likes_by_id, get_user_by_likes_id, get_likes_by_post_id
