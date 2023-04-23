@@ -1,4 +1,6 @@
 from flask import Flask, request, abort
+import logging
+import os
 from datetime import timedelta, datetime, time
 
 app = Flask(__name__, template_folder='templates')
@@ -18,4 +20,5 @@ from routes import *
 
 
 if __name__ == "__main__":
+    logging.info(os.getcwd())
     app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
