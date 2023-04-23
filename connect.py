@@ -39,12 +39,11 @@ def db_connect():
     # response = client.access_secret_version(request={"name": name})
 
     credentials = json.loads(os.environ["CLOUD_SQL_CREDENTIALS_SECRET"])
-    logging.info(credentials)
 
     GCP_USER = credentials["GCP_USER"]
     GCP_PASS = credentials["GCP_PASS"]
     GCP_DB = credentials["GCP_DB"]
-    GCP_CONNECTION_NAME = credentials["GCP_CONNECTION_NAME"]
+    GCP_CONNECTION_NAME = credentials["GCP_CONNECTON_NAME"]
 
     engine = create_engine(
         f"""mysql+pymysql://{GCP_USER}:{GCP_PASS}@/{GCP_DB}?unix_socket=/cloudsql/{GCP_CONNECTION_NAME}""",
