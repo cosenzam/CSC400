@@ -18,7 +18,7 @@
 }
 
 .search{
-  padding-right: 15%;
+  margin-left: -2%;
 }
 
 .search-bio{
@@ -57,7 +57,7 @@
 }
 
 .profile-min-width{
-  min-width: 400px;
+  min-width: 480px;
 }
 
 .profile-font-size-2{
@@ -76,6 +76,12 @@
   padding-bottom: 5%;
 }
 
+.account-btn{
+  height: 45px;
+  width: 120px;
+  font-size: 20px !important;
+}
+
 .login-form{
   margin-bottom: 30%;
 }
@@ -85,17 +91,15 @@
 }
 
 .vertical-height-100{
-  height: calc(100vh - 70px);
-}
-
-.acc-dropdown-pad{
-  padding-right: 1%;
+  height: calc(100vh - 75px);
 }
 
 .dropdown-menu{
   min-width: 1rem;
   background-color: white;
   border-color: rgb(66, 70, 80);
+  width: 120px;
+  font-size: 18px;
 }
 
 .post{
@@ -105,12 +109,12 @@
 
 .post-format{
   font-size: 16px;
-  min-width: 400px;
+  min-width: 480px;
 }
 
 .post-format-view{
   font-size: 16px;
-  min-width: 400px;
+  min-width: 480px;
 }
 
 .post-icon{
@@ -179,8 +183,9 @@ label:hover{
   color: #FFF;
   border: none;
   outline: none;
-  height: 35px;
-  width: 250px;
+  height: 45px;
+  width: 275px;
+  font-size: 18px;
 }
 
 #search > input:focus, textarea:focus{
@@ -277,6 +282,11 @@ span.post-format:hover{
 body, nav, .modal-content {
   background-color:rgb(6, 6, 7);
 }
+
+nav{
+  height: 75px;
+}
+
 /* font */
 body{
   font-family: 'Arial';
@@ -300,6 +310,13 @@ body{
 .button-color{
   background-color: rgb(3, 172, 3) !important;
   color: white !important;
+}
+
+.button-submit-shape{
+  height: 40px;
+  min-width: 100px;
+  border-radius: 25px;
+  font-size: 18px;
 }
 
 .button-color:hover{
@@ -327,7 +344,7 @@ body{
   margin-right: auto; 
   margin-bottom: 1%; 
   margin-top: 1%;
-  min-width: 400px;
+  min-width: 480px;
 }
 
 .nav-tabs-profile {
@@ -335,7 +352,7 @@ body{
   margin-left: auto; 
   margin-right: auto; 
   margin-top: 1%;
-  min-width: 400px;
+  min-width: 480px;
 }
 
 .nav-tabs button.active {
@@ -355,11 +372,47 @@ body{
   background-color: #313538;
 }
 
+.nav-link-hover > .nav-item{
+  padding-left: 1%;
+}
+
+.nav-link-hover > .nav-item > a{
+  border-radius: 25px;
+}
+
+.nav-link-hover > .nav-item > a:hover{
+  border-radius: 25px;
+  background-color: #313538;
+}
+
+.nav-link-hover > .nav-item{
+  font-size: 20px;
+}
+
 .dropdown > button{
   font-size: 18px;
 }
 
 .col-sm-4{
-  min-width: 400px;
-  max-width: 700px;
+  min-width: 480px;
+  max-width: 690px;
 }
+
+/* custom scrollbar
+
+*::-webkit-scrollbar {
+  width: 14px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(175, 175, 175);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color:  rgba(175, 175, 175, 0.274);
+}
+*/

@@ -17,12 +17,12 @@
         {% if "user" not in session %}
             <!-- for a non logged in user-->
             <!-- Onclick event for open alert-->
-            <button id="follow-{{dynamic_user}}" onclick="follow_alert()" class="btn button-color follow-btn">Follow</button>
+            <button id="follow-{{dynamic_user}}" onclick="follow_alert()" class="btn button-color follow-btn button-submit-shape">Follow</button>
         {% else %}
             {% if session["user"] != dynamic_user and not is_following(current_user, user_profile) %}
-                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Follow</button>
+                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn button-submit-shape">Follow</button>
             {% elif session["user"] != dynamic_user and is_following(current_user, user_profile) %} 
-                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn">Unfollow</button>
+                <button id="follow-{{dynamic_user}}" onclick="ajax_follow('{{dynamic_user}}')" class="btn button-color follow-btn button-submit-shape">Unfollow</button>
             {% endif %}
         {% endif %}
         <div class="align-self-center" style="padding-top: 2%;">
@@ -88,7 +88,7 @@
                             <p>{{form.media.label}}</p>
                             <p>{{form.media(size=20)}}</p>
                             <div class="modal-footer">
-                                <button type="submit" class="btn button-color">Submit Post</button>
+                                <button type="submit" class="btn button-color button-submit-shape">Submit Post</button>
                             </div>
                         </form>
                     </div>
