@@ -16,8 +16,9 @@ app.config['EXPLAIN_TEMPLATE_LOADING'] = True
 app.permanent_session_lifetime = timedelta(days = 7) # session length
 app.config['UPLOAD_FOLDER'] = 'static/images/'
 
+import routes
 from routes import *
-
+routes.app = app
 
 if __name__ == "__main__":
     logging.info(os.getcwd())
