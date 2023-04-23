@@ -27,17 +27,17 @@ def db_connect():
     # )
 
 
-    from google.cloud import secretmanager
-    client = secretmanager.SecretManagerServiceClient()
+    # from google.cloud import secretmanager
+    # client = secretmanager.SecretManagerServiceClient()
 
 
-    project_id ="cryptic-saga-384600"
-    secret_id = "CLOUD_SQL_CREDENTIALS_SECRET"
-    version_id="latest"
-    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-    response = client.access_secret_version(request={"name": name})
+    # project_id ="cryptic-saga-384600"
+    # secret_id = "CLOUD_SQL_CREDENTIALS_SECRET"
+    # version_id="latest"
+    # name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+    # response = client.access_secret_version(request={"name": name})
 
-    credentials = json.load(response.payload.data.decode("UTF-8"))
+    credentials = json.load(os.environ["CLOUD_SQL_CREDENTIALS_SECRET"])
 
     GCP_USER = credentials["GCP_USER"]
     GCP_PASS = credentials["GCP_PASS"]
