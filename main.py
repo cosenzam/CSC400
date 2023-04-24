@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import timedelta, datetime, time
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='app/templates')
 app.config['SECRET_KEY'] = "asdf"
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
