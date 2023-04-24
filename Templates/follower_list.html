@@ -17,7 +17,11 @@
             {% for user in users %}
                 <div id="{{ follower_list[i].interaction_id }}" class="card text-center" style="width: 18rem; height: 18rem; margin-bottom: 1%; margin-left: 3%;">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px; margin: auto">
+                        {% if user.profile_picture_media_id == '' %}
                         <img class="card-img-top img-cover" src="/static/images/kitten.jpg" alt="Card image cap">
+                        {% else %}
+                        <img src="/static/images/{{user.id}}/profile/{{user.profile_picture_media_id}}" alt="Card image cap">
+                        {% endif %}
                     </div>
                     <div class="card-body">
                     <a class="text-center" href="{{ url_for('user', dynamic_user = user.user_name) }}" style="color:white;">

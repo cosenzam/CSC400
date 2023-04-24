@@ -24,7 +24,7 @@ class UserProfileForm(FlaskForm):
     occupation = StringField('Occupation', validators = [Optional(), Length(min = 0, max = 64)])
     location = StringField('Location', validators = [Optional(), Length(min = 0, max = 64)])
     date_of_birth = DateField('Date of Birth', validators = [Optional()])
-    profile_picture_media_id = media = FileField('Add Media', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png'])])
+    profile_picture_media_id = FileField('Change PFP', validators = [Optional(), FileAllowed(['jpg', 'jpeg', 'png'])])
 
 class UserSettingsForm(FlaskForm):
     email = StringField('New email', validators = [Optional(), Length(min = 8, max = 64)])

@@ -32,7 +32,11 @@
                 <div class="col-sm-4 search-user" onclick="window.location='/user/{{user.user_name}}'">
                     <h5 class="search-user-name">{{user.user_name}}</h5>
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 60px; height: 60px; float: left; margin-top: 1%;">
-                        <img class="img-cover" src="/static/images/kitten.jpg">
+                        {% if user.profile_picture_media_id == '' %} 
+                        <img src="/static/images/kitten.jpg" class="img-cover">
+                        {% else %}
+                        <img src="/static/images/{{user.id}}/profile/{{user.profile_picture_media_id}}" class="img-cover">
+                        {% endif %}
                     </div>
                     <p class="search-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
                 </div>
@@ -47,15 +51,19 @@
     <div class="tab-pane fade" id="posts" role="tabpanel" aria-labelledby="posts-tab">
         {% if posts %}
             {% for post in posts %}
-            {% set user_name = get_user(id = post.user_id).user_name %}
+            {% set user_name = get_user(id = post.user_id) %}
             <div class="row justify-content-center">
                 <div id="{{post.id}}" class="row justify-content-center post">
                     <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                         <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
+                            {% if user_name.profile_picture_media_id == '' %} 
                             <img class="img-cover" src="/static/images/kitten.jpg">
+                            {% else %}
+                            <img class="img-cover" src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}">
+                            {% endif %}
                         </div>
                         <p style="text-align: left;">
-                            <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name }}</span>
+                            <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name.user_name }}</span>
                             <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(post.timestamp) }}">{{postDateFormat(post, getPostRecency(post))}}</span>
                         </p>
                         <br>

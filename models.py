@@ -646,7 +646,7 @@ class User(Base):
     user_name: Mapped[str] = mapped_column(String(255), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
-    profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default='')
+    profile_picture_media_id: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     first_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     middle_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
