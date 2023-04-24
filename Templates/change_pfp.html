@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center vertical-height-100">
+    <div class="col-sm-4 text-center forms-shadow">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p class="text-center">{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <h1 class="text-center"> Edit Profile </h1>
+        <form action="#" method="post" enctype="multipart/form-data">
+            {{form.csrf_token}}
+            <p> 
+                {{form.profile_picture_media_id.label}}
+                {{form.profile_picture_media_id(size=20)}}
+            </p>
+            <button type="submit" class="btn button-color button-submit-shape" style="margin-bottom: 2%;">Save Change</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
