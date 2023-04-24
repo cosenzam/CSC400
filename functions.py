@@ -129,7 +129,8 @@ def get_reply_ajax_data(post_id):
             "text": reply.text,
             "is_liked": reply.is_liked(from_user),
             "like_count": reply.like_count,
-            "reply_count": reply.reply_count
+            "reply_count": reply.reply_count,
+            "profile_picture": get_profile_picture(user)
             })
     return l
 
@@ -151,7 +152,8 @@ def get_post_ajax_data(post_id):
             "text": post.text,
             "is_liked": post.is_liked(from_user),
             "like_count": post.like_count,
-            "reply_count": post.reply_count
+            "reply_count": post.reply_count,
+            "profile_picture": get_profile_picture(user)
             })
     return l
 
@@ -173,7 +175,8 @@ def get_user_reply_ajax_data(post_id):
             "text": post.text,
             "is_liked": post.is_liked(from_user),
             "like_count": post.like_count,
-            "reply_count": post.reply_count
+            "reply_count": post.reply_count,
+            "profile_picture": get_profile_picture(user)
             })
     return l
 
@@ -193,15 +196,17 @@ def get_home_ajax_data(post_id):
     posts = from_user.get_following_posts_before(post_id, from_user.get_following())
     l=[]
     for post in posts:
+        user = get_user(id = post.user_id)
         l.append({
             "post_id": post.id,
-            "user_name": get_user(id = post.user_id).user_name,
+            "user_name": user.user_name,
             "timestamp": to_date_and_time(post.timestamp),
             "recency": postDateFormat(post, getPostRecency(post)),
             "text": post.text,
             "is_liked": post.is_liked(from_user),
             "like_count": post.like_count,
-            "reply_count": post.reply_count
+            "reply_count": post.reply_count,
+            "profile_picture": get_profile_picture(user)
             })
     return l
 
@@ -236,8 +241,16 @@ def get_likes_ajax_data(likes_id):
             "is_liked": post.is_liked(from_user),
             "like_count": post.like_count,
             "reply_count": post.reply_count,
-            "last_likes_id": last_likes_id
+            "last_likes_id": last_likes_id,
+            "profile_picture": get_profile_picture(user)
             })
     for obj in l:
         print(obj["post_id"])
     return l
+
+def get_profile_picture(user):
+    if user.profile_picture_media_id == None:
+        return False
+    else:
+        image_path = "/static/images/"+str(user.id)+"/profile/"+str(user.profile_picture_media_id)
+    return image_path

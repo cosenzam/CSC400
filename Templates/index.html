@@ -55,10 +55,10 @@
         <div id="{{post.id}}" class="row justify-content-center post">
             <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                 <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                    {% if post_user.profile_picture_media_id == '' %} 
-                    <img src="/static/images/kitten.jpg" class="media-object" style="height:80px; width:80px; float:left; border-radius: 20%">
+                    {% if post_user.profile_picture_media_id == None %} 
+                    <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                     {% else %}
-                    <img src="/static/images/{{post_user.id}}/profile/{{post_user.profile_picture_media_id}}" class="media-object" style="height:80px; width:80px; float:left; border-radius: 35%">
+                    <img id="profile-picture" src="/static/images/{{post_user.id}}/profile/{{post_user.profile_picture_media_id}}" class="img-cover">
                     {% endif %}
                 </div>
                 <p style="text-align: left;">

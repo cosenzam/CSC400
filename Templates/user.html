@@ -27,10 +27,10 @@
         {% endif %}
         <div class="align-self-center" style="padding-top: 2%;">
             <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 80px; height: 80px;">
-                {% if user_profile.profile_picture_media_id == '' %} 
-                <img src="/static/images/kitten.jpg" class="media-object" style="height:80px; width:80px; float:left; border-radius: 20%">
+                {% if user_profile.profile_picture_media_id == None %} 
+                <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                 {% else %}
-                <img src="/static/images/{{user_profile.id}}/profile/{{user_profile.profile_picture_media_id}}" class="media-object" style="height:80px; width:80px; float:left; border-radius: 35%">
+                <img id="profile-picture" src="/static/images/{{user_profile.id}}/profile/{{user_profile.profile_picture_media_id}}" class="img-cover">
                 {% endif %}
             </div>
         </div>
@@ -126,10 +126,10 @@
             <div id="{{post.id}}" class="row justify-content-center post">
                 <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                        {% if user_profile.profile_picture_media_id == '' %} 
-                        <img src="/static/images/kitten.jpg" class="media-object" style="height:50px; width:50px; float:left; border-radius: 20%">
+                        {% if user_profile.profile_picture_media_id == None %} 
+                        <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                         {% else %}
-                        <img src="/static/images/{{user_profile.id}}/profile/{{user_profile.profile_picture_media_id}}" class="media-object" style="height:50px; width:50px; float:left; border-radius: 35%">
+                        <img id="profile-picture" src="/static/images/{{user_profile.id}}/profile/{{user_profile.profile_picture_media_id}}" class="img-cover">
                         {% endif %}
                     </div>
                     <p style="text-align: left;">
@@ -191,14 +191,14 @@
             <div id="{{like.id}}" class="row justify-content-center post">
                 <span id="post-span" onclick="window.location='/post/{{like.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                        {% if user_name.profile_picture_media_id == '' %} 
-                        <img src="/static/images/kitten.jpg" class="img-cover">
+                        {% if user_name.profile_picture_media_id == None %} 
+                        <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                         {% else %}
-                        <img src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}" class="img-cover">
+                        <img id="profile-picture" src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}" class="img-cover">
                         {% endif %}
                     </div>
                     <p style="text-align: left;">
-                        <span id="name" onclick="window.location='/user/{{ user_name }}';event.stopPropagation();">{{ user_name.user_name }}</span>
+                        <span id="name" onclick="window.location='/user/{{ user_name.user_name }}';event.stopPropagation();">{{ user_name.user_name }}</span>
                         <span id="date" class="tt" data-bs-placement="bottom" title="{{ to_date_and_time(like.timestamp) }}">{{postDateFormat(like, getPostRecency(like))}}</span>
                     </p>
                     <br>
@@ -256,10 +256,10 @@
             <div id="{{reply.id}}" class="row justify-content-center post">
                 <span id="reply-span" onclick="window.location='/post/{{reply.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                        {% if user_name.profile_picture_media_id == '' %} 
-                        <img src="/static/images/kitten.jpg" class="img-cover">
+                        {% if user_profile.profile_picture_media_id == None %} 
+                        <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                         {% else %}
-                        <img src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}" class="img-cover">
+                        <img id="profile-picture" src="/static/images/{{user_profile.id}}/profile/{{user_profile.profile_picture_media_id}}" class="img-cover">
                         {% endif %}
                     </div>
                     <p style="text-align: left;">
