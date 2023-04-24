@@ -74,12 +74,18 @@ function ajax_get_replies(reply_id) {
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
       let reply_count = result[i]["reply_count"];
+      let profile_picture = result[i]["profile_picture"]
       
       // clone previous post div element and insert new data
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#reply-span").attr('onclick', "window.location='/post/"+post_id+"';");
-      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      if (profile_picture == false){
+        new_div.find("#profile-picture").attr('src', "/static/images/default.png");
+      }
+      else{
+        new_div.find("#profile-picture").attr('src', profile_picture);
+      }
       new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
@@ -127,11 +133,17 @@ function ajax_get_user_replies(reply_id) {
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
       let reply_count = result[i]["reply_count"];
+      let profile_picture = result[i]["profile_picture"]
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#reply-span").attr('onclick', "window.location='/post/"+post_id+"';");
-      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      if (profile_picture == false){
+        new_div.find("#profile-picture").attr('src', "/static/images/default.png");
+      }
+      else{
+        new_div.find("#profile-picture").attr('src', profile_picture);
+      }
       new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
@@ -179,12 +191,18 @@ function ajax_get_posts(post_id) {
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
       let reply_count = result[i]["reply_count"];
+      let profile_picture = result[i]["profile_picture"]
       //console.log(post_id, like_count);
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
-      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      if (profile_picture == false){
+        new_div.find("#profile-picture").attr('src', "/static/images/default.png");
+      }
+      else{
+        new_div.find("#profile-picture").attr('src', profile_picture);
+      }
       new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
@@ -233,13 +251,19 @@ function ajax_get_likes(likes_id, post_id) {
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
       let reply_count = result[i]["reply_count"];
+      let profile_picture = result[i]["profile_picture"]
       //console.log(post_id, like_count);
 
       var new_div = $("#"+before_id).clone();
       //console.log(new_div.id);
       new_div.attr('id', post_id)
       new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
-      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      if (profile_picture == false){
+        new_div.find("#profile-picture").attr('src', "/static/images/default.png");
+      }
+      else{
+        new_div.find("#profile-picture").attr('src', profile_picture);
+      }
       new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);
@@ -293,11 +317,18 @@ function ajax_get_timeline(post_id) {
       let is_liked = result[i]["is_liked"];
       let like_count = result[i]["like_count"];
       let reply_count = result[i]["reply_count"];
+      let profile_picture = result[i]["profile_picture"]
+      console.log(profile_picture)
 
       var new_div = $("#"+before_id).clone();
       new_div.attr('id', post_id)
       new_div.find("#post-span").attr('onclick', "window.location='/post/"+post_id+"';");
-      //new_div.find("#profile-picture").attr('src', "/static/images/kitten.jpg");
+      if (profile_picture == false){
+        new_div.find("#profile-picture").attr('src', "/static/images/default.png");
+      }
+      else{
+        new_div.find("#profile-picture").attr('src', profile_picture);
+      }
       new_div.find("#name").html(user_name).attr('onclick', "window.location='/user/"+user_name+"';event.stopPropagation();");
       new_div.find("#date").html(recency).attr('data-bs-original-title', timestamp).tooltip('update');
       new_div.find("#content-text").text(text);

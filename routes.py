@@ -668,16 +668,25 @@ def change_pfp():
         if request.method == "POST" and form.validate_on_submit():
             
             media = form.profile_picture_media_id.data
-            
-            filename = secure_filename(media.filename)
-            media.save(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), 'profile', filename))
+            if media:
+                filename = secure_filename(media.filename)
+                media.save(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), 'profile', filename))
 
-            user.update(
-                profile_picture_media_id = filename
-            )
+                user.update(
+                    profile_picture_media_id = filename
+                )
 
-            flash("Your pfp has been updated", "info")
-            return redirect(url_for("edit_profile"))
+                flash("Your pfp has been updated", "info")
+                return redirect(url_for("edit_profile"))
+            else:
+                filename = None
+
+                user.update(
+                    profile_picture_media_id = filename
+                )
+
+                flash("Your pfp has been removed", "info")
+                return redirect(url_for("edit_profile"))
 
         return render_template("change_pfp.html", user_name = user, form = form)
     else:

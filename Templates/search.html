@@ -32,10 +32,10 @@
                 <div class="col-sm-4 search-user" onclick="window.location='/user/{{user.user_name}}'">
                     <h5 class="search-user-name">{{user.user_name}}</h5>
                     <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 60px; height: 60px; float: left; margin-top: 1%;">
-                        {% if user.profile_picture_media_id == '' %} 
-                        <img src="/static/images/kitten.jpg" class="img-cover">
+                        {% if user.profile_picture_media_id == None %} 
+                        <img id="profile-picture" src="/static/images/default.png" class="img-cover">
                         {% else %}
-                        <img src="/static/images/{{user.id}}/profile/{{user.profile_picture_media_id}}" class="img-cover">
+                        <img id="profile-picture" src="/static/images/{{user.id}}/profile/{{user.profile_picture_media_id}}" class="img-cover">
                         {% endif %}
                     </div>
                     <p class="search-bio">{% if user.bio != None %}{{user.bio}}{% endif %}</p>
@@ -56,10 +56,10 @@
                 <div id="{{post.id}}" class="row justify-content-center post">
                     <span id="post-span" onclick="window.location='/post/{{post.id}}';" class="col-sm-4 border post-format" style="word-wrap: break-word">
                         <div class="ratio ratio-1x1 rounded-circle overflow-hidden" style="width: 50px; height: 50px; float: left; margin-top: 1%;">
-                            {% if user_name.profile_picture_media_id == '' %} 
-                            <img class="img-cover" src="/static/images/kitten.jpg">
+                            {% if user_name.profile_picture_media_id == None %} 
+                            <img id="profile-picture" class="img-cover" src="/static/images/default.png">
                             {% else %}
-                            <img class="img-cover" src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}">
+                            <img id="profile-picture" class="img-cover" src="/static/images/{{user_name.id}}/profile/{{user_name.profile_picture_media_id}}">
                             {% endif %}
                         </div>
                         <p style="text-align: left;">
