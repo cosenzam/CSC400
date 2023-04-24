@@ -11,6 +11,9 @@
         {% endif %}
         {% endwith %}
         <h1 class="text-center"> Edit Profile </h1>
+        <p> 
+            <a class="nav-link active bi bi-card-image" aria-current="page" href="{{ url_for('change_pfp') }}"> Change Profile Picture</a>
+        </p>
         <form action="#" method="post" enctype="multipart/form-data">
             {{form.csrf_token}}
             <p>

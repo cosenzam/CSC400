@@ -9,8 +9,8 @@ from connect import db_connect #connect.py method that handles all connections, 
 from models import Base, User, Post, Interaction, Media, MediaCollection, Follows
 from email_validator import validate_email, EmailNotValidError
 import models
-from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, exists_post, get_post, follow, unfollow, upload_collection, 
-    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following, get_user_latest_replies, get_user_likes, get_likes_by_id, get_likes_by_post_id)
+from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, insert_media, exists_post, get_post, follow, unfollow, upload_collection, 
+    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following, get_user_latest_replies, get_user_likes, get_likes_by_id, get_likes_by_post_id, get_media)
 import os, os.path
 from pathlib import Path
 from werkzeug.utils import secure_filename
@@ -108,6 +108,13 @@ def create_account():
 
             #gonna add current user's user_id to session
             session["user_id"] = int(user.id)
+
+            #make directory specific to user upon creating acct
+            user_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))
+            os.mkdir(user_path)
+
+            profile_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id), "profile")
+            os.mkdir(profile_path)
 
             return redirect(url_for("user", dynamic_user = session["user"]))
     else:
@@ -296,14 +303,7 @@ def edit_profile():
                 form.location.data = user.location
             if user.date_of_birth != None:
                 form.date_of_birth.data = user.date_of_birth
-
-            '''
-            if profile.profile_picture_media_id != "NULL":
-                form.profile_picture_media_id.data = profile.profile_picture_media_id
-                filename = secure_filename(profile.profile_picture_media_id.filename)
-                profile.profile_picture_media_id.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            '''
-
+                
         if request.method == "POST" and form.validate_on_submit():
 
             if form.user_bio.data == "":
@@ -320,6 +320,12 @@ def edit_profile():
                 form.occupation.data = None
             if form.location.data == "":
                 form.location.data = None
+            
+            '''
+            media = form.profile_picture_media_id.data
+            filename = secure_filename(media.filename)
+            media.save(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), 'profile', filename))
+            '''
 
             #profile is a user object, User.update() take kwargs for each of its fields.
             user.update(
@@ -331,7 +337,6 @@ def edit_profile():
                 occupation = form.occupation.data,
                 location = form.location.data,
                 date_of_birth = form.date_of_birth.data
-                #profile_picture_media_id = form.profile_picture_media_id.data
             )
 
             flash("Your profile has been updated", "info")
@@ -645,3 +650,36 @@ def follow_scroll(interaction_id):
 def home_scroll(post_id):
     posts = get_home_ajax_data(post_id)
     return posts, 200
+
+
+@app.route("/change_pfp/", methods=["POST", "GET"])
+def change_pfp():
+    if "user" in session:
+        user = session["user"]
+        user_id = session["user_id"]
+        form = UserProfileForm()
+
+        user = get_user(id=user_id)
+
+        if request.method == "GET":
+            if user.profile_picture_media_id != None:
+                form.profile_picture_media_id.data = user.profile_picture_media_id
+                
+        if request.method == "POST" and form.validate_on_submit():
+            
+            media = form.profile_picture_media_id.data
+            
+            filename = secure_filename(media.filename)
+            media.save(os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), 'profile', filename))
+
+            user.update(
+                profile_picture_media_id = filename
+            )
+
+            flash("Your pfp has been updated", "info")
+            return redirect(url_for("edit_profile"))
+
+        return render_template("change_pfp.html", user_name = user, form = form)
+    else:
+        flash("You must be logged in to edit your pfp", "info")
+        return redirect(url_for("login"))
