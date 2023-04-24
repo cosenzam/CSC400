@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import timedelta, datetime, time
 
-app = Flask(__name__, template_folder='app/templates')
+app = Flask(__name__)
 app.config['SECRET_KEY'] = "asdf"
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -16,9 +16,7 @@ app.config['EXPLAIN_TEMPLATE_LOADING'] = True
 app.permanent_session_lifetime = timedelta(days = 7) # session length
 app.config['UPLOAD_FOLDER'] = 'static/images/'
 
-import routes
 from routes import *
-routes.app = app
 
 if __name__ == "__main__":
     logging.info(os.getcwd())
