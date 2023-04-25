@@ -427,3 +427,28 @@ body{
   background-color:  rgba(175, 175, 175, 0.274);
 }
 */
+
+i {
+  color: rgb(3, 172, 3);
+  font-size: 25px;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgb(3, 172, 3);
+  width: 50px;
+  height: 50px;
+  border-radius: 20%;
+}
+
+.dark {
+  --main-background: hsl(230, 17%, 14%);
+  --main-font: white;
+}
+
+.light {
+  --main-background: hsl(228, 3%, 71%);
+}
+
+body {
+  background: var(--main-background);
+  color: var(--main-font);
+}

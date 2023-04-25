@@ -477,3 +477,39 @@ if(window.location.href.includes('/following')){
 $(document).ready(function() {
   $("#loading").hide();
 });
+
+//toggle body theme (gray/black)
+const icon = document.getElementById("toggleButton");
+
+
+function clickHandler() {
+  icon.classList.toggle('bi-brightness-high-fill');
+  
+  if (icon.classList.toggle('bi-moon')) {
+    document.body.classList.remove("light");
+    document.body.classList.add("dark");
+    document.body.style.transition = '2s';
+    localStorage.setItem("theme", "dark");
+    console.log(localStorage.getItem("theme"));
+    } 
+  else {
+    document.body.classList.add("light");
+    document.body.classList.remove("dark");
+    document.body.style.transition = '2s';
+    localStorage.setItem("theme", "light");
+    console.log(localStorage.getItem("theme"));
+    }
+}
+icon.addEventListener("click", clickHandler);
+
+window.onload = checkTheme();
+
+function checkTheme() {
+    const localStorageTheme = localStorage.getItem("theme");
+    console.log(localStorage.getItem("theme"));
+
+    if (localStorageTheme !== null) {
+        // set the theme of body
+        document.body.className = localStorageTheme;
+    }
+}
