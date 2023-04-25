@@ -1,6 +1,9 @@
 import json
 import pathlib
 from sqlalchemy import create_engine
+from google.cloud.sql.connector import Connector
+
+
 
 def db_connect():
 
@@ -14,11 +17,24 @@ def db_connect():
     PUBLIC_IP = credentials["PUBLIC_IP"]
     PROJECT_ID = credentials["PROJECT_ID"]
     DB_NAME = credentials["DB_NAME"]
+    REGION = credentials["REGION"]
     INSTANCE_NAME = credentials["INSTANCE_NAME"]
 
+    INSTANCE_CONNECTION_NAME = f"{PROJECT_ID}:{REGION}:{INSTANCE_NAME}"
+
+    connector = Connector()
+
+    conn = connector.connect(
+       INSTANCE_CONNECTION_NAME,
+       "pymysql",
+       user=USER,
+       password=PASSWORD,
+       db=DB_NAME
+    )
+
     engine = create_engine(
-        f"""
-            mysql+pymysql://{USER}:{PASSWORD}@{PUBLIC_IP}/{DB_NAME}?unix_socket=/cloudsql/{PROJECT_ID}:{INSTANCE_NAME}"""
+        f"mysql+pymysql://",
+        creator=conn
     )
 
     return engine
