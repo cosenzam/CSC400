@@ -440,7 +440,7 @@ i {
 }
 
 .dark {
-  --main-background: hsl(230, 17%, 14%);
+  --main-background: rgb(6, 6, 7);
   --main-font: white;
 }
 
