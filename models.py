@@ -85,7 +85,7 @@ def exists_post():
 #inserts a post, requires a User object and string for text
 def insert_post(user, text):
     post = Post(
-        user_id = user.id,
+        user_id = user,
         text = text,
         media_collection_id = None,
         timestamp = datetime.now()
@@ -511,9 +511,11 @@ def insert_interaction(to_user, from_user, post=None, interaction_type="reply"):
 
     return interaction
 
-def insert_media(user, file_name, post=None, collection=None):
+def insert_media(user, file_name, file_ext, post, collection=None):
     
-    media = Media(file_path = file_name)
+    media = Media(file_path = file_name,
+                  media_type = file_ext,
+                  post_id = post)
     session.add(media)
     session.commit()
     return media
@@ -892,7 +894,8 @@ class Media(Base):
         nullable = False,
         autoincrement = True
     )
-
+    #new column
+    post_id: Mapped[int] = mapped_column(String(255), default=None)
     collection_id: Mapped[Optional[int]] = mapped_column(ForeignKey("media_collection.id"))
     media_type: Mapped[str] = mapped_column(String(255), default='photo')
     file_path: Mapped[str] = mapped_column(String(255), default='\\')
@@ -915,3 +918,18 @@ class Media(Base):
         return collection
 
     media_collection = relationship("MediaCollection", back_populates="media")
+
+def get_file(id=None):
+
+    if id is not None:
+        stmt = select(Media).where(Media.id == id)
+    else:
+        return False
+
+    # print(stmt)
+
+    try:
+        file = session.scalars(stmt).one()
+        return file
+    except NoResultFound:
+        return False

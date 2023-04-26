@@ -32,6 +32,18 @@
             </p>
             <br>
             <p id="content-text">{{post.text}}</p>
+            <!--
+            {% set media = get_file(post.id) %}
+                {% if media.post_id == post.id %}
+                    {% if media.media_type == 'mp4' %}
+                        <video width="300" height="270" controls>
+                            <source src="/static/images/{{post.user_id}}/{{post.id}}/{{media.file_path}}" type="video/mp4">
+                        </video>
+                    {% else %}
+                        <img src="/static/images/{{post.user_id}}/{{post.id}}/{{media.file_path}}" class="media-object" style="height:270px; width:300px; margin-left: auto">
+                    {% endif %}
+                {% endif %}
+                    -->
             <div class="text-center">
                 <span style="float: left;">
                     {% if "user" not in session %}
@@ -112,6 +124,18 @@
                 </p>
                 <br>
                 <p id="content-text">{{reply.text}}</p>
+                <!--
+                    {% set media = get_file(reply.id) %}
+                            {% if media.post_id == reply.id %}
+                                {% if media.media_type == 'mp4' %}
+                                    <video width="300" height="270" controls>
+                                        <source src="/static/images/{{reply.user_id}}/{{reply.id}}/{{media.file_path}}" type="video/mp4">
+                                    </video>
+                                {% else %}
+                                    <img src="/static/images/{{reply.user_id}}/{{reply.id}}/{{media.file_path}}" class="media-object" style="height:270px; width:300px; margin-left: auto">
+                                {% endif %}
+                            {% endif %}
+                    -->
                 <div class="text-center">
                     <span style="float: left;">
                         {% if "user" not in session %}

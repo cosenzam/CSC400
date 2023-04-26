@@ -10,7 +10,7 @@ from models import Base, User, Post, Interaction, Media, MediaCollection, Follow
 from email_validator import validate_email, EmailNotValidError
 import models
 from models import (insert_user, get_user, exists_user, insert_interaction, insert_post, insert_media, exists_post, get_post, follow, unfollow, upload_collection, 
-    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following, get_user_latest_replies, get_user_likes, get_likes_by_id, get_likes_by_post_id, get_media)
+    get_latest_replies, get_latest_post, get_latest_posts, get_interaction, search_users, search_posts, is_following, get_user_latest_replies, get_user_likes, get_likes_by_id, get_likes_by_post_id, get_media, get_file)
 import os, os.path
 from pathlib import Path
 from werkzeug.utils import secure_filename
@@ -37,6 +37,7 @@ def home():
     if "user" in session:
         form = PostForm()
         current_user = get_user(user_name = session["user"])
+        user_id = current_user
         posts = current_user.get_following_posts(current_user.get_following())
         if len(posts) > 0:
                 last_post_id = posts[len(posts) - 1].id
@@ -50,23 +51,52 @@ def home():
             text = form.text.data
             media = form.media.data
 
-            if media is not None:
-                filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if media == None and text:
+                post = insert_post(user=user_id, text=text)
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
+                
+            elif text == None and media:
+                post = insert_post(user=user_id, text="")
+                post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id))
+                os.mkdir(post_path)
 
-            if media == "" and text == "":
-                flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("create_post"))
+                file_paths = []
+                filename = secure_filename(media.filename)
+
+                split_file = os.path.splitext(filename)
+                fileext = split_file[1]
+
+                insert_media(user, filename, fileext, post.id)
+                path = media.save(os.path.join(post_path, filename))
+                file_paths.append(str(path))
+
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
+            
+            elif text and media:
+                post = insert_post(user=user_id, text=text)
+                post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id))
+                os.mkdir(post_path)
+
+                file_paths = []
+                filename = secure_filename(media.filename)
+
+                split_file = os.path.splitext(filename)
+                fileext = split_file[1]
+
+                insert_media(user, filename, fileext, post.id)
+                path = media.save(os.path.join(post_path, filename))
+                file_paths.append(str(path))
+
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
             
             else:
-                #insert_post() returns a post object
+                flash("Text and Media Fields cannot both be blank!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
 
-                post = insert_post(current_user, text)
-                #flash("Post Created!")
-            
-            return redirect(url_for("home"))
-
-        return render_template("index.html", form = form, current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, postDateFormat = postDateFormat, 
+        return render_template("index.html", form = form, current_user = current_user, posts = posts, get_user = get_user, getPostRecency = getPostRecency, get_file = get_file, postDateFormat = postDateFormat, 
         last_post_id = last_post_id, to_date_and_time = to_date_and_time)
     else:
         return redirect(url_for("login"))
@@ -209,28 +239,53 @@ def user(dynamic_user):
             text = form.text.data
             media = form.media.data
 
-            #if get_latest_post(user).timestamp == datetime.now():
-                #flash("Please wait before posting again", "info")
-                #return redirect(url_for("user", dynamic_user = session["user"]))
+            if media == None and text:
+                post = insert_post(user=user_id, text=text)
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
+                
+            elif text == None and media:
+                post = insert_post(user=user_id, text="")
+                post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id))
+                os.mkdir(post_path)
 
-            if media is not None:
+                file_paths = []
                 filename = secure_filename(media.filename)
-                media.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            if media == "" and text == "":
-                flash("Text and Media Fields cannot both be blank!")
-                return redirect(url_for("create_post"))
+                split_file = os.path.splitext(filename)
+                fileext = split_file[1]
+
+                insert_media(user, filename, fileext, post.id)
+                path = media.save(os.path.join(post_path, filename))
+                file_paths.append(str(path))
+
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
+            
+            elif text and media:
+                post = insert_post(user=user_id, text=text)
+                post_path = os.path.join(app.config['UPLOAD_FOLDER'], str(user_id), str(post.id))
+                os.mkdir(post_path)
+
+                file_paths = []
+                filename = secure_filename(media.filename)
+
+                split_file = os.path.splitext(filename)
+                fileext = split_file[1]
+
+                insert_media(user, filename, fileext, post.id)
+                path = media.save(os.path.join(post_path, filename))
+                file_paths.append(str(path))
+
+                flash("Post Created!")
+                return redirect(url_for("user", dynamic_user = session["user"]))
             
             else:
-                #insert_post() returns a post object
-
-                post = insert_post(user_profile, text)
-                #flash("Post Created!")
-                
+                flash("Text and Media Fields cannot both be blank!")
                 return redirect(url_for("user", dynamic_user = session["user"]))
 
         return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, replies = replies, likes = likes,
-        form = form, getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count,
+        form = form, getPostRecency = getPostRecency, postDateFormat = postDateFormat, last_post_id = last_post_id, get_user = get_user, following_count = following_count, get_file = get_file,
         follower_count = follower_count, to_date_and_time = to_date_and_time, is_following = is_following, last_reply_id = last_reply_id, last_likes_id = last_likes_id, last_likes_post_id = last_likes_post_id)
     # If page is not the logged in user's
     else:
@@ -270,7 +325,7 @@ def user(dynamic_user):
                 current_user = ""
 
             return render_template("user.html", user_profile = user_profile, current_user = current_user, dynamic_user = dynamic_user, posts = postings, replies = replies, likes = likes,
-            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = is_following, last_post_id = last_post_id, last_likes_post_id = last_likes_post_id,
+            getPostRecency = getPostRecency, postDateFormat = postDateFormat, is_following = is_following, last_post_id = last_post_id, last_likes_post_id = last_likes_post_id, get_file = get_file,
             get_user = get_user, following_count = following_count, follower_count = follower_count, to_date_and_time = to_date_and_time, last_reply_id = last_reply_id, last_likes_id = last_likes_id)
         else:
             flash("User not found", "info")
@@ -475,7 +530,7 @@ def view_post(post_id):
     else:
         return redirect(url_for("home"))
 
-    return render_template("view_post.html", current_user = current_user, post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat,
+    return render_template("view_post.html", current_user = current_user, post = post, replies = replies, getPostRecency = getPostRecency, postDateFormat = postDateFormat, get_file = get_file,
         get_user = get_user, form = form, last_reply_id = last_reply_id, to_date_and_time = to_date_and_time)
 
 @app.route("/post/<post_id>/like")
