@@ -39,19 +39,17 @@ def home():
     if "user" in session:
         form = PostForm()
         current_user = get_user(user_name = session["user"])
-
-        if current_user is not None:
-            posts = current_user.get_following_posts(current_user.get_following())
-
-            if len(posts) > 0:
-                last_post_id = posts[len(posts) - 1].id
-            else:
-                last_post_id = 1
         
-            print(last_post_id)
+        if current_user is None:
+            return redirect(url_for("login"))
+        
+        posts = current_user.get_following_posts(current_user.get_following())
+        if len(posts) > 0:
+                last_post_id = posts[len(posts) - 1].id
         else:
-            posts = None
-            last_post_id = 0
+            last_post_id = 1
+        
+        print(last_post_id)
 
         if request.method == "POST" and form.validate_on_submit():
             
