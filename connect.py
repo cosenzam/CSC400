@@ -20,7 +20,7 @@ def db_connect():
     MYSQL_DB = credentials["MYSQL_DB"]
 
     engine = create_engine(
-        f"""mysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
+        f"""mysql+pymysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_IP}:{MYSQL_PORT}/{MYSQL_DB}""",
         echo = False
     )
 

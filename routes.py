@@ -19,10 +19,12 @@ from run import app
 from functions import (validateEmail, validatePassword, getPostRecency, postDateFormat, get_token, send_recovery_email, send_signup_email, 
     get_reply_ajax_data, get_post_ajax_data, serial, mail, get_follow_ajax_data, to_date_and_time, get_home_ajax_data, get_user_reply_ajax_data, get_likes_ajax_data)
 import json
+from history_meta import versioned_session
 
 #data base connections
 engine = db_connect()
 Session_MySQLdb = sessionmaker(engine)
+versioned_session(Session_MySQLdb)
 db_session = Session_MySQLdb()
 
 models.session = db_session
@@ -37,13 +39,19 @@ def home():
     if "user" in session:
         form = PostForm()
         current_user = get_user(user_name = session["user"])
-        posts = current_user.get_following_posts(current_user.get_following())
-        if len(posts) > 0:
+
+        if current_user is not None:
+            posts = current_user.get_following_posts(current_user.get_following())
+
+            if len(posts) > 0:
                 last_post_id = posts[len(posts) - 1].id
-        else:
-            last_post_id = 1
+            else:
+                last_post_id = 1
         
-        print(last_post_id)
+            print(last_post_id)
+        else:
+            posts = None
+            last_post_id = 0
 
         if request.method == "POST" and form.validate_on_submit():
             

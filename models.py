@@ -6,8 +6,15 @@ from typing import Optional, List
 from datetime import datetime, date
 from connect import db_connect #connect.py method that handles all connections, returns engine.
 
+from history_meta import (
+    Versioned, 
+    versioned_session
+)
+
 global engine
 global session
+
+
 
 #takes in user_name, email, and password strings to create a User object.
 def insert_user(user_name, email, password):
@@ -28,7 +35,6 @@ def insert_user(user_name, email, password):
     else:
         print(f"User {user_name} already exists.")
         return exists
-
 
 #gets a User object based on id, user_name, or email
 def get_user(id=None, user_name=None, email=None):
@@ -142,7 +148,6 @@ def get_follow_interaction(to_user_id, from_user_id):
         print("No Interaction found.")
         return False
 
-
 def get_likes_interaction(post_id, from_user_id):
     
     stmt = select(Interaction).where(
@@ -158,7 +163,6 @@ def get_likes_interaction(post_id, from_user_id):
     except NoResultFound:
         print("No Interaction found.")
         return False
-
 
 def get_likes_by_id(like_id):
 
@@ -317,7 +321,6 @@ def get_likes_before(likes_id, user_id, n=10):
         return likes
     except NoResultFound:
         return False
-
 
 # get X amount of replies before post_id, for use with ajax and onscroll event
 def get_replies_before(post_id, n=10):
@@ -529,7 +532,7 @@ def upload_collection(user, post, file_paths, collection=None):
     
     return collection
 
-class Base(DeclarativeBase):
+class Base(Versioned, DeclarativeBase):
     __table_args__ = {'mysql_engine':'InnoDB'}
     
 class Interaction(Base):
