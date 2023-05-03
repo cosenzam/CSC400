@@ -11,6 +11,6 @@ Tested with MySQLdb 8.0 on XAMPP
 This allows us to keep keys secret.
 ## 3. run pip install -r requirements.txt
 To make sure all packages are aligned. Use Python 3.9+ Recommended to use a virtual environment (venv/conda/etc)
-## 4. $python run.py
-Run as the command in your terminal.
+## 4. Running the flask app
+run "python run.py" as the command in your terminal.
 ## 5. Browse using the link output from the terminal.
