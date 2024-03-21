@@ -14,3 +14,11 @@ To make sure all packages are aligned. Use Python 3.9+ Recommended to use a virt
 ## 4. Running the flask app
 run "python run.py" as the command in your terminal.
 ## 5. Browse using the link output from the terminal.
+
+# Screenshots:
+
+<img src="./static/screenshots/home%20page.PNG" alt="home png" />
+<img src="./static/screenshots/create%20post%20(home).PNG" alt="create post png" />
+<img src="./static/screenshots/post%20thread.PNG" alt="post thread png" />
+<img src="./static/screenshots/user%20page.PNG" alt="user page png" />
+<img src="./static/screenshots/search%20user.PNG" alt="search user png" />
